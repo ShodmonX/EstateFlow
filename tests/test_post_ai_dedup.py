@@ -214,12 +214,53 @@ async def test_address_similarity_contributes_explainable_signal() -> None:
     )
     incoming = _announcement(
         "new",
-        canonical=_canonical(address="Yunusobod 9 kvartal 12-dom", phone=None),
+        canonical=_canonical(address="Yunusobod 9 kvartal 12 uy 1", phone=None),
     )
 
     decision = await _decision(incoming, [existing])
 
     assert any(signal.name == "similar_address" and signal.matched for signal in decision.breakdown)
+
+
+@pytest.mark.asyncio
+async def test_complete_structured_fingerprint_with_phone_auto_merges() -> None:
+    existing = _announcement("old")
+    incoming = _announcement("new")
+
+    decision = await _decision(incoming, [existing])
+
+    assert decision.decision == "high_confidence_duplicate"
+    assert decision.score >= 60
+
+
+@pytest.mark.asyncio
+async def test_common_realtor_text_does_not_create_duplicate_review() -> None:
+    existing = _announcement(
+        "old",
+        canonical=_canonical(
+            district="Olmazor",
+            rooms=3,
+            area=Decimal("75"),
+            floor=9,
+            price=Decimal("700"),
+            address="Olmazor NBU Bank",
+        ),
+    )
+    incoming = _announcement(
+        "new",
+        canonical=_canonical(
+            district="Olmazor",
+            rooms=2,
+            area=Decimal("65"),
+            floor=7,
+            price=Decimal("600"),
+            address="Olmazor",
+        ),
+    )
+
+    decision = await _decision(incoming, [existing])
+
+    assert decision.decision == "new"
 
 
 @pytest.mark.asyncio

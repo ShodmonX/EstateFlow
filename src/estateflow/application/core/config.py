@@ -96,8 +96,9 @@ class Settings(BaseSettings):
     dedup_phone_weight: int = Field(default=15, ge=0)
     dedup_area_tolerance_sqm: float = Field(default=3.0, ge=0)
     dedup_price_tolerance_ratio: float = Field(default=0.05, ge=0, le=1)
-    dedup_address_similarity_threshold: float = Field(default=0.62, ge=0, le=1)
-    dedup_config_version: str = "estateflow.dedup.v1"
+    dedup_address_similarity_threshold: float = Field(default=0.75, ge=0, le=1)
+    dedup_description_similarity_threshold: float = Field(default=0.82, ge=0, le=1)
+    dedup_config_version: str = "estateflow.dedup.v2"
     dedup_parent_selection_policy: Literal["completeness_trust_first_seen"] = (
         "completeness_trust_first_seen"
     )

@@ -66,7 +66,12 @@ credentials are never included.
 ## Dedup Signals
 
 `dedup_signals.media_phashes` is available for image matching. Phone presence is
-only a weak helper signal and must never decide duplicates on its own.
+only a weak helper signal and must never decide duplicates on its own. The v2
+policy requires an evidence-backed anchor for `possible_duplicate`; a phone
+number plus the complete structured fingerprint (district, rooms, area,
+normalized monthly price, and floor) is treated as a high-confidence duplicate.
+Generic description/address overlap without that corroboration is not enough to
+create a manual-review item.
 
 `dedup_signals.media_phashes` comes from media pHash values. A pHash-only match
 is an image similarity signal, not a complete duplicate decision.

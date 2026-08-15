@@ -31,7 +31,7 @@ AnnouncementStatus = Literal["active", "archived", "manual_review"]
 
 @dataclass(frozen=True)
 class DedupScoringConfig:
-    version: str = "estateflow.dedup.v1"
+    version: str = "estateflow.dedup.v2"
     exact_threshold: int = 100
     high_confidence_threshold: int = 80
     possible_threshold: int = 60
@@ -48,7 +48,8 @@ class DedupScoringConfig:
     phash_hamming_threshold: int = 8
     area_tolerance_sqm: Decimal = Decimal("3")
     price_tolerance_ratio: Decimal = Decimal("0.05")
-    address_similarity_threshold: float = 0.62
+    address_similarity_threshold: float = 0.75
+    description_similarity_threshold: float = 0.82
     parent_selection_policy: str = "completeness_trust_first_seen"
 
 
@@ -444,7 +445,11 @@ class SimilarDescriptionMatcher:
         left = _description_tokens(incoming.canonical.description)
         right = _description_tokens(candidate.canonical.description)
         similarity = jaccard_similarity(left, right)
-        matched = bool(left and right and similarity >= 0.70)
+        matched = bool(
+            left
+            and right
+            and similarity >= config.description_similarity_threshold
+        )
         return ScoreSignal(
             name=self.name,
             weight=30,
@@ -520,16 +525,36 @@ class WeightedDeduplicationEngine:
         )
 
     def _decision_from_score(self, best: CandidateScore) -> DedupDecision:
-        if any(signal.matched and signal.exact for signal in best.signals):
+        matched = {signal.name for signal in best.signals if signal.matched}
+        exact_identity = {"source_url", "forward_origin"}
+        if any(
+            signal.matched
+            and signal.exact
+            and signal.name in exact_identity
+            for signal in best.signals
+        ):
             decision: DedupDecisionType = "exact_duplicate"
             threshold = self._config.exact_threshold
-        elif best.score >= self._config.exact_threshold:
-            decision = "exact_duplicate"
-            threshold = self._config.exact_threshold
-        elif best.score >= self._config.high_confidence_threshold:
+        elif _has_structured_identity(matched):
+            # A phone number plus the complete structured listing fingerprint
+            # is stronger than the raw weighted score (60 by default).  It is
+            # safe to merge without creating a noisy manual-review item.
             decision = "high_confidence_duplicate"
             threshold = self._config.high_confidence_threshold
-        elif best.score >= self._config.possible_threshold:
+        elif best.score >= self._config.exact_threshold and _has_strong_anchor(
+            best.signals
+        ):
+            decision = "exact_duplicate"
+            threshold = self._config.exact_threshold
+        elif best.score >= self._config.high_confidence_threshold and _has_strong_anchor(
+            best.signals
+        ):
+            decision = "high_confidence_duplicate"
+            threshold = self._config.high_confidence_threshold
+        elif (
+            best.score >= self._config.possible_threshold
+            and _has_manual_review_anchor(best.signals)
+        ):
             decision = "possible_duplicate"
             threshold = self._config.possible_threshold
         else:
@@ -543,6 +568,54 @@ class WeightedDeduplicationEngine:
             config_version=self._config.version,
             breakdown=best.signals,
         )
+
+
+_STRUCTURED_IDENTITY_SIGNALS = frozenset(
+    {"district", "rooms", "area", "price", "floor"}
+)
+
+
+def _has_structured_identity(matched: set[str]) -> bool:
+    """Return whether phone + all core listing fields match.
+
+    District, room count, area, normalized monthly price, and floor together
+    form a useful fingerprint.  Phone is required so that common listings in
+    the same district are not merged merely because their numeric fields look
+    alike.
+    """
+
+    return "phone" in matched and _STRUCTURED_IDENTITY_SIGNALS <= matched
+
+
+def _has_strong_anchor(signals: tuple[ScoreSignal, ...]) -> bool:
+    matched = {signal.name for signal in signals if signal.matched}
+    if matched & {"source_url", "forward_origin", "same_image_phash"}:
+        return True
+    if _has_structured_identity(matched):
+        return True
+    return {"phone", "similar_address", "similar_description"} <= matched
+
+
+def _has_manual_review_anchor(signals: tuple[ScoreSignal, ...]) -> bool:
+    """Keep manual review for evidence-backed ambiguity only.
+
+    A score made only from common fields (for example phone + district + room
+    count) is not enough to interrupt operations.  Image, provenance, or a
+    combination of content signals must support the review decision.
+    """
+
+    matched = {signal.name for signal in signals if signal.matched}
+    if matched & {"source_url", "forward_origin", "same_image_phash"}:
+        return True
+    if _has_structured_identity(matched):
+        return False
+    if {"similar_address", "similar_description"} <= matched:
+        return True
+    structured_matches = len(matched & _STRUCTURED_IDENTITY_SIGNALS)
+    return (
+        {"phone", "similar_description"} <= matched
+        and structured_matches >= 2
+    )
 
 
 class InMemoryAnnouncementRepository(DedupCandidateRepository):
@@ -1425,5 +1498,6 @@ def dedup_scoring_config_from_settings(settings: Settings) -> DedupScoringConfig
         area_tolerance_sqm=Decimal(str(settings.dedup_area_tolerance_sqm)),
         price_tolerance_ratio=Decimal(str(settings.dedup_price_tolerance_ratio)),
         address_similarity_threshold=settings.dedup_address_similarity_threshold,
+        description_similarity_threshold=settings.dedup_description_similarity_threshold,
         parent_selection_policy=settings.dedup_parent_selection_policy,
     )

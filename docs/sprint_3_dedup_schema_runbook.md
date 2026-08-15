@@ -144,9 +144,16 @@ Manual review statuses:
 Manual review reasons:
 
 - `possible_duplicate`: score was between the possible threshold and automatic
-  merge threshold;
+  merge threshold **and** there is evidence-backed ambiguity (image/provenance,
+  or corroborating address/description signals). Common fields alone (for
+  example phone + district + room count) must not create a review item;
 - `low_confidence`: schema-valid AI output had low business confidence;
 - `business_quality`: schema-valid data still failed a business-quality check.
+
+The v2 dedup policy treats phone + matching district, rooms, area, normalized
+monthly price, and floor as a strong structured fingerprint and merges it
+automatically. This avoids filling the manual queue with repeated listings from
+the same realtor while keeping weak/generic text matches as new announcements.
 
 Admin actions are idempotent service calls intended to be wired into the Sprint 6
 admin panel: mark as new, merge duplicate, update canonical fields, and reject.

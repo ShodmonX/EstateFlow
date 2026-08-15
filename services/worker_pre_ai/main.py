@@ -30,7 +30,7 @@ async def run() -> None:
             phash_provider=phash_provider,
             ops_notifier=ops_notifier,
             config=PreAiDedupConfig(
-                near_text_threshold=settings.dedup_address_similarity_threshold,
+                near_text_threshold=settings.pre_ai_near_text_threshold,
                 phash_hamming_threshold=settings.media_phash_hamming_threshold,
             ),
         ),

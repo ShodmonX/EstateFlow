@@ -1,0 +1,7 @@
+\echo 'DEPRECATED: use scripts/migrations.py smoke or estateflow-migrations smoke.'
+\set ON_ERROR_STOP on
+do $$
+begin
+    raise exception 'scripts/migration_smoke.psql is deprecated';
+end
+$$;

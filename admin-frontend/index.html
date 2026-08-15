@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#101c2c" />
+    <title>EstateFlow Control Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css?v=20260811-duplicate-compare" />
+  </head>
+  <body>
+    <div id="auth-gate" class="auth-gate">
+      <div class="auth-card">
+        <div class="brand-mark">EF</div>
+        <p class="eyebrow">ESTATEFLOW CONTROL ROOM</p>
+        <h1>Tizimni bir joydan boshqaring.</h1>
+        <p class="muted">Admin API tokenini kiriting. Token faqat shu brauzer sessiyasi davomida saqlanadi.</p>
+        <form id="auth-form">
+          <label class="field"><span>Admin API token</span><input id="admin-token" type="password" autocomplete="off" required /></label>
+          <button class="primary-button" type="submit">Panelni ochish</button>
+        </form>
+        <p id="auth-error" class="error-text hidden"></p>
+      </div>
+    </div>
+
+    <div id="app" class="app hidden">
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark">EF</div><div><strong>EstateFlow</strong><span>Control Room</span></div></div>
+        <div class="status-pill"><i></i><span id="sidebar-status">Tekshirilmoqda</span></div>
+        <nav id="navigation" class="navigation" aria-label="Admin bo'limlari">
+          <button class="nav-item active" data-screen="overview"><span class="nav-icon">01</span> Umumiy ko'rinish</button>
+          <button class="nav-item" data-screen="reviews"><span class="nav-icon">02</span> Review queue <b id="review-badge">0</b></button>
+          <button class="nav-item" data-screen="sources"><span class="nav-icon">03</span> Manbalar</button>
+          <button class="nav-item" data-screen="flags"><span class="nav-icon">04</span> Feature flags</button>
+          <button class="nav-item" data-screen="telegram"><span class="nav-icon">05</span> Telegram sessions</button>
+          <button class="nav-item" data-screen="tags"><span class="nav-icon">06</span> Audience tags</button>
+          <button class="nav-item" data-screen="tools"><span class="nav-icon">07</span> Asboblar</button>
+        </nav>
+        <button id="logout-button" class="logout-button">Sessiyani yopish</button>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar"><div><p class="eyebrow">OPERATIONS / <span id="current-section">OVERVIEW</span></p><h2 id="page-title">Tizim holati</h2></div><div class="topbar-actions"><span id="last-refresh" class="muted small">Yuklanmoqda...</span><button id="refresh-button" class="icon-button" title="Yangilash">↻</button></div></header>
+
+        <section id="overview-screen" class="screen active-screen">
+          <div class="hero-banner"><div><p class="eyebrow light">BUGUNGI NAZORAT MARKAZI</p><h1>Signalni ko'ring.<br /><em>Qarorni tez qiling.</em></h1><p>Review, manbalar, listenerlar va release sozlamalari bir boshqaruv qatlamida.</p></div><div class="hero-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
+          <div class="stat-grid"><article class="stat-card accent"><span>Pending review</span><strong id="stat-reviews">--</strong><small>ko'rib chiqishni kutmoqda</small></article><article class="stat-card"><span>Faol manbalar</span><strong id="stat-sources">--</strong><small>listener topology</small></article><article class="stat-card"><span>Yoqilgan flags</span><strong id="stat-flags">--</strong><small>release controls</small></article><article class="stat-card"><span>Listener holati</span><strong id="stat-listener">--</strong><small id="stat-listener-detail">status yuklanmoqda</small></article></div>
+          <div class="two-column"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">RELEASE</p><h3>Feature flags</h3></div><button class="text-button" data-go="flags">Barchasini ko'rish →</button></div><div id="overview-flags" class="compact-list"></div></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">TELEGRAM</p><h3>Listener topology</h3></div><button class="text-button" data-go="sources">Manbalarni ko'rish →</button></div><div id="overview-listener" class="compact-list"></div></article></div>
+        </section>
+
+        <section id="reviews-screen" class="screen"><div class="section-intro"><div><p class="eyebrow">QUALITY GATE</p><h1>Review queue</h1><p class="muted">AI ishonchi past yoki duplicate ehtimoli bor e'lonlarni shu yerdan boshqaring.</p></div><select id="review-filter"><option value="">Barcha sabablar</option><option value="possible_duplicate">Possible duplicate</option><option value="low_confidence">Low confidence</option><option value="business_quality">Business quality</option></select></div><div class="review-layout"><div id="review-list" class="review-list"></div><aside id="review-detail" class="panel review-detail"><div class="empty-state">Review elementini tanlang.</div></aside></div></section>
+
+        <section id="sources-screen" class="screen"><div class="section-intro"><div><p class="eyebrow">INGESTION</p><h1>Manbalar va listenerlar</h1><p class="muted">Telegram kanal, guruh va listener topology’ni boshqaring.</p></div><button id="refresh-listeners" class="secondary-button">Listenerlarni refresh qilish</button></div><div class="source-layout"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">YANGI MANBA</p><h3>Kanal qo'shish</h3></div></div><form id="source-form" class="form-grid"><label class="field wide"><span>Nomi</span><input name="name" placeholder="Masalan: Yunusobod ijara" required /></label><label class="field wide"><span>Username yoki channel ID</span><input name="identifier" placeholder="@kanal yoki -100..." required /></label><label class="field"><span>Turi</span><select name="source_type"><option value="telegram_channel">Telegram kanal</option><option value="telegram_group">Telegram guruh</option><option value="website">Website</option></select></label><label class="field"><span>Session</span><input name="session_name" placeholder="acc_9889" /></label><label class="field"><span>Adapter</span><input name="adapter_name" placeholder="telethon" /></label><label class="field"><span>Profile</span><input name="source_profile" placeholder="album_text_merge" /></label><button class="primary-button wide" type="submit">Manbani faollashtirish</button></form><p id="source-message" class="form-message hidden"></p></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">TOPOLOGY</p><h3>Listener holati</h3></div></div><div id="listener-status" class="stack-list"></div></article></div><div class="panel"><div class="panel-heading"><div><p class="eyebrow">USER SUGGESTIONS</p><h3>Kanal takliflari</h3></div></div><div id="source-suggestions" class="table-wrap"></div></div></section>
+
+        <section id="flags-screen" class="screen"><div class="section-intro"><div><p class="eyebrow">RELEASE CONTROL</p><h1>Feature flags</h1><p class="muted">Bot, notification, listener va content release’larini xavfsiz boshqaring.</p></div></div><div id="flags-list" class="flag-grid"></div><article class="panel allowlist-panel"><div class="panel-heading"><div><p class="eyebrow">BETA ACCESS</p><h3>Allowlist</h3></div><span id="allowlist-size" class="badge">0 user</span></div><form id="allowlist-form" class="inline-form"><input name="user_id" type="number" min="1" placeholder="Telegram user ID" required /><button class="secondary-button" type="submit">ID qo'shish</button></form><p id="allowlist-message" class="form-message hidden"></p></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">AUDIT</p><h3>Oxirgi flag o'zgarishlari</h3></div></div><div id="flag-audit" class="table-wrap"></div></article></section>
+
+        <section id="telegram-screen" class="screen"><div class="section-intro"><div><p class="eyebrow">TELEGRAM ACCESS</p><h1>Sessionlar</h1><p class="muted">Listener accountlarining authorization va source binding holati.</p></div></div><div id="telegram-sessions" class="session-grid"></div><article class="panel auth-help"><p class="eyebrow">AUTH FLOW</p><h3>Yangi session</h3><p class="muted">Telegram login flow API’da tayyor. Session qo'shish uchun auth start, code confirm va 2FA password bosqichlari kerak bo'ladi. Bu panel mavjud session holatini va source binding’ni kuzatadi.</p></article></section>
+
+        <section id="tags-screen" class="screen"><div class="section-intro"><div><p class="eyebrow">TAXONOMY</p><h1>Audience tags</h1><p class="muted">AI taklif qilgan yangi auditoriya teglarini tasdiqlang yoki rad eting.</p></div></div><div id="tags-list" class="tag-grid"></div></section>
+
+        <section id="tools-screen" class="screen"><div class="section-intro"><div><p class="eyebrow">OPERATIONS TOOLS</p><h1>Asboblar</h1><p class="muted">AI extraction, adapter registry va content pipeline’ni shu yerdan sinang.</p></div></div><div class="tools-grid"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">AI LAB</p><h3>Listing extraction test</h3></div></div><form id="ai-form"><label class="field"><span>E'lon matni</span><textarea name="text" rows="7" placeholder="Yunusobod 2 xona, oyiga 500$..."></textarea></label><button class="primary-button" type="submit">AI bilan tekshirish</button></form><pre id="ai-result" class="code-result hidden"></pre></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">ADAPTERS</p><h3>Adapter registry</h3></div><button id="reload-adapters" class="secondary-button">Reload</button></div><div id="adapter-status" class="compact-list"></div><hr /><div class="panel-heading"><div><p class="eyebrow">CONTENT</p><h3>Daily post generator</h3></div><button id="generate-content" class="secondary-button">Generate</button></div><div id="content-result" class="compact-list"></div></article></div></section>
+      </main>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+    <script src="/app.js?v=20260811-duplicate-compare" type="module"></script>
+  </body>
+</html>

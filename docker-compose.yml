@@ -1,0 +1,279 @@
+name: estateflow
+
+x-app-depends-on: &app-depends-on
+  redis:
+    condition: service_healthy
+  rabbitmq:
+    condition: service_healthy
+
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - estateflow_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - estateflow
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-estateflow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-estateflow_dev_password}
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - estateflow_rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - estateflow
+
+  api:
+    profiles: ["applications"]
+    build:
+      context: .
+      dockerfile: Dockerfile.public-api
+    env_file:
+      - ${ENV_FILE:-.env}
+    command: ["python", "-m", "apps.public_api.main"]
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  admin-api:
+    profiles: ["applications"]
+    build:
+      context: .
+      dockerfile: Dockerfile.admin-api
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-admin-api
+    command: ["python", "-m", "apps.admin_api.main"]
+    ports:
+      - "127.0.0.1:${ADMIN_API_PORT:-8001}:8000"
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  internal-api:
+    profiles: ["applications"]
+    build:
+      context: .
+      dockerfile: Dockerfile.internal-api
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-internal-api
+    command: ["python", "-m", "apps.internal_api.main"]
+    ports:
+      - "127.0.0.1:${INTERNAL_API_PORT:-8002}:8000"
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  frontend:
+    profiles: ["applications"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    networks:
+      - estateflow
+
+  admin-frontend:
+    profiles: ["applications"]
+    build:
+      context: ./admin-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:${ADMIN_WEB_PORT:-8081}:80"
+    depends_on:
+      - admin-api
+    networks:
+      - estateflow
+
+  bot:
+    profiles: ["applications"]
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    env_file:
+      - ${ENV_FILE:-.env}
+    command: ["python", "-m", "apps.bot.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  listener:
+    build:
+      context: .
+      dockerfile: Dockerfile.listener
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-listener
+      WORKER_STAGE: listener
+    command: ["python", "-m", "services.listener.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  worker-pre-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-pre-ai
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-worker-pre-ai
+      WORKER_STAGE: pre_ai
+    command: ["python", "-m", "services.worker_pre_ai.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  worker-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-ai
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-worker-ai
+      WORKER_STAGE: ai
+    command: ["python", "-m", "services.worker_ai.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  worker-dedup:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-dedup
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-worker-dedup
+      WORKER_STAGE: dedup
+    command: ["python", "-m", "services.worker_dedup.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  worker-notification-matcher:
+    profiles: ["applications"]
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-notification-match
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-worker-notification-matcher
+      WORKER_STAGE: notification
+    command: ["python", "-m", "services.worker_notification_match.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  worker-notification:
+    profiles: ["applications"]
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-notification-delivery
+    env_file:
+      - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-worker-notification
+      WORKER_STAGE: notification
+    command: ["python", "-m", "services.worker_notification_delivery.main"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on: *app-depends-on
+    networks:
+      - estateflow
+
+  migrate:
+    profiles: ["migrations"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ${ENV_FILE:-.env}
+    command: ["estateflow-migrations", "upgrade-head"]
+    volumes:
+      - ./data:/app/data
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - estateflow
+
+volumes:
+  estateflow_redis_data:
+  estateflow_rabbitmq_data:
+
+networks:
+  estateflow:
+    driver: bridge

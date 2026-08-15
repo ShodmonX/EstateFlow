@@ -149,6 +149,7 @@ activemq-data/
 
 # Environments
 .env
+.env.ingestion
 .envrc
 .venv
 env/
@@ -156,6 +157,16 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# EstateFlow local secrets and Telegram sessions
+credentials
+data/sessions/
+*.session
+*.session-journal
+
+# Local database backup artifacts (never commit production/test dumps)
+backups/*.dump
+backups/*.sql
 
 # Spyder project settings
 .spyderproject

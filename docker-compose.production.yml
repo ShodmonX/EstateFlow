@@ -1,0 +1,213 @@
+x-production-env: &production-env
+  ENVIRONMENT: production
+  DEBUG: "false"
+  DB_HOST: ${DB_HOST:?DB_HOST is required}
+  DB_PORT: ${DB_PORT:-6529}
+  DB_NAME: ${DB_NAME:-estateflow}
+  DB_USER: ${DB_USER:-estateflow__app_user}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+  REDIS_HOST: redis
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+  QUEUE_BACKEND: rabbitmq
+  RABBITMQ_URL: ${RABBITMQ_URL:?RABBITMQ_URL is required}
+  APP_SECRET_KEY: ${APP_SECRET_KEY:?APP_SECRET_KEY is required}
+  ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?ADMIN_API_TOKEN is required}
+  SOURCE_SUGGESTION_INGRESS_TOKEN: ${SOURCE_SUGGESTION_INGRESS_TOKEN:?SOURCE_SUGGESTION_INGRESS_TOKEN is required}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
+  TELEGRAM_API_ID: ${TELEGRAM_API_ID:?TELEGRAM_API_ID is required}
+  TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:?TELEGRAM_API_HASH is required}
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required}
+  R2_ENDPOINT_URL: ${R2_ENDPOINT_URL:?R2_ENDPOINT_URL is required}
+  R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?R2_ACCESS_KEY_ID is required}
+  R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?R2_SECRET_ACCESS_KEY is required}
+  R2_BUCKET: ${R2_BUCKET:?R2_BUCKET is required}
+
+x-app-hardening: &app-hardening
+  restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+x-api-healthcheck: &api-healthcheck
+  test:
+    - CMD
+    - python
+    - -c
+    - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 20s
+
+services:
+  redis:
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command:
+      - sh
+      - -c
+      - 'exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  rabbitmq:
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?RABBITMQ_USER is required}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  api:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-public-api
+    healthcheck: *api-healthcheck
+
+  admin-api:
+    <<: *app-hardening
+    env_file: []
+    ports: !reset []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-admin-api
+    healthcheck: *api-healthcheck
+
+  internal-api:
+    <<: *app-hardening
+    env_file: []
+    ports: !reset []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-internal-api
+    healthcheck: *api-healthcheck
+
+  frontend:
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  admin-frontend:
+    restart: unless-stopped
+    ports: !reset []
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  bot:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-bot
+
+  listener:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-listener
+      WORKER_STAGE: listener
+
+  worker-pre-ai:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-pre-ai
+      WORKER_STAGE: pre_ai
+
+  worker-ai:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-ai
+      WORKER_STAGE: ai
+
+  worker-dedup:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-dedup
+      WORKER_STAGE: dedup
+
+  worker-notification:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-notification
+      WORKER_STAGE: notification
+
+  worker-notification-matcher:
+    <<: *app-hardening
+    env_file: []
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-notification-matcher
+      WORKER_STAGE: notification
+
+  migrate:
+    <<: *app-hardening
+    restart: "no"
+    env_file: []
+    environment:
+      <<: *production-env
+      DB_USER: ${MIGRATION_DB_USER:-estateflow__dev_user}
+      DB_PASSWORD: ${MIGRATION_DB_PASSWORD:?MIGRATION_DB_PASSWORD is required}
+      SERVICE_NAME: estateflow-migrations

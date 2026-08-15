@@ -1,0 +1,270 @@
+name: estateflow-ingestion
+
+x-database-env: &database-env
+  ENVIRONMENT: production
+  DEBUG: "false"
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  DB_HOST: ${DB_HOST:?DB_HOST is required}
+  DB_PORT: ${DB_PORT:-6529}
+  DB_NAME: ${DB_NAME:-estateflow}
+  DB_USER: ${DB_USER:-estateflow__app_user}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+
+x-migration-env: &migration-env
+  <<: *database-env
+  DB_USER: ${MIGRATION_DB_USER:-estateflow__dev_user}
+  DB_PASSWORD: ${MIGRATION_DB_PASSWORD:?MIGRATION_DB_PASSWORD is required}
+
+x-runtime-env: &runtime-env
+  <<: *database-env
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+  QUEUE_BACKEND: rabbitmq
+  RABBITMQ_URL: ${RABBITMQ_URL:?RABBITMQ_URL is required}
+  RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-estateflow.events}
+  RABBITMQ_PREFETCH_COUNT: ${RABBITMQ_PREFETCH_COUNT:-10}
+  RABBITMQ_MAX_RETRIES: ${RABBITMQ_MAX_RETRIES:-5}
+
+x-service-hardening: &service-hardening
+  restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  stop_grace_period: 30s
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+  healthcheck:
+    test: ["CMD", "python", "-c", "import os; os.kill(1, 0)"]
+    interval: 30s
+    timeout: 5s
+    retries: 3
+    start_period: 20s
+
+x-infra-logging: &infra-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command:
+      - sh
+      - -c
+      - 'exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    logging: *infra-logging
+    networks: [backbone]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?RABBITMQ_USER is required}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    logging: *infra-logging
+    networks: [backbone]
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.ingestion-migrate
+    restart: "no"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    environment:
+      <<: *migration-env
+      DEPLOYMENT_ROLE: migrations
+      SERVICE_NAME: estateflow-ingestion-migrations
+    command: ["estateflow-migrations", "upgrade-head"]
+    volumes:
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    logging: *infra-logging
+    networks: [backbone]
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: Dockerfile.ingestion-bootstrap
+    restart: "no"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    environment:
+      <<: *database-env
+      DEPLOYMENT_ROLE: ingestion-bootstrap
+      SERVICE_NAME: estateflow-ingestion-bootstrap
+      FEATURE_LISTENER_SOURCES_ENABLED: "true"
+      INGESTION_SOURCES_JSON: ${INGESTION_SOURCES_JSON:-[]}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    logging: *infra-logging
+    networks: [backbone]
+
+  listener:
+    <<: *service-hardening
+    build:
+      context: .
+      dockerfile: Dockerfile.listener
+    environment:
+      <<: *runtime-env
+      DEPLOYMENT_ROLE: ingestion-listener
+      SERVICE_NAME: estateflow-ingestion-listener
+      WORKER_STAGE: listener
+      FEATURE_LISTENER_SOURCES_ENABLED: "true"
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:?TELEGRAM_API_ID is required}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:?TELEGRAM_API_HASH is required}
+      TELEGRAM_SESSION_DIR: /app/data/sessions
+      DEFAULT_TELEGRAM_LISTENER_ACCOUNT_KEY: ${DEFAULT_TELEGRAM_LISTENER_ACCOUNT_KEY:-acc_9889}
+      OPS_BOT_TOKEN: ${OPS_BOT_TOKEN:-}
+      OPS_CHAT_ID: ${OPS_CHAT_ID:-}
+    volumes:
+      - ${TELEGRAM_SESSION_PATH:-./data/sessions}:/app/data/sessions
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backbone]
+
+  worker-pre-ai:
+    <<: *service-hardening
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-pre-ai
+    environment:
+      <<: *runtime-env
+      DEPLOYMENT_ROLE: ingestion-pre-ai
+      SERVICE_NAME: estateflow-ingestion-pre-ai
+      WORKER_STAGE: pre_ai
+      OPS_BOT_TOKEN: ${OPS_BOT_TOKEN:-}
+      OPS_CHAT_ID: ${OPS_CHAT_ID:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backbone]
+
+  worker-ai:
+    <<: *service-hardening
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-ai
+    environment:
+      <<: *runtime-env
+      DEPLOYMENT_ROLE: ingestion-ai
+      SERVICE_NAME: estateflow-ingestion-ai
+      WORKER_STAGE: ai
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:?TELEGRAM_API_ID is required}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:?TELEGRAM_API_HASH is required}
+      TELEGRAM_SESSION_DIR: /app/data/sessions
+      TELEGRAM_MEDIA_SESSION_NAME: ${TELEGRAM_MEDIA_SESSION_NAME:-media-acc_9889}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENROUTER_MODEL_SEQUENCE: ${OPENROUTER_MODEL_SEQUENCE:-google/gemini-3.1-flash-lite,google/gemini-3.1-flash-lite-preview}
+      OPENROUTER_TIMEOUT_SECONDS: ${OPENROUTER_TIMEOUT_SECONDS:-30}
+      AI_MIN_CONFIDENCE: ${AI_MIN_CONFIDENCE:-0.72}
+      RENTAL_MIN_CONFIDENCE: ${RENTAL_MIN_CONFIDENCE:-0.60}
+      R2_ENDPOINT_URL: ${R2_ENDPOINT_URL:?R2_ENDPOINT_URL is required}
+      R2_REGION: ${R2_REGION:-auto}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?R2_ACCESS_KEY_ID is required}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?R2_SECRET_ACCESS_KEY is required}
+      R2_BUCKET: ${R2_BUCKET:?R2_BUCKET is required}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
+      OPS_BOT_TOKEN: ${OPS_BOT_TOKEN:-}
+      OPS_CHAT_ID: ${OPS_CHAT_ID:-}
+    volumes:
+      - ${TELEGRAM_SESSION_PATH:-./data/sessions}:/app/data/sessions
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backbone]
+
+  worker-dedup:
+    <<: *service-hardening
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-dedup
+    environment:
+      <<: *runtime-env
+      DEPLOYMENT_ROLE: ingestion-dedup
+      SERVICE_NAME: estateflow-ingestion-dedup
+      WORKER_STAGE: dedup
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks: [backbone]
+
+volumes:
+  redis_data:
+    name: ${REDIS_VOLUME_NAME:-estateflow_estateflow_redis_data}
+  rabbitmq_data:
+    name: ${RABBITMQ_VOLUME_NAME:-estateflow_estateflow_rabbitmq_data}
+
+networks:
+  backbone:
+    name: ${INGESTION_NETWORK_NAME:-estateflow-backbone}
+    driver: bridge

@@ -110,9 +110,9 @@ async def test_nlp_search_tracks_mixed_unmodelled_conditions_without_applying_th
     extraction = await extractor.extract("Yunusabad yoki Chilonzor, 3 xona, metroga yaqin")
 
     assert extraction.criteria.district == "Yunusobod"
+    assert extraction.criteria.selected_districts == ("Yunusobod", "Chilonzor")
     assert extraction.criteria.rooms == 3
     assert "metroga yaqin" in extraction.unapplied_conditions
-    assert "additional_districts:Chilonzor" in extraction.unapplied_conditions
 
 
 @pytest.mark.asyncio

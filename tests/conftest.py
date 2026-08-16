@@ -34,6 +34,7 @@ FLOW_MARKERS_BY_FILE: dict[str, tuple[str, ...]] = {
     "test_sprint4_search.py": ("unit", "search"),
     "test_sprint4_saved_filters_and_bot.py": ("integration", "search", "saved_filters"),
     "test_webapp_auth.py": ("unit", "search"),
+    "test_webapp_nlp_search.py": ("integration", "search", "nlp"),
     "test_rabbitmq_queue.py": ("integration", "observability"),
     "test_sprint5_notifications.py": ("unit", "notification"),
     "test_sprint5_notification_delivery.py": ("integration", "notification"),

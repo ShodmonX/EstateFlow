@@ -124,9 +124,14 @@ def _where(criteria: SearchCriteria) -> tuple[str, list[Any]]:
     if criteria.max_price is not None:
         params.append(criteria.max_price)
         clauses.append(f"a.price_normalized_monthly <= ${len(params)}")
-    if criteria.district is not None:
-        params.append(criteria.district)
-        clauses.append(f"lower(a.district) = lower(${len(params)})")
+    if criteria.selected_districts:
+        district_values = [district.casefold() for district in criteria.selected_districts]
+        if len(district_values) == 1:
+            params.append(criteria.selected_districts[0])
+            clauses.append(f"lower(a.district) = lower(${len(params)})")
+        else:
+            params.append(district_values)
+            clauses.append(f"lower(a.district) = any(${len(params)}::text[])")
     if criteria.rooms is not None:
         params.append(criteria.rooms)
         clauses.append(f"a.rooms = ${len(params)}")

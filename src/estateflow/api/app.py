@@ -92,6 +92,7 @@ def _install_runtime(
     app.state.website_scraper_service = runtime.website_scraper_service
     app.state.metrics_service = runtime.metrics_service
     app.state.search_service = runtime.search_service
+    app.state.nlp_search_extractor = runtime.nlp_search_extractor
     app.state.saved_filter_service = runtime.saved_filter_service
     app.state.source_suggestion_service = runtime.source_suggestion_service
     app.state.telegram_auth_service = runtime.telegram_auth_service

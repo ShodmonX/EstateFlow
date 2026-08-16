@@ -167,6 +167,21 @@ async def test_in_memory_search_repository_get_returns_user_facing_announcement(
     assert await repo.get("missing") is None
 
 
+@pytest.mark.asyncio
+async def test_search_matches_any_selected_district() -> None:
+    repo = InMemorySearchRepository(
+        [
+            _announcement("olmazor", canonical=_canonical(district="Olmazor")),
+            _announcement("chilonzor", canonical=_canonical(district="Chilonzor")),
+            _announcement("yunusobod"),
+        ]
+    )
+
+    result = await repo.search(SearchCriteria(districts=["Olmazor", "Chilonzor"]))
+
+    assert {item.announcement_id for item in result.items} == {"olmazor", "chilonzor"}
+
+
 def test_search_api_contract_and_validation() -> None:
     app = create_app(Settings(environment="test"))
     app.state.search_service = SearchService(InMemorySearchRepository([_announcement("a1")]))
@@ -180,6 +195,12 @@ def test_search_api_contract_and_validation() -> None:
     payload = response.json()
     assert payload["items"][0]["announcement_id"] == "a1"
     assert payload["metadata"]["price_field"] == "price_normalized_monthly"
+
+    multi = TestClient(app).get(
+        "/search/announcements",
+        params=[("districts", "Olmazor"), ("districts", "Chilonzor")],
+    )
+    assert multi.status_code == 200
 
     invalid = TestClient(app).get("/search/announcements", params={"limit": 500})
     assert invalid.status_code == 422

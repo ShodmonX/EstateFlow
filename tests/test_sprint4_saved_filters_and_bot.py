@@ -11,7 +11,7 @@ from estateflow.bot.app import create_bot_dispatcher
 from estateflow.bot.callbacks import CallbackPayload, callback
 from estateflow.bot.controller import BotController
 from estateflow.bot.menu import main_menu
-from estateflow.bot.search_wizard import SearchWizard, parse_price
+from estateflow.bot.search_wizard import SearchWizard, normalize_districts, parse_price
 from estateflow.repositories.saved_filters import InMemorySavedFilterRepository
 from estateflow.repositories.users import InMemoryUserRepository
 from estateflow.services.extraction import CanonicalListing
@@ -148,6 +148,10 @@ def test_search_wizard_validates_price_and_builds_criteria() -> None:
     assert parse_price("1 200,50 usd") == Decimal("1200.50")
     with pytest.raises(ValueError):
         parse_price("narx yo'q")
+
+
+def test_search_wizard_accepts_multiple_districts() -> None:
+    assert normalize_districts("Olmazor yoki Chilonzor") == ("Olmazor", "Chilonzor")
 
 
 @pytest.mark.asyncio

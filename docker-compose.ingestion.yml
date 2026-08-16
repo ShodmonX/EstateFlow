@@ -30,6 +30,8 @@ x-runtime-env: &runtime-env
 x-service-hardening: &service-hardening
   restart: unless-stopped
   init: true
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   read_only: true
   tmpfs:
     - /tmp:rw,noexec,nosuid,size=64m
@@ -60,6 +62,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    mem_limit: 96m
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
@@ -83,6 +86,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     restart: unless-stopped
+    mem_limit: 192m
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?RABBITMQ_USER is required}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required}
@@ -104,7 +108,10 @@ services:
       context: .
       dockerfile: Dockerfile.ingestion-migrate
     restart: "no"
+    mem_limit: 256m
     init: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m
@@ -132,7 +139,10 @@ services:
       context: .
       dockerfile: Dockerfile.ingestion-bootstrap
     restart: "no"
+    mem_limit: 128m
     init: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=32m
@@ -153,6 +163,7 @@ services:
 
   listener:
     <<: *service-hardening
+    mem_limit: 96m
     build:
       context: .
       dockerfile: Dockerfile.listener
@@ -181,6 +192,7 @@ services:
 
   worker-pre-ai:
     <<: *service-hardening
+    mem_limit: 128m
     build:
       context: .
       dockerfile: Dockerfile.worker-pre-ai
@@ -202,6 +214,7 @@ services:
 
   worker-ai:
     <<: *service-hardening
+    mem_limit: 320m
     build:
       context: .
       dockerfile: Dockerfile.worker-ai
@@ -241,6 +254,7 @@ services:
 
   worker-dedup:
     <<: *service-hardening
+    mem_limit: 128m
     build:
       context: .
       dockerfile: Dockerfile.worker-dedup

@@ -3,6 +3,10 @@ const apiBase = window.ESTATEFLOW_API_BASE || "/api";
 let accessToken = sessionStorage.getItem("estateflow_token") || "";
 let currentUser = null;
 let latestCriteria = null;
+let latestNlpExtraction = null;
+let latestNlpTags = [];
+let latestNlpQuery = "";
+let nlpRequestVersion = 0;
 
 if (tg) {
   tg.ready();
@@ -39,19 +43,76 @@ async function authenticate() {
   currentUser = session.user;
 }
 
-function formCriteria() {
+function formCriteria(nlpCriteria = null) {
   const data = new FormData($("#search-form"));
-  const criteria = { sort: data.get("sort") || "newest", limit: 20, offset: 0, include_per_person: data.get("include_per_person") === "on" };
+  const criteria = { sort: data.get("sort") || "newest", limit: 20, offset: 0 };
+  for (const key of ["min_price", "max_price", "include_per_person", "district", "districts", "rooms", "renovation_level", "audience_tag"]) {
+    const value = nlpCriteria?.[key];
+    if (Array.isArray(value) ? value.length : value !== null && value !== undefined && value !== "") criteria[key] = value;
+  }
   for (const key of ["district", "renovation_level"]) if (data.get(key)) criteria[key] = data.get(key);
+  if (data.get("district")) criteria.districts = [data.get("district")];
   for (const key of ["min_price", "max_price", "rooms"]) if (data.get(key)) criteria[key] = Number(data.get(key));
+  criteria.include_per_person = data.get("include_per_person") === "on" || Boolean(nlpCriteria?.include_per_person);
   return criteria;
 }
 
-async function search() {
+function renderNlpTags(tags = [], status = "Matn kiriting va qidiring") {
+  const statusElement = $("#nlp-status");
+  const list = $("#nlp-tags-list");
+  latestNlpTags = tags;
+  if (statusElement) statusElement.textContent = status;
+  if (!list) return;
+  list.innerHTML = tags.map((tag, index) => `<span class="nlp-tag ${tag.applied ? "" : "unsupported"}"${tag.applied ? "" : " title=\"Qidiruvga qo'shilmagan qo'shimcha shart\""}><span>${escapeHtml(tag.value)}</span><button type="button" class="nlp-tag-remove" data-nlp-tag-index="${index}" aria-label="${escapeHtml(tag.value)} shartini olib tashlash" title="Shartni olib tashlash">&#215;</button></span>`).join("");
+}
+
+async function extractNlp(query) {
+  const normalized = query.trim();
+  if (!normalized) {
+    latestNlpExtraction = null;
+    latestNlpQuery = "";
+    renderNlpTags();
+    return null;
+  }
+  const requestVersion = ++nlpRequestVersion;
+  renderNlpTags([], "Mezonlar ajratilmoqda...");
+  const response = await request("/webapp/search/nlp", { method: "POST", body: JSON.stringify({ query: normalized }) });
+  if (requestVersion !== nlpRequestVersion) return null;
+  latestNlpExtraction = response;
+  latestNlpQuery = normalized;
+  renderNlpTags(response.tags || [], "Taglar tayyor");
+  return response;
+}
+
+function removeNlpTag(index) {
+  const tag = latestNlpTags[index];
+  if (!tag || !latestNlpExtraction) return;
+  const criteria = { ...latestNlpExtraction.criteria };
+  if (tag.applied) {
+    if (tag.key === "district") {
+      const districts = (Array.isArray(criteria.districts) ? criteria.districts : [criteria.district])
+        .filter((district) => district && district.toLowerCase() !== tag.value.toLowerCase());
+      criteria.districts = districts;
+      criteria.district = districts[0] || null;
+    } else if (Object.prototype.hasOwnProperty.call(criteria, tag.key)) {
+      criteria[tag.key] = tag.key === "include_per_person" ? false : null;
+    }
+  }
+  latestNlpExtraction = { ...latestNlpExtraction, criteria };
+  renderNlpTags(latestNlpTags.filter((_, tagIndex) => tagIndex !== index), "Tag olib tashlandi");
+  return search({ nlpExtraction: latestNlpExtraction });
+}
+
+async function search({ nlpExtraction = latestNlpExtraction } = {}) {
   clearMessage();
-  const criteria = formCriteria();
+  const criteria = formCriteria(nlpExtraction?.criteria || null);
   latestCriteria = criteria;
-  const params = new URLSearchParams(Object.entries(criteria).filter(([, value]) => value !== "" && value !== undefined).map(([key, value]) => [key, String(value)]));
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(criteria)) {
+    if (value === "" || value === undefined || value === null) continue;
+    if (Array.isArray(value)) value.forEach((item) => params.append(key, String(item)));
+    else params.append(key, String(value));
+  }
   const response = await request(`/webapp/search/announcements?${params}`);
   $("#result-count").textContent = `${response.metadata.total ?? response.items.length} ta variant`;
   const results = $("#results");
@@ -105,7 +166,10 @@ async function loadFilters() {
   const filters = await request("/webapp/filters");
   const container = $("#filters-list");
   if (!filters.length) { container.innerHTML = `<div class="message">Hali saqlangan filter yo'q.</div>`; return; }
-  container.innerHTML = filters.map((item) => `<div class="filter-row"><div><p>${escapeHtml(item.name)}</p><small>${escapeHtml(item.criteria.district || "Barcha tumanlar")} · ${item.enabled ? "Yoqilgan" : "O'chirilgan"}</small></div><button data-filter-id="${escapeHtml(item.filter_id)}">${item.enabled ? "O'chirish" : "Yoqish"}</button></div>`).join("");
+  container.innerHTML = filters.map((item) => {
+    const districts = item.criteria.districts?.length ? item.criteria.districts.join(", ") : item.criteria.district;
+    return `<div class="filter-row"><div><p>${escapeHtml(item.name)}</p><small>${escapeHtml(districts || "Barcha tumanlar")} · ${item.enabled ? "Yoqilgan" : "O'chirilgan"}</small></div><button data-filter-id="${escapeHtml(item.filter_id)}">${item.enabled ? "O'chirish" : "Yoqish"}</button></div>`;
+  }).join("");
   container.querySelectorAll("button").forEach((button) => button.addEventListener("click", async () => {
     const item = filters.find((filter) => filter.filter_id === button.dataset.filterId);
     await request(`/webapp/filters/${item.filter_id}`, { method: "PATCH", body: JSON.stringify({ enabled: !item.enabled }) });
@@ -143,9 +207,29 @@ async function init() {
   if (!location.hash) await search();
 }
 
-$("#search-form").addEventListener("submit", (event) => { event.preventDefault(); search().catch((error) => showMessage(error.message)); });
+$("#search-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    const query = $("#nlp-query").value;
+    const normalizedQuery = query.trim();
+    const extraction = normalizedQuery
+      ? (latestNlpExtraction && latestNlpQuery === normalizedQuery ? latestNlpExtraction : await extractNlp(query))
+      : null;
+    await search({ nlpExtraction: extraction });
+  } catch (error) {
+    renderNlpTags([], "Ajratib bo'lmadi");
+    showMessage(error.message);
+  }
+});
 $("#refresh-button").addEventListener("click", () => search().catch((error) => showMessage(error.message)));
 $("#save-filter-button").addEventListener("click", () => saveFilter().catch((error) => showMessage(error.message)));
+$("#nlp-query").addEventListener("input", () => { latestNlpExtraction = null; nlpRequestVersion += 1; renderNlpTags(); });
+$("#nlp-tags-list").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-nlp-tag-index]");
+  if (!button) return;
+  event.preventDefault();
+  Promise.resolve(removeNlpTag(Number(button.dataset.nlpTagIndex))).catch((error) => showMessage(error.message));
+});
 document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => activateTab(tab.dataset.tab)));
 $("#results").addEventListener("click", (event) => {
   if (event.target.closest("a")) return;

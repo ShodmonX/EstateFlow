@@ -22,6 +22,7 @@ class SearchCriteria(BaseModel):
     max_price: Decimal | None = Field(default=None, ge=0)
     include_per_person: bool = False
     district: str | None = None
+    districts: list[str] = Field(default_factory=list, max_length=12)
     rooms: int | None = Field(default=None, ge=0)
     renovation_level: RenovationLevel | None = None
     audience_tag: str | None = None
@@ -36,6 +37,44 @@ class SearchCriteria(BaseModel):
             return None
         stripped = " ".join(value.split())
         return stripped or None
+
+    @field_validator("districts", mode="before")
+    @classmethod
+    def normalize_districts(cls, value: object) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, str):
+            value = [value]
+        if not isinstance(value, (list, tuple, set)):
+            raise ValueError("districts must be a list of district names")
+        normalized: list[str] = []
+        for item in value:
+            if not isinstance(item, str):
+                raise ValueError("districts must contain strings")
+            clean = " ".join(item.split())
+            if clean and clean.casefold() not in {district.casefold() for district in normalized}:
+                normalized.append(clean)
+        return normalized
+
+    @model_validator(mode="after")
+    def synchronize_district_filters(self) -> SearchCriteria:
+        districts = list(self.districts)
+        if self.district:
+            districts.insert(0, self.district)
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for district in districts:
+            key = district.casefold()
+            if key not in seen:
+                seen.add(key)
+                deduped.append(district)
+        self.districts = deduped
+        self.district = deduped[0] if deduped else None
+        return self
+
+    @property
+    def selected_districts(self) -> tuple[str, ...]:
+        return tuple(self.districts)
 
     @field_validator("audience_tag")
     @classmethod
@@ -139,8 +178,10 @@ def announcement_matches(announcement: StructuredAnnouncement, criteria: SearchC
             and canonical.price_normalized_monthly > criteria.max_price
         ):
             return False
-    if criteria.district and (canonical.district or "").casefold() != criteria.district.casefold():
-        return False
+    if criteria.selected_districts:
+        allowed_districts = {district.casefold() for district in criteria.selected_districts}
+        if (canonical.district or "").casefold() not in allowed_districts:
+            return False
     if criteria.rooms is not None and canonical.rooms != criteria.rooms:
         return False
     if (

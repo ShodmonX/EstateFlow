@@ -1,0 +1,210 @@
+name: estateflow-apps
+
+x-production-env: &production-env
+  ENVIRONMENT: production
+  DEBUG: "false"
+  API_HOST: 0.0.0.0
+  API_PORT: 8000
+  DB_HOST: ${DB_HOST:?DB_HOST is required}
+  DB_PORT: ${DB_PORT:-6529}
+  DB_NAME: ${DB_NAME:-estateflow}
+  DB_USER: ${DB_USER:-estateflow__app_user}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+  REDIS_DB: ${REDIS_DB:-0}
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+  QUEUE_BACKEND: rabbitmq
+  RABBITMQ_URL: ${RABBITMQ_URL:?RABBITMQ_URL is required}
+  RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-estateflow.events}
+  RABBITMQ_PREFETCH_COUNT: ${RABBITMQ_PREFETCH_COUNT:-10}
+  RABBITMQ_MAX_RETRIES: ${RABBITMQ_MAX_RETRIES:-5}
+  APP_SECRET_KEY: ${APP_SECRET_KEY:?APP_SECRET_KEY is required}
+  ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?ADMIN_API_TOKEN is required}
+  SOURCE_SUGGESTION_INGRESS_TOKEN: ${SOURCE_SUGGESTION_INGRESS_TOKEN:?SOURCE_SUGGESTION_INGRESS_TOKEN is required}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
+  TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+  TELEGRAM_MINI_APP_URL: ${TELEGRAM_MINI_APP_URL:-}
+  TELEGRAM_API_ID: ${TELEGRAM_API_ID:?TELEGRAM_API_ID is required}
+  TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:?TELEGRAM_API_HASH is required}
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required}
+  OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+  OPENROUTER_MODEL_SEQUENCE: ${OPENROUTER_MODEL_SEQUENCE:-google/gemini-3.1-flash-lite,google/gemini-3.1-flash-lite-preview}
+  OPENROUTER_TIMEOUT_SECONDS: ${OPENROUTER_TIMEOUT_SECONDS:-30}
+  R2_ENDPOINT_URL: ${R2_ENDPOINT_URL:?R2_ENDPOINT_URL is required}
+  R2_REGION: ${R2_REGION:-auto}
+  R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?R2_ACCESS_KEY_ID is required}
+  R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?R2_SECRET_ACCESS_KEY is required}
+  R2_BUCKET: ${R2_BUCKET:?R2_BUCKET is required}
+  R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:-}
+  FEATURE_BOT_ACCESS_ENABLED: "true"
+  FEATURE_LISTENER_SOURCES_ENABLED: "true"
+  FEATURE_AI_PROCESSING_ENABLED: "true"
+  FEATURE_NOTIFICATIONS_ENABLED: "true"
+  FEATURE_NLP_ENABLED: "true"
+  FEATURE_CONTENT_PUBLISHING_ENABLED: "false"
+  FEATURE_AI_VISION_ENABLED: "true"
+
+x-app-hardening: &app-hardening
+  restart: unless-stopped
+  init: true
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  stop_grace_period: 30s
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+x-api-healthcheck: &api-healthcheck
+  test:
+    - CMD
+    - python
+    - -c
+    - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 20s
+
+x-worker-healthcheck: &worker-healthcheck
+  test: ["CMD", "python", "-c", "import os; os.kill(1, 0)"]
+  interval: 30s
+  timeout: 5s
+  retries: 3
+  start_period: 20s
+
+services:
+  api:
+    <<: *app-hardening
+    mem_limit: 256m
+    build:
+      context: .
+      dockerfile: Dockerfile.public-api
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-public-api
+    healthcheck: *api-healthcheck
+    networks:
+      backbone:
+        aliases: [estateflow-public-api]
+      web:
+        aliases: [estateflow-public-api]
+
+  admin-api:
+    <<: *app-hardening
+    mem_limit: 256m
+    build:
+      context: .
+      dockerfile: Dockerfile.admin-api
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-admin-api
+    healthcheck: *api-healthcheck
+    networks: [backbone]
+
+  internal-api:
+    <<: *app-hardening
+    mem_limit: 160m
+    build:
+      context: .
+      dockerfile: Dockerfile.internal-api
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-internal-api
+    healthcheck: *api-healthcheck
+    networks: [backbone]
+
+  frontend:
+    restart: unless-stopped
+    mem_limit: 48m
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE, SETGID, SETUID]
+    networks: [web]
+
+  admin-frontend:
+    restart: unless-stopped
+    mem_limit: 48m
+    build:
+      context: ./admin-frontend
+      dockerfile: Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE, SETGID, SETUID]
+    networks: [backbone]
+
+  bot:
+    <<: *app-hardening
+    mem_limit: 160m
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-bot
+    healthcheck: *worker-healthcheck
+    networks: [backbone]
+
+  worker-notification-matcher:
+    <<: *app-hardening
+    mem_limit: 96m
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-notification-match
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-notification-matcher
+      WORKER_STAGE: notification
+    healthcheck: *worker-healthcheck
+    networks: [backbone]
+
+  worker-notification:
+    <<: *app-hardening
+    mem_limit: 160m
+    build:
+      context: .
+      dockerfile: Dockerfile.worker-notification-delivery
+    environment:
+      <<: *production-env
+      SERVICE_NAME: estateflow-worker-notification
+      WORKER_STAGE: notification
+    healthcheck: *worker-healthcheck
+    networks: [backbone]
+
+  migrate:
+    <<: *app-hardening
+    restart: "no"
+    mem_limit: 256m
+    build:
+      context: .
+      dockerfile: Dockerfile.ingestion-migrate
+    environment:
+      <<: *production-env
+      DB_USER: ${MIGRATION_DB_USER:-estateflow__dev_user}
+      DB_PASSWORD: ${MIGRATION_DB_PASSWORD:?MIGRATION_DB_PASSWORD is required}
+      SERVICE_NAME: estateflow-app-migrations
+      DEPLOYMENT_ROLE: migrations
+    command: ["estateflow-migrations", "upgrade-head"]
+    networks: [backbone]
+
+networks:
+  backbone:
+    name: ${INGESTION_NETWORK_NAME:-estateflow-backbone}
+    external: true
+  web:
+    name: web
+    external: true

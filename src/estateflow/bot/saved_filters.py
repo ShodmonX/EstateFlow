@@ -178,7 +178,7 @@ def _filter_details(item: UserFilter) -> str:
         [
             f"Nomi: {item.name}",
             f"Holat: {'yoqilgan' if item.enabled else 'o‘chirilgan'}",
-            f"Tuman: {criteria.district or 'skip'}",
+            f"Tuman: {', '.join(criteria.selected_districts) or 'skip'}",
             f"Xona: {criteria.rooms if criteria.rooms is not None else 'skip'}",
             f"Byudjet: {criteria.max_price if criteria.max_price is not None else 'skip'}",
             f"Kishiga narx: {'ha' if criteria.include_per_person else 'yoq'}",
@@ -189,7 +189,7 @@ def _filter_details(item: UserFilter) -> str:
 
 
 def _default_name(criteria: SearchCriteria) -> str:
-    district = criteria.district or "Barcha tumanlar"
+    district = ", ".join(criteria.selected_districts) or "Barcha tumanlar"
     rooms = f"{criteria.rooms} xona" if criteria.rooms is not None else "xona skip"
     price = f"{criteria.max_price:g}$" if criteria.max_price is not None else "byudjet skip"
     return f"{district} {rooms} {price}"

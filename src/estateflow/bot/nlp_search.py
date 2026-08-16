@@ -94,7 +94,7 @@ def _summary_screen(*, user_id: int, extraction: NlpSearchExtraction) -> BotScre
     criteria = extraction.criteria
     lines = [
         "AI tushungan filterlar:",
-        f"Tuman: {criteria.district or 'tanlanmagan'}",
+        f"Tuman: {', '.join(criteria.selected_districts) or 'tanlanmagan'}",
         f"Xona: {criteria.rooms if criteria.rooms is not None else 'tanlanmagan'}",
         f"Byudjet: {criteria.max_price if criteria.max_price is not None else 'tanlanmagan'}",
         "Narx turi: " + ("kishi boshiga ham" if criteria.include_per_person else "faqat umumiy"),

@@ -357,9 +357,11 @@ class SQLAlchemySearchRepository:
                             AnnouncementRecord.price_basis.is_(None),
                         )
                     )
-                if criteria.district is not None:
+                if criteria.selected_districts:
                     statement = statement.where(
-                        func.lower(AnnouncementRecord.district) == criteria.district.casefold()
+                        func.lower(AnnouncementRecord.district).in_(
+                            [district.casefold() for district in criteria.selected_districts]
+                        )
                     )
                 if criteria.rooms is not None:
                     statement = statement.where(AnnouncementRecord.rooms == criteria.rooms)

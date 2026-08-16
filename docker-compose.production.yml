@@ -25,6 +25,8 @@ x-production-env: &production-env
 x-app-hardening: &app-hardening
   restart: unless-stopped
   init: true
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   read_only: true
   tmpfs:
     - /tmp:rw,noexec,nosuid,size=64m

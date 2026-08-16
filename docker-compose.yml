@@ -58,7 +58,9 @@ services:
       - ./alembic.ini:/app/alembic.ini:ro
     depends_on: *app-depends-on
     networks:
-      - estateflow
+      estateflow:
+        aliases:
+          - estateflow-public-api
 
   admin-api:
     profiles: ["applications"]

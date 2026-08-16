@@ -9,6 +9,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from estateflow.api.search import SearchItemResponse, SearchResponse
 from estateflow.application.core.exceptions import EstateFlowError
+from estateflow.services.nlp_search import (
+    NlpSearchExtraction,
+    NlpSearchExtractionFailedError,
+    validate_nlp_query_text,
+)
 from estateflow.services.saved_filters import SavedFilterService, UserFilter
 from estateflow.services.search import SearchCriteria
 from estateflow.services.telegram_webapp_auth import (
@@ -34,6 +39,24 @@ class WebAppAuthResponse(BaseModel):
     access_token: str
     expires_in: int
     user: WebAppUserResponse
+
+
+class NlpSearchRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=140)
+
+
+class NlpSearchTagResponse(BaseModel):
+    key: str
+    label: str
+    value: str
+    applied: bool = True
+
+
+class NlpSearchResponse(BaseModel):
+    query: str
+    criteria: SearchCriteria
+    tags: list[NlpSearchTagResponse]
+    confidence: float
 
 
 class SavedFilterResponse(BaseModel):
@@ -118,6 +141,40 @@ async def current_user(
     return _user_response(_require_user(request, authorization))
 
 
+@router.post("/search/nlp", response_model=NlpSearchResponse)
+async def webapp_nlp_search(
+    request: Request,
+    body: NlpSearchRequest,
+    authorization: str | None = Header(default=None),
+) -> NlpSearchResponse:
+    _require_user(request, authorization)
+    extractor = getattr(request.app.state, "nlp_search_extractor", None)
+    if extractor is None:
+        raise EstateFlowError(
+            code="nlp_search_unavailable",
+            message="NLP qidiruv xizmati hozircha mavjud emas.",
+            status_code=503,
+        )
+    try:
+        query = validate_nlp_query_text(body.query)
+    except ValueError as exc:
+        raise EstateFlowError(code="invalid_nlp_query", message=str(exc), status_code=422) from exc
+    try:
+        extraction = await extractor.extract(query)
+    except NlpSearchExtractionFailedError as exc:
+        raise EstateFlowError(
+            code="nlp_search_failed",
+            message="Qidiruv matnidan mezonlarni ajratib bo'lmadi. Qayta urinib ko'ring.",
+            status_code=502,
+        ) from exc
+    return NlpSearchResponse(
+        query=query,
+        criteria=extraction.criteria,
+        tags=_nlp_tags(extraction),
+        confidence=extraction.confidence,
+    )
+
+
 @router.get("/search/announcements", response_model=SearchResponse)
 async def webapp_search(
     request: Request,
@@ -126,6 +183,7 @@ async def webapp_search(
     max_price: Annotated[Decimal | None, Query(ge=0)] = None,
     include_per_person: bool = False,
     district: str | None = None,
+    districts: Annotated[list[str] | None, Query()] = None,
     rooms: Annotated[int | None, Query(ge=0)] = None,
     renovation_level: Literal["none", "basic", "good", "euro", "luxury"] | None = None,
     audience_tag: str | None = None,
@@ -147,6 +205,7 @@ async def webapp_search(
             max_price=max_price,
             include_per_person=include_per_person,
             district=district,
+            districts=districts or [],
             rooms=rooms,
             renovation_level=renovation_level,
             audience_tag=audience_tag,
@@ -365,6 +424,65 @@ def _user_response(user: TelegramWebAppIdentity) -> WebAppUserResponse:
         first_name=user.first_name,
         last_name=user.last_name,
     )
+
+
+def _nlp_tags(extraction: NlpSearchExtraction) -> list[NlpSearchTagResponse]:
+    criteria = extraction.criteria
+    tags: list[NlpSearchTagResponse] = []
+    for district in criteria.selected_districts:
+        tags.append(NlpSearchTagResponse(key="district", label="Tuman", value=district))
+    if criteria.rooms is not None:
+        tags.append(NlpSearchTagResponse(key="rooms", label="Xona", value=f"{criteria.rooms} xona"))
+    if criteria.max_price is not None:
+        tags.append(
+            NlpSearchTagResponse(
+                key="max_price",
+                label="Budjet",
+                value=f"{criteria.max_price} gacha",
+            )
+        )
+    if criteria.include_per_person:
+        tags.append(
+            NlpSearchTagResponse(
+                key="include_per_person",
+                label="Narx turi",
+                value="Bir kishilik ham",
+            )
+        )
+    if criteria.renovation_level:
+        tags.append(
+            NlpSearchTagResponse(
+                key="renovation_level",
+                label="Remont",
+                value=criteria.renovation_level,
+            )
+        )
+    if criteria.audience_tag:
+        audience_labels = {
+            "family": "Yosh oila",
+            "students": "Talabalar",
+            "foreigners": "Chet elliklar",
+        }
+        tags.append(
+            NlpSearchTagResponse(
+                key="audience_tag",
+                label="Kim uchun",
+                value=audience_labels.get(criteria.audience_tag, criteria.audience_tag),
+            )
+        )
+    for condition in extraction.unapplied_conditions:
+        value = condition
+        if condition.startswith("additional_districts:"):
+            value = condition.removeprefix("additional_districts:").replace(",", ", ")
+        tags.append(
+            NlpSearchTagResponse(
+                key="condition",
+                label="Qo'shimcha shart",
+                value=value,
+                applied=False,
+            )
+        )
+    return tags
 
 
 def _filter_response(item: UserFilter) -> SavedFilterResponse:

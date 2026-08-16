@@ -181,11 +181,9 @@ def normalize_nlp_search_extraction(raw: NlpSearchExtractionRaw) -> NlpSearchExt
     applied: list[str] = []
     unapplied = list(raw.unapplied_conditions)
     districts = [district for value in raw.districts if (district := normalize_district(value))]
-    if len(districts) > 1:
-        unapplied.append("additional_districts:" + ",".join(districts[1:]))
     district = districts[0] if districts else None
     if district is not None:
-        applied.append("district")
+        applied.append("districts")
 
     if raw.rooms is not None:
         applied.append("rooms")
@@ -202,6 +200,7 @@ def normalize_nlp_search_extraction(raw: NlpSearchExtractionRaw) -> NlpSearchExt
         max_price=raw.monthly_budget,
         include_per_person=raw.price_basis_preference == "include_per_person",
         district=district,
+        districts=districts,
         rooms=raw.rooms,
         renovation_level=raw.renovation_level,
         audience_tag=raw.audience_tag,

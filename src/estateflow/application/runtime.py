@@ -51,6 +51,7 @@ from estateflow.services.analytics import (
     TechnicalMetricRecorder,
 )
 from estateflow.services.adapter_defaults import DEFAULT_TELEGRAM_ADAPTER_NAME
+from estateflow.services.ai_client import create_openrouter_llm_client
 from estateflow.services.audience_tags import AudienceTagService
 from estateflow.services.content_automation import (
     ContentAutomationService,
@@ -70,6 +71,7 @@ from estateflow.services.notifications import (
     TelegramTransientError,
     TelegramUserBlockedError,
 )
+from estateflow.services.nlp_search import NlpSearchExtractor
 from estateflow.services.referrals import ReferralService
 from estateflow.services.ops_notifications import (
     DisabledOpsNotificationService,
@@ -144,6 +146,7 @@ class EstateFlowRuntime:
     bot_controller: BotController
     referral_service: ReferralService | None = None
     event_queue: EventQueue | None = None
+    nlp_search_extractor: NlpSearchExtractor | None = None
 
     async def aclose(self) -> None:
         self.queue_consumer.stop()
@@ -199,6 +202,7 @@ def build_runtime(settings: Settings, *, role: Role = "api") -> EstateFlowRuntim
     )
 
     ops_notifier = _ops_notifier(settings)
+    nlp_search_extractor = _build_nlp_search_extractor(settings, ops_notifier)
     search_service = SearchService(search_repo)
     user_service = UserService(user_repo, analytics_recorder=analytics_recorder)
     referral_service = ReferralService(
@@ -362,6 +366,19 @@ def build_runtime(settings: Settings, *, role: Role = "api") -> EstateFlowRuntim
         notification_delivery_repository=notification_delivery_repository,
         notification_bot=notification_bot,
         bot_controller=bot_controller,
+        nlp_search_extractor=nlp_search_extractor,
+    )
+
+
+def _build_nlp_search_extractor(
+    settings: Settings,
+    ops_notifier: OpsNotificationService,
+) -> NlpSearchExtractor | None:
+    if settings.openrouter_api_key is None:
+        return None
+    return NlpSearchExtractor(
+        llm_client=create_openrouter_llm_client(settings=settings, ops_notifier=ops_notifier),
+        min_confidence=settings.ai_min_confidence,
     )
 
 

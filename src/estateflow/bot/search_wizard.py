@@ -49,6 +49,7 @@ class SearchWizardState:
     owner_id: int
     step: WizardStep = "district"
     district: str | None = None
+    districts: tuple[str, ...] = ()
     rooms: int | None = None
     max_price: Decimal | None = None
     include_per_person: bool = False
@@ -58,6 +59,7 @@ class SearchWizardState:
     def criteria(self, *, offset: int = 0) -> SearchCriteria:
         return SearchCriteria(
             district=self.district,
+            districts=list(self.districts),
             rooms=self.rooms,
             max_price=self.max_price,
             include_per_person=self.include_per_person,
@@ -119,10 +121,16 @@ class SearchWizard:
         if state is None:
             state = SearchWizardState(owner_id=user_id)
         parsed_price = parse_price(max_price) if isinstance(max_price, str) else max_price
+        selected_districts = state.districts
+        selected_district = state.district
+        if district is not None:
+            selected_districts = normalize_districts(district)
+            selected_district = selected_districts[0]
         updated = SearchWizardState(
             owner_id=state.owner_id,
             step=state.step,
-            district=state.district if district is None else normalize_district(district),
+            district=selected_district,
+            districts=selected_districts,
             rooms=state.rooms if rooms is None else validate_rooms(rooms),
             max_price=state.max_price if max_price is None else parsed_price,
             include_per_person=state.include_per_person
@@ -142,7 +150,8 @@ class SearchWizard:
     def handle_text(self, *, user_id: int, text: str) -> BotScreen:
         state = self._require_state(user_id)
         if state.step == "district":
-            updated = replace(state, district=normalize_district(text), step="rooms")
+            districts = normalize_districts(text)
+            updated = replace(state, district=districts[0], districts=districts, step="rooms")
         elif state.step == "rooms":
             updated = replace(state, rooms=validate_rooms_text(text), step="budget")
         elif state.step == "budget":
@@ -229,6 +238,7 @@ class SearchWizard:
             owner_id=user_id,
             step="done",
             district=criteria.district,
+            districts=criteria.selected_districts,
             rooms=criteria.rooms,
             max_price=criteria.max_price,
             include_per_person=criteria.include_per_person,
@@ -332,6 +342,18 @@ def normalize_district(value: str) -> str:
     return KNOWN_DISTRICTS[key]
 
 
+def normalize_districts(value: str) -> tuple[str, ...]:
+    parts = re.split(r"\s+(?:va|yoki|or|или)\s+|[,;/]+", value.strip(), flags=re.IGNORECASE)
+    districts: list[str] = []
+    for part in parts:
+        clean = normalize_district(part)
+        if clean.casefold() not in {district.casefold() for district in districts}:
+            districts.append(clean)
+    if not districts:
+        raise ValueError("At least one district is required.")
+    return tuple(districts)
+
+
 def validate_rooms(value: int) -> int:
     if value < 0 or value > 20:
         raise ValueError("Rooms value is outside allowed range.")
@@ -369,7 +391,7 @@ def _prompt(state: SearchWizardState) -> BotScreen:
     user_id = state.owner_id
     if state.step == "district":
         return BotScreen(
-            text="Tumanni yozing. Masalan: Yunusobod",
+            text="Tumanni yoki tumanlarni yozing. Masalan: Yunusobod yoki Chilonzor",
             buttons=_control_buttons(user_id),
         )
     if state.step == "rooms":
@@ -455,7 +477,7 @@ def _previous_step(step: WizardStep) -> WizardStep:
 
 def _clear_step_value(state: SearchWizardState) -> SearchWizardState:
     if state.step == "district":
-        return replace(state, district=None)
+        return replace(state, district=None, districts=())
     if state.step == "rooms":
         return replace(state, rooms=None)
     if state.step == "budget":

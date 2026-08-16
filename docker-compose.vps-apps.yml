@@ -6,7 +6,7 @@ x-production-env: &production-env
   API_HOST: 0.0.0.0
   API_PORT: 8000
   DB_HOST: ${DB_HOST:?DB_HOST is required}
-  DB_PORT: ${DB_PORT:-6529}
+  DB_PORT: ${DB_PORT:-5432}
   DB_NAME: ${DB_NAME:-estateflow}
   DB_USER: ${DB_USER:-estateflow__app_user}
   DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
@@ -83,7 +83,7 @@ x-worker-healthcheck: &worker-healthcheck
   start_period: 20s
 
 services:
-  api:
+  estateflow-api:
     <<: *app-hardening
     mem_limit: 256m
     build:
@@ -91,13 +91,13 @@ services:
       dockerfile: Dockerfile.public-api
     environment:
       <<: *production-env
-      SERVICE_NAME: estateflow-public-api
+      SERVICE_NAME: estateflow-api
     healthcheck: *api-healthcheck
     networks:
       backbone:
-        aliases: [estateflow-public-api]
+        aliases: [estateflow-api]
       web:
-        aliases: [estateflow-public-api]
+        aliases: [estateflow-api]
 
   admin-api:
     <<: *app-hardening
@@ -133,7 +133,9 @@ services:
       - no-new-privileges:true
     cap_drop: [ALL]
     cap_add: [CHOWN, DAC_OVERRIDE, NET_BIND_SERVICE, SETGID, SETUID]
-    networks: [web]
+    networks:
+      web:
+        aliases: [estateflow-mini-app]
 
   admin-frontend:
     restart: unless-stopped

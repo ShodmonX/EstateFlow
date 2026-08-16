@@ -22,7 +22,7 @@ docker compose config --quiet
 ## 2. Image build va migration
 
 ~~~powershell
-docker compose build api admin-api internal-api bot frontend listener worker-pre-ai worker-ai worker-dedup worker-notification-matcher worker-notification
+docker compose build estateflow-api admin-api internal-api bot frontend listener worker-pre-ai worker-ai worker-dedup worker-notification-matcher worker-notification
 docker compose --profile migrations run --rm migrate
 .venv\Scripts\python.exe scripts\migration_smoke.py
 ~~~
@@ -41,7 +41,7 @@ docker compose events --since 10m
 ~~~
 
 - [ ] postgres, rabbitmq va redis healthy.
-- [ ] api, admin-api, internal-api, bot, frontend, listener va barcha workerlar Up.
+- [ ] estateflow-api, admin-api, internal-api, bot, frontend, listener va barcha workerlar Up.
 - [ ] Restart loop yo'q.
 - [ ] Loglarda Traceback, ConnectionRefused yoki ModuleNotFoundError yo'q.
 
@@ -292,4 +292,3 @@ docker compose exec rabbitmq rabbitmqctl list_queues name messages consumers > t
 - [ ] Pytest evidence saqlandi.
 - [ ] Real Telegram image uchun announcement ID, media row, object key va hash yozib olindi.
 - [ ] VPS evidence fayllariga token, credential yoki private key yozilmadi.
-

@@ -2,7 +2,7 @@ x-production-env: &production-env
   ENVIRONMENT: production
   DEBUG: "false"
   DB_HOST: ${DB_HOST:?DB_HOST is required}
-  DB_PORT: ${DB_PORT:-6529}
+  DB_PORT: ${DB_PORT:-5432}
   DB_NAME: ${DB_NAME:-estateflow}
   DB_USER: ${DB_USER:-estateflow__app_user}
   DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
@@ -86,12 +86,12 @@ services:
         max-size: 10m
         max-file: "5"
 
-  api:
+  estateflow-api:
     <<: *app-hardening
     env_file: []
     environment:
       <<: *production-env
-      SERVICE_NAME: estateflow-public-api
+      SERVICE_NAME: estateflow-api
     healthcheck: *api-healthcheck
 
   admin-api:

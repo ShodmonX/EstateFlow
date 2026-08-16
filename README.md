@@ -15,7 +15,7 @@ Use the dedicated one-shot migration step before starting the API, bot, or worke
 
 ```powershell
 docker compose --profile migrations run --rm migrate
-estateflow-public-api
+estateflow-api
 estateflow-admin-api
 estateflow-internal-api
 estateflow-bot

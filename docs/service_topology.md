@@ -10,7 +10,7 @@ shipping the complete source tree to every worker.
 
 | Service | Port | Responsibility |
 | --- | ---: | --- |
-| `api` | 8000 | Public search and Telegram Mini App API |
+| `estateflow-api` | 8000 | Public search and Telegram Mini App API |
 | `admin-api` | 8001 | Admin review, source, feature flag, and operations API |
 | `internal-api` | 8002 | Internal callbacks and service-to-service endpoints |
 | `frontend` | 8080 | Static Mini App; `/api` proxies to the public API |

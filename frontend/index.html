@@ -14,35 +14,39 @@
         <div class="brand-mark"><span class="brand-dot"></span><div><p class="eyebrow">ESTATEFLOW</p><p class="brand-subtitle">Toshkent ijara bozori</p></div></div>
         <button class="icon-button" id="refresh-button" aria-label="Yangilash">&#8635;</button>
       </header>
-
-      <section class="intro">
-        <p class="eyebrow">NATURAL LANGUAGE SEARCH</p>
-        <h1>O'zingizga mos uyni toping.</h1>
-        <p class="intro-copy">Istaganingizni oddiy tilda yozing — kerakli variantlarni tezda topamiz.</p>
-      </section>
-
-      <nav class="tabs" aria-label="Bo'limlar">
-        <button class="tab active" data-tab="search">Qidiruv</button>
-        <button class="tab" data-tab="filters">Saqlanganlar</button>
-        <button class="tab" data-tab="profile">Profil</button>
-      </nav>
+      <div id="message" class="message hidden" role="status"></div>
 
       <section id="search-view" class="view active-view">
-        <form id="search-form" class="filter-panel">
-          <label class="nlp-field wide"><span>Qidiruv so'rovi</span><textarea id="nlp-query" name="nlp_query" rows="3" maxlength="140" placeholder="Masalan: Chilonzorda 2 xonali, mebelli uy 600$ gacha"></textarea></label>
-          <div class="nlp-tags wide" aria-live="polite"><small id="nlp-status">Mezonlarni ajratish uchun yozishni boshlang</small><div id="nlp-tags-list" class="nlp-tags-list"></div></div>
-          <label class="field wide"><span>Tuman</span><input name="district" placeholder="Masalan, Yunusobod" autocomplete="off" /></label>
-          <label class="field"><span>Min. narx</span><input name="min_price" type="number" min="0" placeholder="300" /></label>
-          <label class="field"><span>Max. narx</span><input name="max_price" type="number" min="0" placeholder="1200" /></label>
-          <label class="field"><span>Xona</span><select name="rooms"><option value="">Barchasi</option><option value="1">1 xona</option><option value="2">2 xona</option><option value="3">3 xona</option><option value="4">4+ xona</option></select></label>
-          <label class="field"><span>Remont</span><select name="renovation_level"><option value="">Barchasi</option><option value="good">Yaxshi</option><option value="euro">Euro</option><option value="luxury">Luxury</option></select></label>
-          <label class="field wide"><span>Saralash</span><select name="sort"><option value="newest">Eng yangi</option><option value="cheapest">Arzonidan</option><option value="price_desc">Qimmatidan</option></select></label>
-          <label class="check-field wide"><input name="include_per_person" type="checkbox" /><span>Bir kishilik narxlarni ham ko'rsatish</span></label>
-          <div class="form-actions wide"><button class="primary-button" type="submit">Qidirish <span aria-hidden="true">&#8594;</span></button><button class="ghost-button" type="button" id="save-filter-button">Filterni saqlash</button></div>
+        <section class="intro">
+          <p class="eyebrow">AI QIDIRUV</p>
+          <h1>O'zingizga mos uyni toping.</h1>
+          <p class="intro-copy">Talablaringizni oddiy tilda yozing. EstateFlow mos e'lonlarni bir joyga jamlaydi.</p>
+        </section>
+
+        <form id="search-form" class="search-panel">
+          <label class="sr-only" for="nlp-query">Qidiruv so'rovi</label>
+          <div class="search-composer">
+            <textarea id="nlp-query" name="nlp_query" rows="3" maxlength="140" placeholder="Masalan: Olmazor va Chilonzorda 2 xonali, mebelli uy 600$ gacha"></textarea>
+            <button class="primary-button search-button" id="search-button" type="submit"><span id="search-button-label">Qidirish</span><span aria-hidden="true">&#8594;</span></button>
+          </div>
+          <div class="nlp-tags" aria-live="polite"><small id="nlp-status">Mezonlarni ajratish uchun yozishni boshlang</small><div id="nlp-tags-list" class="nlp-tags-list"></div></div>
+
+          <details class="advanced-filters">
+            <summary><span>Aniq filtrlar</span><small>Ixtiyoriy</small></summary>
+            <div class="filter-grid">
+              <label class="field wide"><span>Tumanlar</span><input name="districts_input" placeholder="Masalan, Olmazor, Chilonzor" autocomplete="off" /></label>
+              <label class="field"><span>Min. narx</span><input name="min_price" type="number" min="0" inputmode="numeric" placeholder="300" /></label>
+              <label class="field"><span>Max. narx</span><input name="max_price" type="number" min="0" inputmode="numeric" placeholder="1200" /></label>
+              <label class="field"><span>Xona</span><select name="rooms"><option value="">Barchasi</option><option value="1">1 xona</option><option value="2">2 xona</option><option value="3">3 xona</option><option value="4">4 xona</option></select></label>
+              <label class="field"><span>Remont</span><select name="renovation_level"><option value="">Barchasi</option><option value="none">Remontsız</option><option value="basic">Oddiy</option><option value="good">Yaxshi</option><option value="euro">Yevro</option><option value="luxury">Lyuks</option></select></label>
+              <label class="check-field wide"><input name="include_per_person" type="checkbox" /><span>Bir kishilik narxlarni ham ko'rsatish</span></label>
+              <button class="ghost-button wide" type="button" id="save-filter-button">Joriy filtrni saqlash</button>
+            </div>
+          </details>
         </form>
-        <div id="message" class="message hidden" role="status"></div>
-        <div class="results-heading"><div><strong id="result-count">Yuklanmoqda...</strong><span> / Eng mos variantlar</span></div><button class="sort-button" type="button" aria-label="Saralash">&#8597;</button></div>
+        <div class="results-heading"><div><strong id="result-count">Yuklanmoqda...</strong><span> / Eng mos variantlar</span></div><label class="sort-control"><span class="sr-only">Saralash</span><select id="sort-select" name="sort" form="search-form"><option value="newest">Eng yangi</option><option value="cheapest">Arzonidan</option><option value="price_desc">Qimmatidan</option></select></label></div>
         <section id="results" class="results" aria-live="polite"></section>
+        <button class="ghost-button load-more hidden" id="load-more-button" type="button">Yana ko'rsatish</button>
       </section>
 
       <section id="filters-view" class="view hidden"><div class="section-heading"><span>Saqlangan filterlar</span><small>10 tagacha</small></div><div id="filters-list" class="stack-list"></div></section>
@@ -58,11 +62,11 @@
       </section>
     </main>
     <nav class="bottom-nav" aria-label="Asosiy navigatsiya">
-      <button class="tab active" data-tab="search"><span aria-hidden="true">⌂</span><small>Qidiruv</small></button>
-      <button class="tab" data-tab="filters"><span aria-hidden="true">♡</span><small>Saqlanganlar</small></button>
-      <button class="tab" data-tab="profile"><span aria-hidden="true">◉</span><small>Profil</small></button>
+      <button class="tab active" data-tab="search"><span class="nav-icon" aria-hidden="true">⌂</span><small>Qidiruv</small></button>
+      <button class="tab" data-tab="filters"><span class="nav-icon" aria-hidden="true">♡</span><small>Saqlanganlar</small></button>
+      <button class="tab" data-tab="profile"><span class="nav-icon" aria-hidden="true">◉</span><small>Profil</small></button>
     </nav>
-    <dialog id="save-dialog"><form method="dialog" id="save-filter-form"><p class="eyebrow">YANGI FILTER</p><h2>Bu qidiruvni saqlang</h2><input name="name" required maxlength="64" placeholder="Masalan, Yunusobod 2 xona" /><div class="dialog-actions"><button value="cancel" class="ghost-button">Bekor qilish</button><button value="save" class="primary-button">Saqlash</button></div></form></dialog>
+    <dialog id="save-dialog"><form id="save-filter-form"><p class="eyebrow">YANGI FILTER</p><h2>Bu qidiruvni saqlang</h2><p class="dialog-copy">Keyinroq bir bosishda shu mezonlar bo'yicha qidiring.</p><input name="name" required maxlength="64" autocomplete="off" placeholder="Masalan, Chilonzor 2 xona" /><div class="dialog-actions"><button type="button" id="save-dialog-cancel" class="ghost-button">Bekor qilish</button><button type="submit" class="primary-button">Saqlash</button></div></form></dialog>
     <script src="/app.js" type="module"></script>
   </body>
 </html>

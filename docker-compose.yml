@@ -42,13 +42,15 @@ services:
     networks:
       - estateflow
 
-  api:
+  estateflow-api:
     profiles: ["applications"]
     build:
       context: .
       dockerfile: Dockerfile.public-api
     env_file:
       - ${ENV_FILE:-.env}
+    environment:
+      SERVICE_NAME: estateflow-api
     command: ["python", "-m", "apps.public_api.main"]
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
@@ -60,7 +62,7 @@ services:
     networks:
       estateflow:
         aliases:
-          - estateflow-public-api
+          - estateflow-api
 
   admin-api:
     profiles: ["applications"]
@@ -110,7 +112,7 @@ services:
     ports:
       - "127.0.0.1:${WEB_PORT:-8080}:80"
     depends_on:
-      - api
+      - estateflow-api
     networks:
       - estateflow
 

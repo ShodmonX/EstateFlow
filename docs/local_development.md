@@ -123,7 +123,7 @@ timestamp, level, service, event, correlation ID
 View API logs:
 
 ```powershell
-docker compose logs --tail 50 api
+docker compose logs --tail 50 estateflow-api
 ```
 
 Use `x-correlation-id` to trace one request:

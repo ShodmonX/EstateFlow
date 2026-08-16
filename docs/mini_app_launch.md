@@ -12,14 +12,14 @@ EstateFlow foydalanuvchi tajribasi endi ikki qatlamga bo'linadi:
 2. Backend va frontend image'larini build qiling:
 
 ```powershell
-docker compose build api bot frontend
+docker compose build estateflow-api bot frontend
 ```
 
 3. Migration va servislarni ishga tushiring:
 
 ```powershell
 docker compose run --rm migrate
-docker compose up -d postgres redis api bot worker frontend
+docker compose up -d redis rabbitmq estateflow-api bot frontend
 ```
 
 Local Mini App `http://127.0.0.1:8080` manzilida ochiladi. Telegram production

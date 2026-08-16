@@ -163,7 +163,7 @@ services:
 
   listener:
     <<: *service-hardening
-    mem_limit: 96m
+    mem_limit: 128m
     build:
       context: .
       dockerfile: Dockerfile.listener
@@ -214,7 +214,7 @@ services:
 
   worker-ai:
     <<: *service-hardening
-    mem_limit: 320m
+    mem_limit: 512m
     build:
       context: .
       dockerfile: Dockerfile.worker-ai

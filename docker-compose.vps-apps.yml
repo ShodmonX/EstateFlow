@@ -85,7 +85,7 @@ x-worker-healthcheck: &worker-healthcheck
 services:
   estateflow-api:
     <<: *app-hardening
-    mem_limit: 256m
+    mem_limit: 384m
     build:
       context: .
       dockerfile: Dockerfile.public-api
@@ -101,7 +101,7 @@ services:
 
   admin-api:
     <<: *app-hardening
-    mem_limit: 256m
+    mem_limit: 384m
     build:
       context: .
       dockerfile: Dockerfile.admin-api
@@ -113,7 +113,7 @@ services:
 
   internal-api:
     <<: *app-hardening
-    mem_limit: 160m
+    mem_limit: 384m
     build:
       context: .
       dockerfile: Dockerfile.internal-api
@@ -151,7 +151,7 @@ services:
 
   bot:
     <<: *app-hardening
-    mem_limit: 160m
+    mem_limit: 320m
     build:
       context: .
       dockerfile: Dockerfile.bot
@@ -163,7 +163,7 @@ services:
 
   worker-notification-matcher:
     <<: *app-hardening
-    mem_limit: 96m
+    mem_limit: 128m
     build:
       context: .
       dockerfile: Dockerfile.worker-notification-match
@@ -176,7 +176,7 @@ services:
 
   worker-notification:
     <<: *app-hardening
-    mem_limit: 160m
+    mem_limit: 256m
     build:
       context: .
       dockerfile: Dockerfile.worker-notification-delivery

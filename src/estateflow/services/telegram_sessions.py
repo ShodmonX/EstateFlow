@@ -2,12 +2,17 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
+from typing import Any
 
 from sqlalchemy import select
 
 from estateflow.db.session import DatabaseSessionManager
 from estateflow.models.listeners import IngestionSourceRecord
 from estateflow.services.listener_pool import TELEGRAM_SOURCE_TYPES
+from estateflow.services.source_config import (
+    DEFAULT_PARSER_VERSION,
+    parser_key_from_legacy_profile,
+)
 from estateflow.services.telegram_auth import (
     TelegramAuthService,
     TelegramSessionStatus,
@@ -23,6 +28,10 @@ class TelegramSessionSourceBinding:
     source_profile: str | None
     enabled: bool
     session_name: str
+    parser_key: str | None = None
+    parser_version: str | None = None
+    parser_config: dict[str, Any] | None = None
+    parser_mode: str = "active"
 
 
 @dataclass(frozen=True)
@@ -90,6 +99,11 @@ class TelegramSessionInventoryService:
                     source_profile=row.source_profile,
                     enabled=row.enabled,
                     session_name=session_name,
+                    parser_key=row.parser_key
+                    or parser_key_from_legacy_profile(row.source_profile),
+                    parser_version=row.parser_version or DEFAULT_PARSER_VERSION,
+                    parser_config=dict(row.parser_config or {}),
+                    parser_mode=row.parser_mode,
                 )
             )
         return {key: tuple(value) for key, value in grouped.items()}

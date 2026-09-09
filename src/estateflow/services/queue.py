@@ -17,6 +17,7 @@ from estateflow.contracts.events import (
     NOTIFICATION_DELIVERY_QUEUE,
     POST_AI_DEDUP_QUEUE,
     RAW_ANNOUNCEMENT_QUEUE,
+    SOURCE_PARSER_QUARANTINE_QUEUE,
     QueueMessage,
     serialize_queue_message,
 )
@@ -30,12 +31,14 @@ __all__ = [
     "PublishingQueue",
     "QueueMessage",
     "RAW_ANNOUNCEMENT_QUEUE",
+    "SOURCE_PARSER_QUARANTINE_QUEUE",
     "RabbitMQEventQueue",
     "RedisEventQueue",
 ]
 
 EVENT_QUEUE_NAMES = (
     RAW_ANNOUNCEMENT_QUEUE,
+    SOURCE_PARSER_QUARANTINE_QUEUE,
     AI_PROCESSING_QUEUE,
     POST_AI_DEDUP_QUEUE,
     ANNOUNCEMENT_PERSISTED_QUEUE,

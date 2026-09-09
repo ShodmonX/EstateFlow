@@ -2,7 +2,7 @@ name: estateflow-ingestion
 
 x-database-env: &database-env
   ENVIRONMENT: production
-  DEBUG: "false"
+  ESTATEFLOW_DEBUG: "false"
   LOG_LEVEL: ${LOG_LEVEL:-INFO}
   DB_HOST: ${DB_HOST:?DB_HOST is required}
   DB_PORT: ${DB_PORT:-5432}

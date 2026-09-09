@@ -1,140 +1,63 @@
-# Local Development Runbook
+# Local development
 
-## Prerequisites
+## Prerequisites and deterministic checks
 
-- Python 3.12+
-- Docker with Docker Compose
-
-## Environment
-
-Copy the example file for local overrides:
+Use Python 3.12+ and, for infrastructure, Docker Desktop with Docker Compose. From the repository root in PowerShell:
 
 ```powershell
-Copy-Item .env.example .env
-```
-
-The checked-in example contains only non-secret placeholders. Real Telegram,
-OpenRouter, R2, and database secrets must stay in `.env` or a secret manager.
-PostgreSQL is not run by Compose: development uses the isolated DigitalOcean
-`estateflow_dev` database through the local forward `localhost:6529`.
-Redis and RabbitMQ remain local containers.
-
-## Local Containers
-
-Validate Compose:
-
-```powershell
-$env:ENV_FILE=".env.example"; docker compose --env-file .env.example config
-```
-
-Avoid running `docker compose config` against a real `.env` that contains secrets,
-because Compose renders environment values in its output.
-
-Start the local stack:
-
-```powershell
-docker compose up --build
-```
-
-The API is exposed on:
-
-```text
-http://localhost:8000/health/live
-http://localhost:8000/health/ready
-```
-
-Redis and RabbitMQ are bound to localhost only:
-
-```text
-Redis:      localhost:6379
-RabbitMQ:   localhost:5672
-```
-
-Inside Docker, the API uses the remote database and local Redis/RabbitMQ:
-
-```text
-DB_HOST=localhost
-DB_PORT=6529
-DB_NAME=estateflow_dev
-DB_USER=estateflow_dev__dev_user
-REDIS_HOST=redis
-```
-
-## Data Persistence
-
-PostgreSQL data is managed and backed up on the DigitalOcean host. The local
-Compose stack persists only Redis and RabbitMQ data.
-
-Local Redis append-only data is stored in:
-
-```text
-estateflow_redis_data
-```
-
-Container restarts keep data in these volumes. Removing the volumes deletes local
-development data.
-
-## Migrations
-
-Use `estateflow_dev` with `estateflow_dev__dev_user` for schema changes. The
-runtime containers use the matching `estateflow_dev__app_user` role. For pytest,
-load `.env.test.example` (or equivalent secure values) so tests target only
-`estateflow_test`; its runtime and migration roles are `estateflow_test__app_user`
-and `estateflow_test__dev_user`.
-
-Alembic is not initialized in Sprint 0. When it is added, runtime code should use
-`Settings.database_url` (`postgresql+asyncpg`) and Alembic should use
-`Settings.sync_database_url` (`postgresql+psycopg2`).
-
-## Repeatable Sprint 0 Smoke
-
-Run the fast local smoke check first. It uses test doubles and never calls
-Telegram, OpenRouter, R2, PostgreSQL, or Redis:
-
-```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install -e ".[dev]"
 .venv\Scripts\python.exe scripts\smoke_check.py
+.venv\Scripts\python.exe -m pytest -ra
+.venv\Scripts\python.exe scripts\evaluate_source_parser.py
 ```
 
-Then run the full local checks:
+These checks use test doubles; Docker-backed tests can run when a daemon is available. See [testing](testing.md) for skip conditions and broker opt-in.
+
+## Environment and database
+
+Create `.env` only if you do not already have one:
 
 ```powershell
-.venv\Scripts\python.exe -m pytest
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Set a local `DB_PASSWORD`. The helper reads `DB_USER`, `DB_PASSWORD`, and `DB_NAME` from `.env`, starts or reuses `estateflow-postgres16-local` (`postgres:16`), and binds it to `127.0.0.1:55436`. Its independent volume is `estateflow-postgres16-local-data`; changing env credentials does not reinitialize an existing volume.
+
+```powershell
+.\scripts\start_local_postgres.ps1
+docker compose up -d redis rabbitmq
+.venv\Scripts\python.exe -m alembic upgrade head
+.venv\Scripts\python.exe -m alembic current
+```
+
+PostgreSQL is not a Compose service. Host Python/Alembic uses `localhost:55436`; Compose services override database host/port with `DOCKER_DB_HOST` / `DOCKER_DB_PORT` (default `host.docker.internal:55436`). Linux users need explicit host-gateway access; see [deployment](deployment.md).
+
+The example RabbitMQ password is an explicit development-only default matching the base Compose broker. Set `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, and the URL consistently when changing it. Redis/RabbitMQ use Compose hostnames inside containers; host-side service processes require `localhost` instead.
+
+## Start an API or the live stack
+
+For API development after migration:
+
+```powershell
+docker compose --profile applications up -d --build estateflow-api
+Invoke-RestMethod http://localhost:8000/health/live
+Invoke-RestMethod http://localhost:8000/health/ready
+```
+
+Readiness checks the configured database, Redis, and event queue. Add `frontend`, `admin-api`, `admin-frontend`, or `internal-api` explicitly as needed; the full applications profile also starts the bot and notification delivery and requires their credentials.
+
+Live ingestion needs Telegram API credentials, an authorized listener session, a distinct media session, enabled sources, OpenRouter and object-storage configuration. Populate source `session_name` explicitly to match your configured account. Existing code retains legacy fallback session names for compatibility; changing an example does not rename sessions or DB bindings. Source flags are persisted, so changing an env default does not necessarily override existing release state. Follow [ingestion deployment](ingestion_vps_deployment.md) for bootstrap and startup order.
+
+## Validation and logs
+
+Use quiet rendering with a real env file to avoid printing credentials:
+
+```powershell
+docker compose --profile applications config --quiet
 .venv\Scripts\python.exe -m ruff check .
-.venv\Scripts\python.exe -m mypy src tests
-```
-
-For Docker-backed readiness, start the stack and call:
-
-```powershell
-Invoke-RestMethod -Uri http://localhost:8000/health/ready
-```
-
-Expected result: `status=ok`, with the remote `postgres` and local `redis`
-dependencies both `ok`.
-
-## Logs
-
-Development logs are human-readable console logs. Each request log includes:
-
-```text
-timestamp, level, service, event, correlation ID
-```
-
-View API logs:
-
-```powershell
+.venv\Scripts\python.exe -m mypy src
 docker compose logs --tail 50 estateflow-api
 ```
 
-Use `x-correlation-id` to trace one request:
-
-```powershell
-Invoke-WebRequest -UseBasicParsing `
-  -Uri http://localhost:8000/health/live `
-  -Headers @{ "x-correlation-id" = "manual-smoke" }
-```
-
-## Sprint 1 Handoff
-
-The listener/source/queue contracts for the next sprint are documented in
-[`docs/sprint_1_handoff.md`](sprint_1_handoff.md).
+Attach `x-correlation-id` to HTTP requests when tracing a flow. Keep logs and replay data private. Container restarts retain the separate database, broker and cache volumes; deleting volumes destroys their data.

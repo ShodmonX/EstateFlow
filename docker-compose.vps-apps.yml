@@ -2,7 +2,7 @@ name: estateflow-apps
 
 x-production-env: &production-env
   ENVIRONMENT: production
-  DEBUG: "false"
+  ESTATEFLOW_DEBUG: "false"
   API_HOST: 0.0.0.0
   API_PORT: 8000
   DB_HOST: ${DB_HOST:?DB_HOST is required}

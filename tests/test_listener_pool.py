@@ -45,6 +45,25 @@ def _source(source_id: str) -> SourceConfig:
 
 
 @pytest.mark.asyncio
+async def test_assignment_service_ensures_every_configured_session_account() -> None:
+    account_repository = InMemoryListenerAccountRepository(
+        [ListenerAccountMetadata(account_key="listener-a", health_status="reconnecting")]
+    )
+    service = ListenerAssignmentService(
+        account_repository=account_repository,
+        assignment_repository=InMemoryChannelAssignmentRepository(),
+        ops_notifier=DisabledOpsNotificationService(),
+    )
+
+    accounts = await service.ensure_accounts(["listener-b", "listener-a", "listener-b"])
+
+    assert [(account.account_key, account.health_status) for account in accounts] == [
+        ("listener-a", "reconnecting"),
+        ("listener-b", "online"),
+    ]
+
+
+@pytest.mark.asyncio
 async def test_reconcile_balances_channels_across_two_healthy_accounts() -> None:
     account_repository = InMemoryListenerAccountRepository(
         [

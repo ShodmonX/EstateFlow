@@ -14,6 +14,12 @@ from pydantic import SecretStr
 from estateflow.adapters.contracts import AdapterReloadReport
 from estateflow.api.app import create_app
 from estateflow.application.core.config import Settings
+from estateflow.services.listener_pool import (
+    InMemoryChannelAssignmentRepository,
+    InMemoryListenerAccountRepository,
+    ListenerAccountMetadata,
+    ListenerAssignmentService,
+)
 from estateflow.services.listener_refresh import (
     RedisListenerRefreshStore,
     TelegramListenerCoordinator,
@@ -27,7 +33,11 @@ from estateflow.services.listener_status import (
     ListenerTopologyStatus,
 )
 from estateflow.services.ops_notifications import DisabledOpsNotificationService
-from estateflow.services.source_config import SourceConfig
+from estateflow.services.source_config import (
+    InMemorySourceRegistry,
+    ParserMode,
+    SourceConfig,
+)
 
 
 class FakeSourceRegistry:
@@ -44,6 +54,10 @@ class FakeSourceRegistry:
         adapter_name: str | None = None,
         source_profile: str | None = None,
         session_name: str | None = None,
+        parser_key: str | None = None,
+        parser_version: str | None = None,
+        parser_config: dict[str, object] | None = None,
+        parser_mode: ParserMode | None = None,
     ) -> tuple[SourceConfig, bool]:
         source_id = f"{source_type}:{identifier}"
         created = source_id not in self.sources
@@ -56,6 +70,10 @@ class FakeSourceRegistry:
             adapter_name=adapter_name,
             source_profile=source_profile,
             listener_account_key=session_name,
+            parser_key=parser_key,
+            parser_version=parser_version,
+            parser_config=parser_config or {},
+            parser_mode=parser_mode or "active",
         )
         self.sources[source_id] = source
         self.calls.append(
@@ -66,6 +84,10 @@ class FakeSourceRegistry:
                 "adapter_name": adapter_name,
                 "source_profile": source_profile,
                 "session_name": session_name,
+                "parser_key": parser_key,
+                "parser_version": parser_version,
+                "parser_config": parser_config,
+                "parser_mode": parser_mode,
             }
         )
         return source, created
@@ -107,6 +129,10 @@ class FakeTelegramSessionInventoryService:
                         identifier="@estateflow_test_channel",
                         name="EstateFlow Test Channel",
                         source_profile="caption_first",
+                        parser_key="agency.alpha",
+                        parser_version="2",
+                        parser_config={"minimum_score": 0.8},
+                        parser_mode="active",
                         enabled=True,
                         session_name="acc_9889",
                     ),
@@ -203,6 +229,9 @@ class FakeListenerTopologyService:
                     source_ids=("telegram_channel:@estateflow_test_channel",),
                     source_identifiers=("@estateflow_test_channel",),
                     source_names=("EstateFlow Test Channel",),
+                    parser_keys=("agency.alpha",),
+                    parser_modes=("shadow",),
+                    session_name="acc_9889",
                 ),
             ),
         )
@@ -231,6 +260,10 @@ class FakeListenerTopologyService:
                     assignment_reason="initial",
                     session_name_hint="listener-default",
                     session_path_hint="/tmp/estateflow/data/sessions/listener-default",
+                    parser_key="agency.alpha",
+                    parser_version="2",
+                    parser_config={"minimum_score": 0.8},
+                    parser_mode="shadow",
                 ),
             ),
             accounts=(
@@ -343,6 +376,16 @@ async def test_admin_sources_enable_signals_listener_refresh() -> None:
                 "adapter_name": "telegram_telethon",
                 "source_profile": "caption_first",
                 "session_name": "acc_9889",
+                "parser_key": "agency.alpha",
+                "parser_version": "2026-08-20",
+                "parser_config": {
+                    "family": "single_listing",
+                    "filters": {
+                        "include_any": [r"(?i)\bkvartira\b"],
+                        "unmatched_policy": "quarantine",
+                    },
+                },
+                "parser_mode": "shadow",
             },
         )
         refresh_response = client.post(
@@ -359,6 +402,16 @@ async def test_admin_sources_enable_signals_listener_refresh() -> None:
     assert payload["enabled"] is True
     assert payload["source_profile"] == "caption_first"
     assert payload["session_name"] == "acc_9889"
+    assert payload["parser_key"] == "agency.alpha"
+    assert payload["parser_version"] == "2026-08-20"
+    assert payload["parser_config"] == {
+        "family": "single_listing",
+        "filters": {
+            "include_any": [r"(?i)\bkvartira\b"],
+            "unmatched_policy": "quarantine",
+        },
+    }
+    assert payload["parser_mode"] == "shadow"
     assert payload["refresh_version"] == 1
     assert refresh_payload["refresh_version"] == 2
     assert fake_registry.calls == [
@@ -369,11 +422,201 @@ async def test_admin_sources_enable_signals_listener_refresh() -> None:
             "adapter_name": "telegram_telethon",
             "source_profile": "caption_first",
             "session_name": "acc_9889",
+            "parser_key": "agency.alpha",
+            "parser_version": "2026-08-20",
+            "parser_config": {
+                "family": "single_listing",
+                "filters": {
+                    "include_any": [r"(?i)\bkvartira\b"],
+                    "unmatched_policy": "quarantine",
+                },
+            },
+            "parser_mode": "shadow",
         }
     ]
     assert fake_auth.access_checks == [
         ("acc_9889", "@estateflow_test_channel"),
     ]
+
+
+@pytest.mark.asyncio
+async def test_admin_parser_key_only_update_resets_stale_version_and_config() -> None:
+    settings = Settings(environment="test", admin_api_token=SecretStr("secret-admin"))
+    app = create_app(settings)
+    app.state.source_registry = InMemorySourceRegistry(
+        [
+            SourceConfig(
+                source_id="telegram_channel:@estateflow_test_channel",
+                name="EstateFlow Test Channel",
+                source_type="telegram_channel",
+                identifier="@estateflow_test_channel",
+                listener_account_key="acc_9889",
+                parser_key="agency.old",
+                parser_version="9",
+                parser_config={"family": "digest_blocks"},
+                parser_mode="shadow",
+            )
+        ]
+    )
+    app.state.listener_refresh_store = FakeListenerRefreshStore()
+    app.state.telegram_auth_service = FakeTelegramAuthService()
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/sources/enable",
+            headers={"X-Admin-Token": "secret-admin"},
+            json={
+                "source_type": "telegram_channel",
+                "identifier": "@estateflow_test_channel",
+                "name": "EstateFlow Test Channel",
+                "session_name": "acc_9889",
+                "parser_key": "generic.mixed_feed",
+            },
+        )
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["parser_key"] == "generic.mixed_feed"
+    assert payload["parser_version"] == "1"
+    assert payload["parser_config"] == {}
+    assert payload["parser_mode"] == "shadow"
+
+
+@pytest.mark.asyncio
+async def test_admin_rejects_invalid_merged_binding_before_refresh() -> None:
+    settings = Settings(environment="test", admin_api_token=SecretStr("secret-admin"))
+    app = create_app(settings)
+    app.state.source_registry = InMemorySourceRegistry(
+        [
+            SourceConfig(
+                source_id="telegram_channel:@estateflow_test_channel",
+                name="EstateFlow Test Channel",
+                source_type="telegram_channel",
+                identifier="@estateflow_test_channel",
+                listener_account_key="acc_9889",
+                parser_key="agency.visible",
+                parser_config={
+                    "parser_key": "agency.hidden",
+                    "family": "single_listing",
+                },
+            )
+        ]
+    )
+    refresh_store = FakeListenerRefreshStore()
+    app.state.listener_refresh_store = refresh_store
+    app.state.telegram_auth_service = FakeTelegramAuthService()
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/sources/enable",
+            headers={"X-Admin-Token": "secret-admin"},
+            json={
+                "source_type": "telegram_channel",
+                "identifier": "@estateflow_test_channel",
+                "name": "EstateFlow Test Channel",
+                "session_name": "acc_9889",
+                "parser_mode": "shadow",
+            },
+        )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "invalid_source_parser_binding"
+    assert refresh_store.version_value == 0
+
+
+def test_admin_source_parser_preview_splits_digest_without_side_effects() -> None:
+    settings = Settings(environment="test", admin_api_token=SecretStr("secret-admin"))
+    app = create_app(settings)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/source-parser/preview",
+            headers={"X-Admin-Token": "secret-admin"},
+            json={
+                "source_id": "preview.digest",
+                "text": (
+                    "1. Chilonzor 2 xona kvartira 450 USD\n"
+                    "2. Yunusobod 3 xona kvartira 700 USD"
+                ),
+                "parser_key": "preview.digest",
+                "parser_version": "1",
+                "parser_config": {"family": "digest_blocks"},
+            },
+        )
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["decision"] == "emit"
+    assert payload["parser_key"] == "preview.digest"
+    assert [item["cleaned_text"] for item in payload["candidates"]] == [
+        "1. Chilonzor 2 xona kvartira 450 USD",
+        "2. Yunusobod 3 xona kvartira 700 USD",
+    ]
+    assert payload["quarantined_candidates"] == []
+
+
+def test_admin_source_parser_preview_exposes_partial_quarantine() -> None:
+    settings = Settings(environment="test", admin_api_token=SecretStr("secret-admin"))
+    app = create_app(settings)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/source-parser/preview",
+            headers={"X-Admin-Token": "secret-admin"},
+            json={
+                "source_id": "preview.partial",
+                "text": "Chilonzor kvartira 500 USD\n---\nKanal yangiligi",
+                "parser_key": "preview.partial",
+                "parser_config": {
+                    "family": "digest_blocks",
+                    "split": {"patterns": ["(?m)^---$"]},
+                    "filters": {
+                        "include_any": ["(?i)\\bkvartira\\b"],
+                        "unmatched_policy": "quarantine",
+                    },
+                },
+            },
+        )
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert [item["cleaned_text"] for item in payload["candidates"]] == [
+        "Chilonzor kvartira 500 USD"
+    ]
+    assert [item["cleaned_text"] for item in payload["quarantined_candidates"]] == [
+        "Kanal yangiligi"
+    ]
+
+
+@pytest.mark.asyncio
+async def test_admin_rejects_semantically_invalid_parser_before_persisting() -> None:
+    settings = Settings(environment="test", admin_api_token=SecretStr("secret-admin"))
+    app = create_app(settings)
+    fake_registry = FakeSourceRegistry()
+    fake_refresh = FakeListenerRefreshStore()
+    fake_auth = FakeTelegramAuthService()
+    app.state.source_registry = fake_registry
+    app.state.listener_refresh_store = fake_refresh
+    app.state.telegram_auth_service = fake_auth
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/admin/sources/enable",
+            headers={"X-Admin-Token": "secret-admin"},
+            json={
+                "source_type": "telegram_channel",
+                "identifier": "@invalid_recipe",
+                "name": "Invalid recipe",
+                "session_name": "acc_9889",
+                "parser_key": "source.invalid",
+                "parser_config": {"unknown_recipe_field": 123},
+            },
+        )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "invalid_source_parser_binding"
+    assert fake_registry.calls == []
+    assert fake_auth.access_checks == []
 
 
 @pytest.mark.asyncio
@@ -417,6 +660,8 @@ async def test_admin_telegram_sessions_endpoint_lists_status_and_bindings() -> N
     assert payload[0]["session_name"] == "acc_9889"
     assert payload[0]["status"] == "ready"
     assert payload[0]["bound_sources"][0]["session_name"] == "acc_9889"
+    assert payload[0]["bound_sources"][0]["parser_key"] == "agency.alpha"
+    assert payload[0]["bound_sources"][0]["parser_config"] == {"minimum_score": 0.8}
 
 
 @pytest.mark.asyncio
@@ -458,6 +703,10 @@ async def test_admin_listener_status_reports_sources_adapters_and_session_hints(
     assert payload["adapter_report"]["loaded_count"] == 1
     assert payload["worker_snapshot"]["started"] is True
     assert payload["sources"][0]["source_profile"] == "caption_first"
+    assert payload["sources"][0]["parser_key"] == "agency.alpha"
+    assert payload["sources"][0]["parser_config"] == {"minimum_score": 0.8}
+    assert payload["worker_snapshot"]["groups"][0]["parser_keys"] == ["agency.alpha"]
+    assert payload["worker_snapshot"]["groups"][0]["session_name"] == "acc_9889"
     assert payload["sources"][0]["session_path_hint"].endswith("listener-default")
     assert payload["listener_accounts"][0]["assigned_source_count"] == 1
     assert payload["assignments"][0]["reason"] == "initial"
@@ -539,6 +788,17 @@ async def test_listener_refresh_uses_session_name_when_building_telegram_plugin(
     ]
     created_session_names: list[str] = []
     created_clients: list[FakeTelegramClient] = []
+    account_repository = InMemoryListenerAccountRepository(
+        [
+            ListenerAccountMetadata(account_key="acc_9889"),
+            ListenerAccountMetadata(account_key="acc_9999", health_status="reconnecting"),
+        ]
+    )
+    assignment_service = ListenerAssignmentService(
+        account_repository=account_repository,
+        assignment_repository=InMemoryChannelAssignmentRepository(),
+        ops_notifier=DisabledOpsNotificationService(),
+    )
 
     module_name = "estateflow.test_listener_refresh_session_plugin"
     module = ModuleType(module_name)
@@ -568,6 +828,7 @@ async def test_listener_refresh_uses_session_name_when_building_telegram_plugin(
             refresh_store=FakeListenerRefreshStore(),
             redis=cast(Any, FakeRedis()),
             ops_notifier=DisabledOpsNotificationService(),
+            assignment_service=assignment_service,
             poll_interval_seconds=0.01,
         )
         report = await coordinator.refresh(reason="session-binding")
@@ -579,6 +840,11 @@ async def test_listener_refresh_uses_session_name_when_building_telegram_plugin(
     assert report.started is True
     assert created_session_names == ["acc_9889", "acc_9999"]
     assert len(created_clients) == 2
+    accounts = {
+        account.account_key: account for account in await account_repository.list_accounts()
+    }
+    assert accounts["acc_9889"].health_status == "online"
+    assert accounts["acc_9999"].health_status == "online"
 
 
 @pytest.mark.asyncio
@@ -655,7 +921,7 @@ async def test_listener_refresh_groups_sources_by_adapter_name() -> None:
 
 
 @pytest.mark.asyncio
-async def test_listener_refresh_groups_sources_by_profile_under_same_adapter() -> None:
+async def test_listener_refresh_shares_client_across_source_parser_bindings() -> None:
     settings = Settings(environment="test")
     sources = [
         SourceConfig(
@@ -666,6 +932,7 @@ async def test_listener_refresh_groups_sources_by_profile_under_same_adapter() -
             adapter_name="telegram_telethon",
             source_profile="caption_first",
             listener_account_key="acc_9889",
+            parser_key="agency.alpha",
         ),
         SourceConfig(
             source_id="telegram_channel:@estateflow_album_b",
@@ -675,6 +942,7 @@ async def test_listener_refresh_groups_sources_by_profile_under_same_adapter() -
             adapter_name="telegram_telethon",
             source_profile="album_text_merge",
             listener_account_key="acc_9889",
+            parser_key="agency.beta",
         ),
     ]
     created_clients: list[FakeTelegramClient] = []
@@ -710,10 +978,11 @@ async def test_listener_refresh_groups_sources_by_profile_under_same_adapter() -
 
     assert report.started is True
     assert report.telegram_source_count == 2
-    assert len(created_clients) == 2
-    assert sorted(
-        [source.identifier for source in client.subscribed_sources] for client in created_clients
-    ) == [["@estateflow_album_a"], ["@estateflow_album_b"]]
+    assert len(created_clients) == 1
+    assert [source.identifier for source in created_clients[0].subscribed_sources] == [
+        "@estateflow_album_a",
+        "@estateflow_album_b",
+    ]
 
 
 @pytest.mark.asyncio

@@ -5,14 +5,15 @@
 - Queue: `dedup.post_ai.structured_announcements`
 - Payload schema version: `estateflow.announcement.v1`
 
-Only successfully validated and normalized announcements are published here.
-Malformed LLM output, storage failures, all-model failures, and low-confidence
-manual-review records are persisted by the AI worker but are not sent to post-AI
-deduplication.
+Validated and normalized announcements are published here. Valid low-confidence
+or missing-required-field results can also be forwarded with manual-review reasons
+so the dedup stage persists their review state. Malformed output and failed model
+or storage operations do not become successful canonical announcements.
 
 ## Idempotency
 
-`idempotency_key` is inherited from the raw ingestion contract. Consumers must
+`idempotency_key` follows the raw ingestion contract, including stable candidate
+suffixes when source parsing fans out. Consumers must
 treat it as the unique processing key and make writes idempotent.
 
 ## Required Payload Fields
@@ -60,8 +61,9 @@ solely because Vision was unavailable.
 - `width`
 - `height`
 
-Raw image binaries, temporary local paths, signed URL tokens, and storage
-credentials are never included.
+Raw image binaries and storage credentials are not payload fields. `storage_url`
+is derived from the configured public base URL or endpoint; avoid embedding
+credentials or signed URL tokens in that configuration.
 
 ## Dedup Signals
 
@@ -73,12 +75,13 @@ normalized monthly price, and floor) is treated as a high-confidence duplicate.
 Generic description/address overlap without that corroboration is not enough to
 create a manual-review item.
 
-`dedup_signals.media_phashes` comes from media pHash values. A pHash-only match
-is an image similarity signal, not a complete duplicate decision.
+`dedup_signals.media_phashes` uses the current byte-derived media hash. A hash-only
+match is not a complete duplicate decision or verified perceptual image matching.
+See [media limitations](operations.md#media-limitation).
 
 ## Processing Audit
 
-AI worker persistence records:
+AI processing repository records include:
 
 - `idempotency_key`
 - `status`
@@ -91,10 +94,11 @@ AI worker persistence records:
 - `failure_reason`
 - `post_ai_published`
 
-The worker first persists a successful canonical record, then publishes to this
-queue, then marks `post_ai_published=true`. If a worker restarts after
-canonical persistence but before publish completion, retry republishes the
-handoff once and marks the record published.
+The worker saves a canonical processing record, publishes to this queue, then
+marks `post_ai_published=true`. A retry can reuse that record while its repository
+retains it. The current split worker uses `InMemoryAiProcessingRepository`; records
+do not survive process restart. This is not a durable outbox or an exactly-once
+publication guarantee. PostgreSQL persistence occurs in the downstream dedup stage.
 
 ## Failure Statuses
 

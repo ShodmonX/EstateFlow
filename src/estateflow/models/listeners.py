@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import (
     BigInteger,
@@ -15,6 +16,7 @@ from sqlalchemy import (
     func,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from estateflow.models.base import Base, CreatedUpdatedDeletedMixin, CreatedUpdatedMixin
@@ -63,6 +65,22 @@ class IngestionSourceRecord(CreatedUpdatedDeletedMixin, Base):
             "average_response_ms is null or average_response_ms >= 0",
             name="ck_ingestion_sources_average_response_ms_nonnegative",
         ),
+        CheckConstraint(
+            "parser_key is null or btrim(parser_key) <> ''",
+            name="ck_ingestion_sources_parser_key_nonblank",
+        ),
+        CheckConstraint(
+            "parser_version is null or btrim(parser_version) <> ''",
+            name="ck_ingestion_sources_parser_version_nonblank",
+        ),
+        CheckConstraint(
+            "jsonb_typeof(parser_config) = 'object'",
+            name="ck_ingestion_sources_parser_config_object",
+        ),
+        CheckConstraint(
+            "parser_mode in ('active', 'shadow', 'disabled')",
+            name="ck_ingestion_sources_parser_mode",
+        ),
         Index(
             "ix_ingestion_sources_active",
             "source_type",
@@ -85,6 +103,20 @@ class IngestionSourceRecord(CreatedUpdatedDeletedMixin, Base):
     )
     adapter_name: Mapped[str | None] = mapped_column(Text)
     source_profile: Mapped[str | None] = mapped_column(Text)
+    parser_key: Mapped[str | None] = mapped_column(Text)
+    parser_version: Mapped[str | None] = mapped_column(Text)
+    parser_config: Mapped[dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict,
+        server_default=text("'{}'::jsonb"),
+    )
+    parser_mode: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="active",
+        server_default=text("'active'"),
+    )
     listener_account_key: Mapped[str | None] = mapped_column(
         Text, ForeignKey("listener_accounts.account_key")
     )

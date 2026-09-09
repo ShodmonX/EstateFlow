@@ -22,3 +22,12 @@ data/sessions
 *.dump
 *.sql
 
+
+# Exclude private archives and generated artifacts from image contexts
+.local
+.test-tmp
+.edge-deploy
+backups
+logs
+benchmark-results
+node_modules

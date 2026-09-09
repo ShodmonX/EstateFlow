@@ -42,7 +42,8 @@ async def main() -> None:
         print("REPLAY none")
         return
     selected["queue_name"] = "ai.processing.raw_announcements"
-    metadata = dict(selected.get("metadata", {}))
+    raw_metadata = selected.get("metadata", {})
+    metadata = dict(raw_metadata) if isinstance(raw_metadata, dict) else {}
     metadata.update({"retry_count": "0", "replayed_from": source, "media_probe": "true"})
     selected["metadata"] = metadata
     connection = await aio_pika.connect_robust(os.environ["RABBITMQ_URL"])

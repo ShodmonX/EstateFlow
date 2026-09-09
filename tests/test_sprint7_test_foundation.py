@@ -73,6 +73,7 @@ def test_test_inventory_maps_every_test_file_to_layer_and_flow() -> None:
 
 def test_default_test_environment_strips_real_external_credentials() -> None:
     assert os.environ["ENVIRONMENT"] == "test"
+    assert os.environ["ESTATEFLOW_DEBUG"] == "false"
     assert "TELEGRAM_BOT_TOKEN" not in os.environ
     assert "OPENROUTER_API_KEY" not in os.environ
     assert "R2_SECRET_ACCESS_KEY" not in os.environ

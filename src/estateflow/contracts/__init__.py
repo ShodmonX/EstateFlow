@@ -7,6 +7,7 @@ from estateflow.contracts.events import (
     POST_AI_DEDUP_QUEUE,
     RAW_ANNOUNCEMENT_DLQ,
     RAW_ANNOUNCEMENT_QUEUE,
+    SOURCE_PARSER_QUARANTINE_QUEUE,
     QueueMessage,
     serialize_queue_message,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "POST_AI_DEDUP_QUEUE",
     "RAW_ANNOUNCEMENT_DLQ",
     "RAW_ANNOUNCEMENT_QUEUE",
+    "SOURCE_PARSER_QUARANTINE_QUEUE",
     "QueueMessage",
     "serialize_queue_message",
 ]

@@ -17,6 +17,9 @@ from estateflow.services.pre_ai_dedup import (
     jaccard_similarity,
     normalize_listing_text,
 )
+from estateflow.services.source_parsing.contracts import (
+    are_fanout_source_message_siblings,
+)
 
 DedupDecisionType = Literal[
     "exact_duplicate",
@@ -65,6 +68,7 @@ class StructuredAnnouncement:
     media: tuple[StoredMedia, ...] = ()
     source_url: str | None = None
     forward_origin_key: str | None = None
+    source_message_ids: tuple[str, ...] = ()
     trusted_source_score: int = 0
     parent_id: str | None = None
     status: AnnouncementStatus = "active"
@@ -83,6 +87,14 @@ class StructuredAnnouncement:
         import uuid
 
         idempotency_key = payload["idempotency_key"]
+        source_message_id = str(payload["source_message_id"])
+        raw_source_message_ids = payload.get("source_message_ids")
+        source_message_ids = tuple(
+            str(item)
+            for item in raw_source_message_ids
+            if item is not None
+        ) if isinstance(raw_source_message_ids, list | tuple) else ()
+        source_message_ids = source_message_ids or (source_message_id,)
         announcement_id = str(uuid.uuid5(uuid.NAMESPACE_URL, idempotency_key))
         raw_review_reason = payload.get("manual_review_reason")
         review_reason: ReviewReason | None = None
@@ -95,11 +107,13 @@ class StructuredAnnouncement:
             idempotency_key=idempotency_key,
             source_id=payload["source_id"],
             source_channel_id=payload["source_channel_id"],
-            source_message_id=payload["source_message_id"],
+            source_message_id=source_message_id,
             occurred_at=datetime.fromisoformat(payload["occurred_at"]),
             canonical=CanonicalListing.model_validate(payload["canonical"]),
             media=tuple(StoredMedia(**item) for item in payload.get("media", [])),
             source_url=payload.get("source_url"),
+            forward_origin_key=payload.get("forward_origin_key"),
+            source_message_ids=source_message_ids,
             status="manual_review" if review_reason is not None else "active",
             review_reason=review_reason,
         )
@@ -195,6 +209,20 @@ class ManualReviewQueue(Protocol):
     ) -> ManualReviewItem: ...
 
 
+def _are_fanout_sibling_announcements(
+    incoming: StructuredAnnouncement,
+    candidate: StructuredAnnouncement,
+) -> bool:
+    return bool(
+        incoming.source_id == candidate.source_id
+        and incoming.source_channel_id == candidate.source_channel_id
+        and are_fanout_source_message_siblings(
+            incoming.source_message_id,
+            candidate.source_message_id,
+        )
+    )
+
+
 class SourceUrlMatcher:
     name = "source_url"
 
@@ -204,13 +232,26 @@ class SourceUrlMatcher:
         candidate: StructuredAnnouncement,
         config: DedupScoringConfig,
     ) -> ScoreSignal:
-        matched = bool(incoming.source_url and incoming.source_url == candidate.source_url)
+        fanout_siblings = _are_fanout_sibling_announcements(incoming, candidate)
+        matched = bool(
+            incoming.source_url
+            and incoming.source_url == candidate.source_url
+            and not fanout_siblings
+        )
         return ScoreSignal(
             name=self.name,
             weight=config.source_url_weight,
             matched=matched,
             exact=matched,
-            reason="source URL matched exactly" if matched else "source URL missing or different",
+            reason=(
+                "source URL belongs to a distinct digest sibling"
+                if fanout_siblings
+                else (
+                    "source URL matched exactly"
+                    if matched
+                    else "source URL missing or different"
+                )
+            ),
         )
 
 
@@ -223,9 +264,11 @@ class ForwardOriginMatcher:
         candidate: StructuredAnnouncement,
         config: DedupScoringConfig,
     ) -> ScoreSignal:
+        fanout_siblings = _are_fanout_sibling_announcements(incoming, candidate)
         matched = bool(
             incoming.forward_origin_key
             and incoming.forward_origin_key == candidate.forward_origin_key
+            and not fanout_siblings
         )
         return ScoreSignal(
             name=self.name,
@@ -233,9 +276,13 @@ class ForwardOriginMatcher:
             matched=matched,
             exact=matched,
             reason=(
-                "forward provenance matched exactly"
-                if matched
-                else "forward provenance missing or different"
+                "forward provenance belongs to a distinct digest sibling"
+                if fanout_siblings
+                else (
+                    "forward provenance matched exactly"
+                    if matched
+                    else "forward provenance missing or different"
+                )
             ),
         )
 
@@ -249,18 +296,27 @@ class ImagePHashMatcher:
         candidate: StructuredAnnouncement,
         config: DedupScoringConfig,
     ) -> ScoreSignal:
+        fanout_siblings = _are_fanout_sibling_announcements(incoming, candidate)
         best_distance: int | None = None
         for media in incoming.media:
             for candidate_media in candidate.media:
                 distance = hamming_distance_hex(media.phash, candidate_media.phash)
                 if best_distance is None or distance < best_distance:
                     best_distance = distance
-        matched = best_distance is not None and best_distance <= config.phash_hamming_threshold
+        matched = bool(
+            best_distance is not None
+            and best_distance <= config.phash_hamming_threshold
+            and not fanout_siblings
+        )
         return ScoreSignal(
             name=self.name,
             weight=config.same_image_weight,
             matched=matched,
-            reason="image pHash matched" if matched else "no close image pHash match",
+            reason=(
+                "image belongs to a distinct digest sibling"
+                if fanout_siblings
+                else ("image pHash matched" if matched else "no close image pHash match")
+            ),
             details={} if best_distance is None else {"hamming_distance": best_distance},
         )
 
@@ -757,11 +813,17 @@ class InMemoryAnnouncementRepository(DedupCandidateRepository):
         incoming: StructuredAnnouncement,
         candidate: StructuredAnnouncement,
     ) -> bool:
-        if incoming.source_url and incoming.source_url == candidate.source_url:
+        fanout_siblings = _are_fanout_sibling_announcements(incoming, candidate)
+        if (
+            incoming.source_url
+            and incoming.source_url == candidate.source_url
+            and not fanout_siblings
+        ):
             return True
         if (
             incoming.forward_origin_key
             and incoming.forward_origin_key == candidate.forward_origin_key
+            and not fanout_siblings
         ):
             return True
         if set(incoming.canonical.phone_numbers) & set(candidate.canonical.phone_numbers):
@@ -776,11 +838,14 @@ class InMemoryAnnouncementRepository(DedupCandidateRepository):
             and incoming.canonical.rooms == candidate.canonical.rooms
         ):
             return True
-        return any(
-            hamming_distance_hex(incoming_media.phash, candidate_media.phash)
-            <= self._config.phash_hamming_threshold
-            for incoming_media in incoming.media
-            for candidate_media in candidate.media
+        return bool(
+            not fanout_siblings
+            and any(
+                hamming_distance_hex(incoming_media.phash, candidate_media.phash)
+                <= self._config.phash_hamming_threshold
+                for incoming_media in incoming.media
+                for candidate_media in candidate.media
+            )
         )
 
 

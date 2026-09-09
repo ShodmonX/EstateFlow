@@ -7,6 +7,23 @@ from estateflow.api.app import ApiProfile, create_app
 from estateflow.application.core.config import Settings
 
 
+def test_settings_ignore_ambient_generic_debug_variable(monkeypatch) -> None:
+    monkeypatch.setenv("DEBUG", "release")
+    monkeypatch.delenv("ESTATEFLOW_DEBUG", raising=False)
+
+    settings = Settings(environment="test")
+
+    assert settings.debug is False
+
+
+def test_settings_read_namespaced_debug_variable(monkeypatch) -> None:
+    monkeypatch.setenv("ESTATEFLOW_DEBUG", "true")
+
+    settings = Settings(environment="test")
+
+    assert settings.debug is True
+
+
 def test_create_app_import_safe() -> None:
     app = create_app(Settings(environment="test"))
 

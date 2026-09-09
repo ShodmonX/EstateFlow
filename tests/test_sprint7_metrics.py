@@ -416,6 +416,22 @@ async def test_product_event_buckets_and_technical_snapshot_are_deduped() -> Non
         subject_id="listener-a",
         metadata={"status": "flood_wait"},
     )
+    await technical_recorder.record_metric(
+        metric_name="source_parser_decision",
+        idempotency_key="parser-source-a-emit",
+        occurred_at=at,
+        component="source_parser",
+        subject_id="source-a",
+        metadata={"decision": "emit", "parser_version": "1"},
+    )
+    await technical_recorder.record_metric(
+        metric_name="source_parser_decision",
+        idempotency_key="parser-source-b-drop",
+        occurred_at=at,
+        component="source_parser",
+        subject_id="source-b",
+        metadata={"decision": "drop", "parser_version": "2"},
+    )
 
     snapshot = await ProductMetricsService(
         product_repo,
@@ -436,6 +452,15 @@ async def test_product_event_buckets_and_technical_snapshot_are_deduped() -> Non
     assert snapshot.technical_metrics.notification_retry_count == 1
     assert snapshot.technical_metrics.notification_error_count == 1
     assert snapshot.technical_metrics.listener_health_counts == {"flood_wait": 1}
+    assert snapshot.technical_metrics.source_parser_decision_count == 2
+    assert snapshot.technical_metrics.source_parser_decision_counts == {
+        "drop": 1,
+        "emit": 1,
+    }
+    assert snapshot.technical_metrics.source_parser_source_counts == {
+        "source-a": {"emit": 1},
+        "source-b": {"drop": 1},
+    }
 
 
 def test_product_event_hourly_buckets_are_available_for_dashboard_drilldown() -> None:
@@ -528,6 +553,7 @@ def test_beta_metrics_endpoint_is_admin_protected_and_returns_snapshot() -> None
     assert allowed.status_code == 200
     assert allowed.json()["activation_rate"]["numerator"] == 1
     assert allowed.json()["technical_metrics"]["queue_delay_avg_ms"] == 250
+    assert allowed.json()["technical_metrics"]["source_parser_decision_count"] == 0
 
 
 @pytest.mark.asyncio

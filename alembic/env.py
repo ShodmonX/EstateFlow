@@ -1,6 +1,7 @@
+import re
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 
 from alembic import context
 from estateflow.application.core.config import get_settings
@@ -24,6 +25,17 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 
+SAFE_SCHEMA_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def migration_schema() -> str | None:
+    schema = context.get_x_argument(as_dictionary=True).get("schema")
+    if schema is None:
+        return None
+    if not SAFE_SCHEMA_RE.fullmatch(schema):
+        raise ValueError(f"Invalid migration schema: {schema}")
+    return schema
+
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -43,11 +55,13 @@ def run_migrations_offline() -> None:
 
     """
     url = config.get_main_option("sqlalchemy.url")
+    schema = migration_schema()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table_schema=schema,
     )
 
     with context.begin_transaction():
@@ -68,7 +82,17 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        schema = migration_schema()
+        if schema is not None:
+            connection.execute(text(f'create schema if not exists "{schema}"'))
+            connection.execute(text(f'set search_path to "{schema}", public'))
+            connection.commit()
+            connection.dialect.default_schema_name = schema
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table_schema=schema,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

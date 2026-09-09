@@ -1,8 +1,8 @@
-# Sprint 2 AI Worker Handoff
+# AI Worker Input Contract
 
 ## Input Queue
 
-Sprint 2 AI workers consume:
+AI workers consume:
 
 ```text
 ai.processing.raw_announcements
@@ -50,7 +50,7 @@ Optional raw fields:
 - `size_bytes`
 - `access_hash`
 
-No binary media is stored in Redis. Sprint 2 may download media in a worker stage,
+Queue payloads contain references, not binary media. AI workers download media,
 then upload processed files to object storage.
 
 ## Pre-AI Decision
@@ -74,8 +74,7 @@ If AI processing fails after dequeue:
 
 - Retry with the worker retry policy.
 - Preserve `correlation_id` in logs and Ops alerts.
-- Send exhausted failures to `ingestion.raw_announcements.dlq` or a later
-  AI-specific DLQ when introduced.
+- Send exhausted AI-stage failures to `ai.processing.raw_announcements.dlq`.
 
 Raw text, phone numbers, account sessions, API hashes, and bot tokens must not be
 logged in worker errors or Ops alerts.

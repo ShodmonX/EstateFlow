@@ -3,11 +3,12 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 
-from estateflow.adapters.telethon_listener import _media_references
+from estateflow.adapters.telethon_listener import TelethonClientAdapter, _media_references
 from estateflow.services.listener_pool import (
     InMemoryChannelAssignmentRepository,
     InMemoryListenerAccountRepository,
@@ -110,6 +111,7 @@ def _update(
     media_group_id: str | None = None,
     media_id: str = "photo-1",
     text: str | None = "Yunusobod 2 xona 500$ +998901234567",
+    source_username: str | None = None,
 ) -> TelegramUpdate:
     return TelegramUpdate(
         update_type=update_type,  # type: ignore[arg-type]
@@ -130,6 +132,7 @@ def _update(
             )
         ],
         media_group_id=media_group_id,
+        source_username=source_username,
     )
 
 
@@ -183,6 +186,46 @@ def test_telethon_media_mapping_accepts_message_convenience_properties() -> None
 
 
 @pytest.mark.asyncio
+async def test_telethon_transient_entity_failure_recovers_source_from_event_username() -> None:
+    class FakeTelethonClient:
+        async def get_entity(self, _identifier: str) -> object:
+            raise ValueError("entity cache unavailable")
+
+        def add_event_handler(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+    adapter = object.__new__(TelethonClientAdapter)
+    adapter._client = FakeTelethonClient()
+    adapter._source_identifiers_by_chat_id = {}
+    adapter._source_usernames_by_chat_id = {}
+    adapter._source_identifiers_by_username = {}
+    await adapter.subscribe([_source(identifier="@source")])
+    message = SimpleNamespace(
+        id=31,
+        chat_id=-1001,
+        date=datetime(2026, 8, 1, tzinfo=UTC),
+        message="Configured parser must survive",
+        media=None,
+        photo=None,
+        document=None,
+        grouped_id=None,
+        fwd_from=None,
+    )
+    event = SimpleNamespace(
+        chat_id=-1001,
+        chat=SimpleNamespace(username="SOURCE"),
+        message=message,
+    )
+
+    update = adapter._message_event_to_update(event, "created")
+
+    assert update.source_channel_id == "-1001"
+    assert update.source_identifier == "@source"
+    assert update.source_username == "SOURCE"
+    assert adapter._source_identifiers_by_chat_id["-1001"] == "@source"
+
+
+@pytest.mark.asyncio
 async def test_new_message_is_mapped_to_versioned_raw_queue_event() -> None:
     queue = RecordingQueue()
     client = FakeTelegramClient(updates=[_update()])
@@ -203,6 +246,92 @@ async def test_new_message_is_mapped_to_versioned_raw_queue_event() -> None:
     assert payload["forward_metadata"]["original_message_id"] == "99"
     assert payload["media"][0]["media_id"] == "photo-1"
     assert payload["source_url"] == "https://t.me/source/10"
+    assert payload["parser_key"] == "generic.album_caption"
+    assert payload["parser_version"] == "1"
+    assert payload["parser_mode"] == "active"
+    assert payload["parser_provenance"]["source_binding"] == "configured"
+
+
+@pytest.mark.asyncio
+async def test_listener_uses_event_username_when_channel_identifier_is_numeric() -> None:
+    queue = RecordingQueue()
+    listener = _listener(
+        client=FakeTelegramClient(
+            updates=[_update(identifier="-1001", source_username="SOURCE")]
+        ),
+        queue=queue,
+    )
+
+    await listener.run()
+
+    assert queue.messages[0].payload["source_id"] == "source-1"
+    assert queue.messages[0].payload["parser_key"] == "generic.album_caption"
+    assert queue.messages[0].payload["parser_provenance"]["source_binding"] == "configured"
+
+
+@pytest.mark.asyncio
+async def test_one_listener_resolves_distinct_parser_binding_for_each_source() -> None:
+    queue = RecordingQueue()
+    sources = [
+        SourceConfig(
+            source_id="source-a",
+            name="Source A",
+            source_type="telegram_channel",
+            identifier="@source_a",
+            parser_key="agency.alpha",
+            parser_version="2",
+            parser_config={"cleanup": {"footer": "@source_a"}},
+            parser_mode="shadow",
+        ),
+        SourceConfig(
+            source_id="source-b",
+            name="Source B",
+            source_type="telegram_channel",
+            identifier="@source_b",
+            parser_key="agency.beta",
+            parser_version="7",
+            parser_config={"minimum_score": 0.7},
+            parser_mode="disabled",
+        ),
+    ]
+    listener = TelegramAccountListener(
+        account_key="listener-a",
+        client=FakeTelegramClient(
+            updates=[
+                _update(identifier="@SOURCE_A", message_id="21", text="Alpha raw text"),
+                _update(identifier="@source_b", message_id="22", text="Beta raw text"),
+            ]
+        ),
+        sources=sources,
+        event_publisher=QueueRawTelegramEventPublisher(
+            queue=queue,
+            idempotency_store=InMemoryIdempotencyStore(),
+        ),
+        idempotency_store=InMemoryIdempotencyStore(),
+        assignment_service=ListenerAssignmentService(
+            account_repository=InMemoryListenerAccountRepository(
+                [ListenerAccountMetadata(account_key="listener-a")]
+            ),
+            assignment_repository=InMemoryChannelAssignmentRepository(),
+            ops_notifier=DisabledOpsNotificationService(),
+        ),
+        ops_notifier=DisabledOpsNotificationService(),
+    )
+
+    await listener.run()
+
+    assert [(item.payload["source_id"], item.payload["parser_key"]) for item in queue.messages] == [
+        ("source-a", "agency.alpha"),
+        ("source-b", "agency.beta"),
+    ]
+    assert queue.messages[0].payload["parser_config"] == {
+        "cleanup": {"footer": "@source_a"}
+    }
+    assert queue.messages[0].payload["parser_mode"] == "shadow"
+    assert queue.messages[0].payload["text"] == "Alpha raw text"
+    assert queue.messages[1].payload["parser_version"] == "7"
+    assert queue.messages[1].payload["parser_mode"] == "disabled"
+    assert queue.messages[1].payload["text"] == "Beta raw text"
 
 
 def test_telegram_source_url_requires_public_username_and_numeric_message_id() -> None:

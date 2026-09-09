@@ -483,6 +483,15 @@ def create_r2_object_storage(settings: Settings) -> R2ObjectStorage:
     )
 
 
+def configured_object_storage_from_settings(settings: Settings) -> ObjectStorage:
+    try:
+        return create_r2_object_storage(settings)
+    except (StorageUploadError, ModuleNotFoundError, ImportError):
+        if settings.environment == "production":
+            raise
+        return InMemoryObjectStorage()
+
+
 def media_processing_config_from_settings(settings: Settings) -> MediaProcessingConfig:
     return MediaProcessingConfig(
         max_input_bytes=settings.media_max_input_bytes,

@@ -37,6 +37,7 @@ from estateflow.services.post_ai_dedup import (
     dedup_scoring_config_from_settings,
     manual_review_decision,
 )
+from estateflow.services.source_parsing import fanout_candidate_source_message_id
 
 
 def _canonical(
@@ -90,6 +91,9 @@ def _announcement(
     media: tuple[StoredMedia, ...] = (),
     source_url: str | None = None,
     source_id: str = "source-a",
+    source_message_id: str | None = None,
+    source_message_ids: tuple[str, ...] | None = None,
+    forward_origin_key: str | None = None,
     created_at: datetime | None = None,
 ) -> StructuredAnnouncement:
     return StructuredAnnouncement(
@@ -97,11 +101,13 @@ def _announcement(
         idempotency_key=f"telegram:-100:{announcement_id}:created",
         source_id=source_id,
         source_channel_id="-100",
-        source_message_id=announcement_id,
+        source_message_id=source_message_id or announcement_id,
+        source_message_ids=source_message_ids or (source_message_id or announcement_id,),
         occurred_at=datetime(2026, 8, 1, tzinfo=UTC),
         canonical=canonical or _canonical(),
         media=media,
         source_url=source_url,
+        forward_origin_key=forward_origin_key,
         created_at=created_at or datetime(2026, 8, 1, tzinfo=UTC),
     )
 
@@ -204,6 +210,102 @@ async def test_exact_source_url_is_exact_duplicate() -> None:
 
     assert decision.decision == "exact_duplicate"
     assert decision.score >= 100
+
+
+def test_post_ai_contract_preserves_fanout_source_provenance() -> None:
+    source_message_id = fanout_candidate_source_message_id("42", 1)
+    announcement = StructuredAnnouncement.from_payload(
+        {
+            "idempotency_key": "telegram:-100:42:created:candidate:slot-1",
+            "source_id": "source-a",
+            "source_channel_id": "-100",
+            "source_message_id": source_message_id,
+            "source_message_ids": ["42"],
+            "source_url": "https://t.me/source_a/42",
+            "forward_origin_key": "-2002:99",
+            "occurred_at": datetime(2026, 8, 1, tzinfo=UTC).isoformat(),
+            "canonical": _canonical().model_dump(mode="json"),
+        }
+    )
+
+    assert announcement.source_message_id == source_message_id
+    assert announcement.source_message_ids == ("42",)
+    assert announcement.source_url == "https://t.me/source_a/42"
+    assert announcement.forward_origin_key == "-2002:99"
+
+
+@pytest.mark.asyncio
+async def test_digest_siblings_are_persisted_as_separate_post_ai_parents() -> None:
+    source_url = "https://t.me/source_a/42"
+    forward_origin = "-2002:99"
+    first = _announcement(
+        "digest-first",
+        source_message_id=fanout_candidate_source_message_id("42", 0),
+        source_message_ids=("42",),
+        source_url=source_url,
+        forward_origin_key=forward_origin,
+        canonical=_canonical(
+            price=Decimal("500"),
+            district="Chilonzor",
+            rooms=2,
+            area=Decimal("55"),
+            floor=3,
+            address="Chilonzor 5 kvartal",
+            phone="+998901112233",
+        ),
+        media=(_media("digest-first", "0123456789abcdef"),),
+    )
+    second = _announcement(
+        "digest-second",
+        source_message_id=fanout_candidate_source_message_id("42", 1),
+        source_message_ids=("42",),
+        source_url=source_url,
+        forward_origin_key=forward_origin,
+        canonical=_canonical(
+            price=Decimal("1200"),
+            district="Sergeli",
+            rooms=4,
+            area=Decimal("100"),
+            floor=9,
+            address="Sergeli 7 massiv",
+            phone="+998909998877",
+        ),
+        media=(_media("digest-second", "0123456789abcdef"),),
+    )
+    config = DedupScoringConfig()
+    sibling_signals = {
+        matcher.name: matcher.match(second, first, config)
+        for matcher in DEFAULT_SIGNAL_MATCHERS
+    }
+    repository = InMemoryAnnouncementRepository()
+    processor = PostAiDedupProcessor(
+        engine=WeightedDeduplicationEngine(candidate_repository=repository),
+        announcement_repository=repository,
+        manual_review_queue=ManualReviewQueueService(repository),
+    )
+
+    first_decision = await processor.process(first)
+    second_decision = await processor.process(second)
+
+    assert first_decision.decision == "new"
+    assert second_decision.decision == "new"
+    assert not sibling_signals["source_url"].matched
+    assert not sibling_signals["forward_origin"].matched
+    assert not sibling_signals["same_image_phash"].matched
+    persisted = repository.list_all_for_audit()
+    assert {item.announcement_id for item in persisted} == {
+        "digest-first",
+        "digest-second",
+    }
+    assert all(item.parent_id is None for item in persisted)
+    assert all(item.source_message_ids == ("42",) for item in persisted)
+    assert len(
+        {
+            (item.source_id, item.source_channel_id, item.source_message_id)
+            for item in persisted
+        }
+    ) == 2
+    assert repository.merge_audit == []
 
 
 @pytest.mark.asyncio

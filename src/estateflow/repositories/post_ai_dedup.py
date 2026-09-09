@@ -333,7 +333,7 @@ class AsyncpgParentChildAnnouncementRepository(AsyncpgDedupCandidateRepository):
                     prompt_version, occurred_at, created_at, updated_at
                 )
                 values (
-                    $1::uuid, $2, $3, $4, $5, array[$5]::text[], null, $6, $7, $8,
+                    $1::uuid, $2, $3, $4, $5, $36::text[], null, $6, $7, $8,
                     $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
                     $21, $22::text[], $23, $24, $25, $26, $27, $28::text[],
                     $29::text[], $30, $31::jsonb, $32::text[], $33, $34, $35, $35
@@ -379,6 +379,7 @@ class AsyncpgParentChildAnnouncementRepository(AsyncpgDedupCandidateRepository):
                 announcement.canonical.prompt_version,
                 announcement.occurred_at,
                 announcement.created_at,
+                list(announcement.source_message_ids or (announcement.source_message_id,)),
             )
             assert record is not None
             persisted_announcement_id = str(record["announcement_id"])
@@ -633,7 +634,7 @@ class AsyncpgParentChildAnnouncementRepository(AsyncpgDedupCandidateRepository):
                 assumptions, prompt_version, occurred_at, created_at, updated_at
             )
             values (
-                $1::uuid, $2, $3, $4, $5, array[$5]::text[], $6::uuid, 'active',
+                $1::uuid, $2, $3, $4, $5, $35::text[], $6::uuid, 'active',
                 1, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
                 $19, $20, $21::text[], $22, $23, $24, $25, $26, $27::text[],
                 $28::text[], $29, $30::jsonb, $31::text[], $32, $33, $34, $34
@@ -678,6 +679,7 @@ class AsyncpgParentChildAnnouncementRepository(AsyncpgDedupCandidateRepository):
             child.canonical.prompt_version,
             child.occurred_at,
             child.created_at,
+            list(child.source_message_ids or (child.source_message_id,)),
         )
         assert record is not None
         await _save_announcement_media(conn, child.announcement_id, child.media)
@@ -776,6 +778,7 @@ def _announcement_from_record_with_media(
         source_id=str(record["source_id"]),
         source_channel_id=str(record["source_channel_id"]),
         source_message_id=str(record["source_message_id"]),
+        source_message_ids=tuple(str(item) for item in (record["source_message_ids"] or ())),
         occurred_at=record["occurred_at"],
         canonical=_canonical_from_record(record),
         media=tuple(

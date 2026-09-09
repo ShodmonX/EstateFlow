@@ -4,7 +4,7 @@ import hashlib
 import re
 import unicodedata
 from dataclasses import dataclass, field
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
 from estateflow.services.ops_notifications import OpsNotificationService
 from estateflow.services.telegram_listener import (
@@ -12,6 +12,9 @@ from estateflow.services.telegram_listener import (
     TelegramForwardMetadata,
     TelegramMediaReference,
 )
+
+if TYPE_CHECKING:
+    from estateflow.application.core.config import Settings
 
 PreAiDecisionType = Literal[
     "proceed_to_ai",
@@ -35,6 +38,13 @@ _WORD_PATTERN = re.compile(r"[\w$]+", re.UNICODE)
 class PreAiDedupConfig:
     near_text_threshold: float = 0.88
     phash_hamming_threshold: int = 8
+
+
+def pre_ai_dedup_config_from_settings(settings: Settings) -> PreAiDedupConfig:
+    return PreAiDedupConfig(
+        near_text_threshold=settings.pre_ai_near_text_threshold,
+        phash_hamming_threshold=settings.pre_ai_phash_hamming_threshold,
+    )
 
 
 @dataclass(frozen=True)
@@ -225,7 +235,27 @@ class PreAiDedupFilter:
     ) -> RawEventReference | None:
         if event_signals.forward_origin_key is None:
             return None
-        return await self._signal_store.find_by_forward_origin(event_signals.forward_origin_key)
+        reference = await self._signal_store.find_by_forward_origin(
+            event_signals.forward_origin_key
+        )
+        if reference is None or not _are_fanout_sibling_references(
+            event_signals.reference,
+            reference,
+        ):
+            return reference
+
+        # The first matching forward-origin can be a sibling candidate emitted from
+        # this same digest. Ignore siblings, while still finding a retry of this
+        # candidate or the same forward from another raw Telegram event.
+        for recent in await self._signal_store.list_recent_signals():
+            if recent.forward_origin_key != event_signals.forward_origin_key:
+                continue
+            if not _are_fanout_sibling_references(
+                event_signals.reference,
+                recent.reference,
+            ):
+                return recent.reference
+        return None
 
     async def _match_text_hash(
         self, event_signals: RawEventDedupSignals
@@ -319,18 +349,42 @@ async def build_raw_event_dedup_signals(
         phash = await phash_provider.phash(media)
         if phash is not None:
             media_phashes.append(phash)
+    parser_provenance = getattr(event, "parser_provenance", {})
+    parent_reference_value = (
+        parser_provenance.get("raw_event_id")
+        if isinstance(parser_provenance, dict)
+        else None
+    )
+    parent_reference = (
+        str(parent_reference_value)
+        if parent_reference_value not in (None, "")
+        else None
+    )
     return RawEventDedupSignals(
         reference=RawEventReference(
             raw_event_id=event.idempotency_key,
             source_id=event.source_id,
             source_channel_id=event.source_channel_id,
             source_message_id=event.source_message_id,
+            parent_reference=parent_reference,
         ),
         forward_origin_key=forward_origin_key(event.forward_metadata),
         text_hash=text_hash,
         normalized_text=normalized or None,
         phones=frozenset(extract_phone_numbers(event.text or "")),
         media_phashes=tuple(media_phashes),
+    )
+
+
+def _are_fanout_sibling_references(
+    left: RawEventReference,
+    right: RawEventReference,
+) -> bool:
+    return bool(
+        left.parent_reference
+        and right.parent_reference
+        and left.parent_reference == right.parent_reference
+        and left.raw_event_id != right.raw_event_id
     )
 
 

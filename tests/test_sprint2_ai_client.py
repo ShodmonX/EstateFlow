@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
 import pytest
@@ -18,6 +19,7 @@ from estateflow.services.ai_client import (
     create_openrouter_llm_client,
     parse_openrouter_response,
 )
+from estateflow.services.extraction import ListingExtractionRaw, listing_json_schema
 from estateflow.services.ops_notifications import DisabledOpsNotificationService
 
 
@@ -66,6 +68,30 @@ def _response(confidence: float, *, model: str = "model") -> LLMResponse:
     return LLMResponse(model=model, content={"confidence": confidence}, confidence=confidence)
 
 
+def _listing_request() -> LLMRequest:
+    return LLMRequest(
+        messages=[LLMMessage(role="user", content="safe")],
+        json_schema=listing_json_schema(),
+        correlation_id="cid-listing",
+        min_confidence=0.72,
+        fallback_policy="listing_quality",
+        response_validator=ListingExtractionRaw.model_validate,
+    )
+
+
+def _listing_response(
+    confidence: float,
+    *,
+    model: str,
+    **content: Any,
+) -> LLMResponse:
+    return LLMResponse(
+        model=model,
+        content={"confidence": confidence, **content},
+        confidence=confidence,
+    )
+
+
 @pytest.mark.asyncio
 async def test_primary_success_uses_first_configured_model() -> None:
     transport = ScriptedTransport([_response(0.9)])
@@ -96,6 +122,8 @@ async def test_transport_error_falls_back_to_next_model() -> None:
     assert response.confidence == 0.88
     assert transport.models == ["primary", "fallback"]
     assert [attempt.status for attempt in attempts] == ["failed", "success"]
+    assert attempts[0].decision_reason == "retryable_transport_error"
+    assert attempts[1].selected is True
 
 
 @pytest.mark.asyncio
@@ -150,6 +178,303 @@ async def test_low_confidence_retries_until_final_model() -> None:
         "low_confidence",
         "success",
     ]
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_does_not_send_explicit_non_rental_junk_to_preview() -> None:
+    transport = ScriptedTransport(
+        [
+            _listing_response(
+                0.18,
+                model="primary",
+                is_rental_announcement=False,
+                rental_confidence=0.98,
+                description="Kanal qoidalari va umumiy suhbat",
+            ),
+            _listing_response(
+                0.95,
+                model="preview",
+                is_rental_announcement=True,
+                price=500,
+                rooms=2,
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=RecordingOps(),
+    )
+
+    response, attempts = await client.complete_json(_listing_request())
+
+    assert response.model == "primary"
+    assert transport.models == ["primary"]
+    assert attempts[0].status == "low_confidence"
+    assert attempts[0].decision_reason == "explicit_non_rental_no_fallback"
+    assert attempts[0].selected is True
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_returns_best_valid_low_confidence_response() -> None:
+    transport = ScriptedTransport(
+        [
+            _listing_response(
+                0.51,
+                model="primary",
+                is_rental_announcement=True,
+                rental_confidence=0.9,
+                price=450,
+                rooms=2,
+            ),
+            _listing_response(
+                0.63,
+                model="preview",
+                is_rental_announcement=True,
+                rental_confidence=0.92,
+                price=450,
+                rooms=2,
+                district="Yunusobod",
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=RecordingOps(),
+    )
+
+    response, attempts = await client.complete_json(_listing_request())
+
+    assert response.model == "preview"
+    assert response.confidence == 0.63
+    assert transport.models == ["primary", "preview"]
+    assert [attempt.status for attempt in attempts] == ["low_confidence", "low_confidence"]
+    assert attempts[0].selected is False
+    assert attempts[1].selected is True
+    assert attempts[1].decision_reason == "plausible_listing_low_confidence"
+    assert attempts[1].selection_reason == "best_valid_low_quality_response_returned"
+    assert attempts[1].fallback_trigger_reason == "plausible_listing_low_confidence"
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_sends_plausible_incomplete_result_to_preview() -> None:
+    transport = ScriptedTransport(
+        [
+            _listing_response(
+                0.91,
+                model="primary",
+                is_rental_announcement=True,
+                rental_confidence=0.94,
+            ),
+            _listing_response(
+                0.9,
+                model="preview",
+                is_rental_announcement=True,
+                rental_confidence=0.95,
+                listing_type="rent",
+                price=500,
+                rooms=2,
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=RecordingOps(),
+    )
+
+    response, attempts = await client.complete_json(_listing_request())
+
+    assert response.model == "preview"
+    assert transport.models == ["primary", "preview"]
+    assert attempts[0].status == "incomplete"
+    assert attempts[0].decision_reason == "plausible_listing_incomplete"
+    assert attempts[1].status == "success"
+    assert attempts[1].decision_reason == "listing_quality_gate_passed"
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_uses_source_required_fields_for_preview_decision() -> None:
+    complete_primary = _listing_response(
+        0.51,
+        model="primary",
+        is_rental_announcement=True,
+        rental_confidence=0.9,
+        price=450,
+        rooms=2,
+    )
+    transport = ScriptedTransport(
+        [
+            complete_primary,
+            _listing_response(
+                0.9,
+                model="preview",
+                is_rental_announcement=True,
+                price=450,
+                rooms=2,
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=RecordingOps(),
+    )
+    request = replace(_listing_request(), required_listing_fields=("price", "rooms"))
+
+    response, attempts = await client.complete_json(request)
+
+    assert response.model == "primary"
+    assert transport.models == ["primary"]
+    assert attempts[0].decision_reason == "source_required_fields_complete_no_fallback"
+
+    missing_transport = ScriptedTransport(
+        [
+            complete_primary,
+            _listing_response(
+                0.9,
+                model="preview",
+                is_rental_announcement=True,
+                price=450,
+                rooms=2,
+                district="Yunusobod",
+            ),
+        ]
+    )
+    missing_client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=missing_transport,
+        ops_notifier=RecordingOps(),
+    )
+
+    selected, missing_attempts = await missing_client.complete_json(
+        replace(_listing_request(), required_listing_fields=("price", "district"))
+    )
+
+    assert selected.model == "preview"
+    assert missing_transport.models == ["primary", "preview"]
+    assert missing_attempts[0].decision_reason == "source_required_fields_missing:district"
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_checks_required_fields_after_validator_normalization() -> None:
+    transport = ScriptedTransport(
+        [
+            _listing_response(
+                0.91,
+                model="primary",
+                is_rental_announcement=True,
+                rental_confidence=0.9,
+                price=450,
+                phone_numbers=["not-a-phone"],
+            ),
+            _listing_response(
+                0.92,
+                model="preview",
+                is_rental_announcement=True,
+                rental_confidence=0.92,
+                price=450,
+                phone_numbers=["+998 90 123 45 67"],
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=RecordingOps(),
+    )
+
+    response, attempts = await client.complete_json(
+        replace(_listing_request(), required_listing_fields=("phone_numbers",))
+    )
+
+    assert response.model == "preview"
+    assert transport.models == ["primary", "preview"]
+    assert attempts[0].decision_reason == "source_required_fields_missing:phone_numbers"
+    assert attempts[1].decision_reason == "listing_quality_gate_passed"
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_ranks_required_completeness_before_other_signals() -> None:
+    ops = RecordingOps()
+    transport = ScriptedTransport(
+        [
+            _listing_response(
+                0.61,
+                model="primary",
+                is_rental_announcement=True,
+                rental_confidence=0.9,
+                price=450,
+                rooms=2,
+            ),
+            _listing_response(
+                0.60,
+                model="preview",
+                listing_type="rent",
+                rental_confidence=0.9,
+                district="Yunusobod",
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=ops,
+    )
+
+    response, attempts = await client.complete_json(
+        replace(_listing_request(), required_listing_fields=("district",))
+    )
+
+    assert response.model == "preview"
+    assert attempts[1].selected is True
+    assert attempts[1].selection_reason == "best_valid_low_quality_response_returned"
+    assert attempts[1].fallback_trigger_reason == "source_required_fields_missing:district"
+    assert any(
+        "llm_selection" in message
+        and "selected=true" in message
+        and "selection_reason=best_valid_low_quality_response_returned" in message
+        for message in ops.messages
+    )
+
+
+@pytest.mark.asyncio
+async def test_listing_policy_rejects_contradictory_rental_classification_without_preview() -> None:
+    transport = ScriptedTransport(
+        [
+            _listing_response(
+                0.93,
+                model="primary",
+                is_rental_announcement=True,
+                rental_confidence=0.95,
+                listing_type="sale",
+                price=85_000,
+                rooms=3,
+            ),
+            _listing_response(
+                0.94,
+                model="preview",
+                is_rental_announcement=True,
+                listing_type="rent",
+                price=600,
+                rooms=3,
+            ),
+        ]
+    )
+    client = ModelFallbackLLMClient(
+        models=("primary", "preview"),
+        transport=transport,
+        ops_notifier=RecordingOps(),
+    )
+
+    response, attempts = await client.complete_json(_listing_request())
+
+    assert response.model == "primary"
+    assert transport.models == ["primary"]
+    assert attempts[0].status == "classification_conflict"
+    assert attempts[0].decision_reason == "contradictory_rental_classification_no_fallback"
+    assert attempts[0].selected is True
 
 
 @pytest.mark.asyncio

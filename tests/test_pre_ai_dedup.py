@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from estateflow.application.core.config import Settings
 from estateflow.services.ops_notifications import DisabledOpsNotificationService
 from estateflow.services.pre_ai_dedup import (
     InMemoryPreAiDedupAuditSink,
@@ -17,6 +18,7 @@ from estateflow.services.pre_ai_dedup import (
     build_raw_event_dedup_signals,
     extract_phone_numbers,
     normalize_listing_text,
+    pre_ai_dedup_config_from_settings,
     text_sha256,
 )
 from estateflow.services.telegram_listener import (
@@ -51,6 +53,20 @@ class FixedPHashProvider(MediaPHashProvider):
 
     async def phash(self, media: TelegramMediaReference) -> str | None:
         return self._mapping.get(media.media_id)
+
+
+def test_pre_ai_config_uses_its_dedicated_phash_threshold() -> None:
+    settings = Settings(
+        environment="test",
+        pre_ai_near_text_threshold=0.91,
+        pre_ai_phash_hamming_threshold=3,
+        media_phash_hamming_threshold=11,
+    )
+
+    config = pre_ai_dedup_config_from_settings(settings)
+
+    assert config.near_text_threshold == 0.91
+    assert config.phash_hamming_threshold == 3
 
 
 def _event(

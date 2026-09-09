@@ -4,7 +4,7 @@ import json
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Any, Protocol
 
 from redis.asyncio import Redis
 from sqlalchemy import select
@@ -27,6 +27,9 @@ class ListenerTopologyGroup:
     source_ids: tuple[str, ...]
     source_identifiers: tuple[str, ...]
     source_names: tuple[str, ...]
+    parser_keys: tuple[str, ...] = ()
+    parser_modes: tuple[str, ...] = ()
+    session_name: str | None = None
     runnable: bool = True
     error: str | None = None
 
@@ -38,6 +41,9 @@ class ListenerTopologyGroup:
             "source_ids": list(self.source_ids),
             "source_identifiers": list(self.source_identifiers),
             "source_names": list(self.source_names),
+            "parser_keys": list(self.parser_keys),
+            "parser_modes": list(self.parser_modes),
+            "session_name": self.session_name,
             "runnable": self.runnable,
             "error": self.error,
         }
@@ -45,6 +51,7 @@ class ListenerTopologyGroup:
     @classmethod
     def from_payload(cls, payload: dict[str, object]) -> ListenerTopologyGroup:
         source_profile = payload.get("source_profile")
+        session_name = payload.get("session_name")
         error = payload.get("error")
         return cls(
             adapter_name=str(payload["adapter_name"]),
@@ -53,6 +60,9 @@ class ListenerTopologyGroup:
             source_ids=_payload_strings(payload.get("source_ids")),
             source_identifiers=_payload_strings(payload.get("source_identifiers")),
             source_names=_payload_strings(payload.get("source_names")),
+            parser_keys=_payload_strings(payload.get("parser_keys")),
+            parser_modes=_payload_strings(payload.get("parser_modes")),
+            session_name=str(session_name) if session_name else None,
             runnable=bool(payload.get("runnable", True)),
             error=str(error) if error else None,
         )
@@ -142,6 +152,10 @@ class ListenerSourceTopology:
     assignment_reason: str | None
     session_name_hint: str | None
     session_path_hint: str | None
+    parser_key: str | None = None
+    parser_version: str | None = None
+    parser_config: dict[str, Any] | None = None
+    parser_mode: str = "active"
 
 
 @dataclass(frozen=True)
@@ -324,6 +338,10 @@ def _source_topology(
             source.listener_account_key,
             assigned_account_key,
         ),
+        parser_key=source.effective_parser_key,
+        parser_version=source.effective_parser_version,
+        parser_config=dict(source.parser_config),
+        parser_mode=source.parser_mode,
     )
 
 

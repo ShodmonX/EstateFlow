@@ -312,6 +312,7 @@ def build_runtime(settings: Settings, *, role: Role = "api") -> EstateFlowRuntim
         redis_event_queue=event_queue,
         post_ai_processor=post_ai_dedup_processor,
         ops_notifier=ops_notifier,
+        technical_recorder=technical_recorder,
         audience_tag_service=audience_tag_service,
         notification_worker=notification_worker,
         release_controls=release_controls,

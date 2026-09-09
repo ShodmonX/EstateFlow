@@ -1,6 +1,6 @@
 x-production-env: &production-env
   ENVIRONMENT: production
-  DEBUG: "false"
+  ESTATEFLOW_DEBUG: "false"
   DB_HOST: ${DB_HOST:?DB_HOST is required}
   DB_PORT: ${DB_PORT:-5432}
   DB_NAME: ${DB_NAME:-estateflow}

@@ -27,13 +27,14 @@ class Settings(BaseSettings):
         env_file=".env",
         case_sensitive=False,
         extra="ignore",
+        populate_by_name=True,
     )
 
     environment: Environment = "development"
     deployment_role: DeploymentRole = "full"
     service_name: str = "estateflow-api"
     log_level: str = "INFO"
-    debug: bool = False
+    debug: bool = Field(default=False, validation_alias="ESTATEFLOW_DEBUG")
 
     api_host: str = "0.0.0.0"
     api_port: int = Field(default=8000, ge=1, le=65535)
@@ -238,7 +239,7 @@ class Settings(BaseSettings):
                     f"Production ingestion values are required: {', '.join(missing_values)}."
                 )
         if self.debug:
-            raise ValueError("DEBUG must be false in production.")
+            raise ValueError("ESTATEFLOW_DEBUG must be false in production.")
         if self.deployment_role in queue_roles and self.queue_backend != "rabbitmq":
             raise ValueError("QUEUE_BACKEND must be rabbitmq in production.")
         return self

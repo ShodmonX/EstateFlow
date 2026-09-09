@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -93,6 +94,30 @@ def test_alembic_upgrade_head_and_bridge_stamp_on_throwaway_postgres() -> None:
             capture_output=True,
             text=True,
         )
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "alembic",
+                "-c",
+                str(ALEMBIC_INI),
+                "downgrade",
+                "f8a3b2c4d5e6",
+            ],
+            check=True,
+            cwd=PROJECT_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            [sys.executable, "-m", "alembic", "-c", str(ALEMBIC_INI), "upgrade", "head"],
+            check=True,
+            cwd=PROJECT_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
         current_run = subprocess.run(
             [sys.executable, "-m", "alembic", "-c", str(ALEMBIC_INI), "current"],
             check=True,
@@ -114,6 +139,10 @@ def test_alembic_upgrade_head_and_bridge_stamp_on_throwaway_postgres() -> None:
                 ("notifications", "next_attempt_at"),
                 ("source_suggestions", "source_type"),
                 ("technical_metric_events", "metric_name"),
+                ("ingestion_sources", "parser_key"),
+                ("ingestion_sources", "parser_version"),
+                ("ingestion_sources", "parser_config"),
+                ("ingestion_sources", "parser_mode"),
             ):
                 columns = {column["name"] for column in inspector.get_columns(table_name)}
                 assert column_name in columns
@@ -171,6 +200,26 @@ def test_alembic_upgrade_head_and_bridge_stamp_on_throwaway_postgres() -> None:
                 assert inserted is False
 
             assert "head" in current_run.stdout or "head" in current_run.stderr
+
+            smoke_schema = f"estateflow_smoke_{uuid4().hex[:8]}"
+            smoke_run = subprocess.run(
+                [
+                    sys.executable,
+                    str(PROJECT_ROOT / "scripts" / "migration_smoke.py"),
+                    "--schema",
+                    smoke_schema,
+                ],
+                check=True,
+                cwd=PROJECT_ROOT,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            smoke_result = json.loads(smoke_run.stdout.strip().splitlines()[-1])
+            assert smoke_result["revision"] == "a1c4e7f9b2d6"
+            assert smoke_result["schema"] == smoke_schema
+            assert "alembic_version" in inspect(engine).get_table_names(schema=smoke_schema)
+            assert "announcements" in inspect(engine).get_table_names(schema=smoke_schema)
 
             legacy_schema = f"legacy_bridge_{uuid4().hex[:8]}"
             _apply_legacy_sql_schema(settings, schema=legacy_schema)

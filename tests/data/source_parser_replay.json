@@ -1,0 +1,246 @@
+{
+  "name": "estateflow.synthetic.source-parser.v1",
+  "description": "Synthetic Telegram parser replay cases; no real channels or personal data.",
+  "recipes": [
+    {
+      "parser_key": "benchmark.single_cleanup",
+      "parser_version": "1",
+      "family": "single_listing",
+      "cleanup": {
+        "strip_patterns": [
+          "(?im)^\\s*Follow @synthetic_parser_benchmark\\s*$"
+        ]
+      }
+    },
+    {
+      "parser_key": "benchmark.digest",
+      "parser_version": "1",
+      "family": "digest_blocks",
+      "cleanup": {
+        "strip_patterns": [
+          "(?im)^\\s*Synthetic footer\\s*$"
+        ]
+      },
+      "filters": {
+        "include_any": [
+          "(?i)\\b(?:kvartira|hovli)\\b"
+        ],
+        "unmatched_policy": "quarantine"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "single-cleanup",
+      "event": {
+        "source_id": "synthetic:single",
+        "source_message_id": "101",
+        "parser_key": "benchmark.single_cleanup",
+        "parser_version": "1",
+        "parser_mode": "active",
+        "parser_diagnostics": {
+          "fixture": "event-level-binding"
+        },
+        "parser_provenance": {
+          "dataset": "synthetic-v1"
+        },
+        "text": "  Yunusobod   2 xona kvartira 500 USD  \n\n\nFollow @synthetic_parser_benchmark"
+      },
+      "expected": {
+        "decision": "emit",
+        "candidate_count": 1,
+        "candidate_texts": [
+          "Yunusobod 2 xona kvartira 500 USD"
+        ]
+      }
+    },
+    {
+      "case_id": "digest-two-blocks",
+      "event": {
+        "source_id": "synthetic:digest",
+        "source_message_id": "201",
+        "text": "1. Chilonzor 2 xona kvartira 450 USD\n2. Yunusobod 3 xona kvartira 700 USD\nSynthetic footer"
+      },
+      "payload": {
+        "parser_key": "benchmark.digest",
+        "parser_version": "1"
+      },
+      "expected": {
+        "decision": "emit",
+        "candidate_count": 2,
+        "candidate_texts": [
+          "1. Chilonzor 2 xona kvartira 450 USD",
+          "2. Yunusobod 3 xona kvartira 700 USD"
+        ]
+      }
+    },
+    {
+      "case_id": "digest-three-blocks",
+      "event": {
+        "source_id": "synthetic:digest",
+        "source_message_id": "202",
+        "text": "1. Mirobod 1 xona kvartira 350 USD\n2. Uchtepa 2 xona kvartira 480 USD\n3. Sergeli hovli ijaraga beriladi 900 USD"
+      },
+      "payload": {
+        "parser_key": "benchmark.digest",
+        "parser_version": "1"
+      },
+      "expected": {
+        "decision": "emit",
+        "candidate_count": 3,
+        "candidate_texts": [
+          "1. Mirobod 1 xona kvartira 350 USD",
+          "2. Uchtepa 2 xona kvartira 480 USD",
+          "3. Sergeli hovli ijaraga beriladi 900 USD"
+        ]
+      }
+    },
+    {
+      "case_id": "mixed-feed-emit",
+      "event": {
+        "source_id": "synthetic:mixed",
+        "source_message_id": "301",
+        "text": "Yakkasaroyda kvartira ijaraga beriladi, 2 xona, 600 USD"
+      },
+      "payload": {
+        "parser_key": "generic.mixed_feed"
+      },
+      "expected": {
+        "decision": "emit",
+        "candidate_count": 1,
+        "candidate_texts": [
+          "Yakkasaroyda kvartira ijaraga beriladi, 2 xona, 600 USD"
+        ]
+      }
+    },
+    {
+      "case_id": "mixed-feed-drop",
+      "event": {
+        "source_id": "synthetic:mixed",
+        "source_message_id": "302",
+        "text": "Reklama: dasturlash kursiga ro'yxatdan o'ting"
+      },
+      "payload": {
+        "parser_key": "generic.mixed_feed"
+      },
+      "expected": {
+        "decision": "drop",
+        "candidate_count": 0
+      }
+    },
+    {
+      "case_id": "mixed-feed-quarantine",
+      "event": {
+        "source_id": "synthetic:mixed",
+        "source_message_id": "303",
+        "text": "Bugungi uchrashuv soat o'n sakkizda boshlanadi"
+      },
+      "payload": {
+        "parser_key": "generic.mixed_feed"
+      },
+      "expected": {
+        "decision": "quarantine",
+        "candidate_count": 0
+      }
+    },
+    {
+      "case_id": "album-caption",
+      "event": {
+        "source_id": "synthetic:album",
+        "source_message_id": "401",
+        "media_group_id": "synthetic-album-1",
+        "text": "Olmazorda 3 xona kvartira 750 USD",
+        "media": [
+          {
+            "media_id": "synthetic-photo-1",
+            "media_type": "photo",
+            "mime_type": "image/jpeg"
+          },
+          {
+            "media_id": "synthetic-photo-2",
+            "media_type": "photo",
+            "mime_type": "image/jpeg"
+          }
+        ]
+      },
+      "payload": {
+        "parser_key": "generic.album_caption"
+      },
+      "expected": {
+        "decision": "emit",
+        "candidate_count": 1,
+        "candidate_texts": [
+          "Olmazorda 3 xona kvartira 750 USD"
+        ]
+      }
+    },
+    {
+      "case_id": "album-media-only",
+      "event": {
+        "source_id": "synthetic:album",
+        "source_message_id": "402",
+        "media_group_id": "synthetic-album-2",
+        "text": null,
+        "media": [
+          {
+            "media_id": "synthetic-photo-3",
+            "media_type": "photo",
+            "mime_type": "image/jpeg"
+          }
+        ]
+      },
+      "payload": {
+        "parser_key": "generic.album_caption"
+      },
+      "expected": {
+        "decision": "emit",
+        "candidate_count": 1,
+        "candidate_texts": [
+          ""
+        ]
+      }
+    },
+    {
+      "case_id": "invalid-inline-config",
+      "event": {
+        "source_id": "synthetic:invalid",
+        "source_message_id": "501",
+        "text": "Bektemir 2 xona kvartira 400 USD"
+      },
+      "payload": {
+        "parser_key": "generic.single_listing",
+        "parser_config": {
+          "cleanup": {
+            "strip_patterns": [
+              "("
+            ]
+          }
+        }
+      },
+      "expected": {
+        "decision": "quarantine",
+        "candidate_count": 0
+      }
+    },
+    {
+      "case_id": "digest-overflow-config",
+      "event": {
+        "source_id": "synthetic:overflow",
+        "source_message_id": "502",
+        "text": "1. Mirobod 1 xona kvartira 300 USD\n2. Uchtepa 2 xona kvartira 500 USD\n3. Sergeli 3 xona kvartira 700 USD"
+      },
+      "payload": {
+        "parser_key": "generic.digest_blocks",
+        "parser_config": {
+          "split": {
+            "max_candidates": 2
+          }
+        }
+      },
+      "expected": {
+        "decision": "quarantine",
+        "candidate_count": 0
+      }
+    }
+  ]
+}

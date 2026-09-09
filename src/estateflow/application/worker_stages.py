@@ -118,9 +118,19 @@ async def _run_queue_stage(
     bot = None
 
     if stage == "pre_ai":
-        pre_ai_processor = _build_pre_ai_processor(settings, event_queue, ops_notifier)
+        pre_ai_processor = _build_pre_ai_processor(
+            settings,
+            event_queue,
+            ops_notifier,
+            technical_recorder,
+        )
     elif stage == "ai":
-        ai_worker = _build_ai_worker(settings, event_queue, ops_notifier)
+        ai_worker = _build_ai_worker(
+            settings,
+            event_queue,
+            ops_notifier,
+            technical_recorder,
+        )
     elif stage == "dedup":
         post_ai_processor = _build_post_ai_processor(
             settings,
@@ -156,13 +166,18 @@ async def _run_queue_stage(
             await bot.close()
 
 
-def _build_pre_ai_processor(settings: Settings, event_queue: Any, ops_notifier: Any) -> Any:
+def _build_pre_ai_processor(
+    settings: Settings,
+    event_queue: Any,
+    ops_notifier: Any,
+    technical_recorder: TechnicalMetricRecorder | None,
+) -> Any:
     from estateflow.services.ingestion_pipeline import PreAiIngestionProcessor
     from estateflow.services.pre_ai_dedup import (
         InMemoryPreAiDedupSignalStore,
-        PreAiDedupConfig,
         PreAiDedupFilter,
         StableMediaReferencePHashProvider,
+        pre_ai_dedup_config_from_settings,
     )
 
     signal_store = InMemoryPreAiDedupSignalStore()
@@ -172,39 +187,36 @@ def _build_pre_ai_processor(settings: Settings, event_queue: Any, ops_notifier: 
             signal_store=signal_store,
             phash_provider=phash_provider,
             ops_notifier=ops_notifier,
-            config=PreAiDedupConfig(
-                near_text_threshold=settings.pre_ai_near_text_threshold,
-                phash_hamming_threshold=settings.media_phash_hamming_threshold,
-            ),
+            config=pre_ai_dedup_config_from_settings(settings),
         ),
         ai_queue=event_queue,
         signal_store=signal_store,
         phash_provider=phash_provider,
+        technical_recorder=technical_recorder,
     )
 
 
-def _build_ai_worker(settings: Settings, event_queue: Any, ops_notifier: Any) -> Any:
+def _build_ai_worker(
+    settings: Settings,
+    event_queue: Any,
+    ops_notifier: Any,
+    technical_recorder: TechnicalMetricRecorder | None,
+) -> Any:
     from estateflow.services.ai_client import create_openrouter_llm_client
     from estateflow.services.ai_worker import AiExtractionWorker, InMemoryAiProcessingRepository
     from estateflow.services.media_storage import (
-        InMemoryObjectStorage,
         MediaProcessor,
         MediaStorageService,
         ObjectStorage,
         SmartMediaResolver,
-        StorageUploadError,
-        create_r2_object_storage,
+        configured_object_storage_from_settings,
         media_processing_config_from_settings,
     )
 
     if settings.openrouter_api_key is None:
         raise RuntimeError("AI worker requires OPENROUTER_API_KEY")
     llm_client = create_openrouter_llm_client(settings=settings, ops_notifier=ops_notifier)
-    storage: ObjectStorage
-    try:
-        storage = create_r2_object_storage(settings)
-    except (StorageUploadError, ModuleNotFoundError, ImportError):
-        storage = InMemoryObjectStorage()
+    storage: ObjectStorage = configured_object_storage_from_settings(settings)
     return AiExtractionWorker(
         llm_client=llm_client,
         media_service=MediaStorageService(
@@ -218,6 +230,7 @@ def _build_ai_worker(settings: Settings, event_queue: Any, ops_notifier: Any) ->
         prompt_version=settings.ai_prompt_version,
         min_confidence=settings.ai_min_confidence,
         rental_min_confidence=settings.rental_min_confidence,
+        technical_recorder=technical_recorder,
         ai_vision_enabled=settings.feature_ai_vision_enabled,
     )
 

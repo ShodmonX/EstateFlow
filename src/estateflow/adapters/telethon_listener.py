@@ -39,6 +39,7 @@ class TelethonClientAdapter(TelegramClientAdapter):
         self._disconnected = False
         self._source_identifiers_by_chat_id: dict[str, str] = {}
         self._source_usernames_by_chat_id: dict[str, str] = {}
+        self._source_identifiers_by_username: dict[str, str] = {}
 
     async def connect(self) -> None:
         self._disconnected = False
@@ -59,6 +60,8 @@ class TelethonClientAdapter(TelegramClientAdapter):
             if not source.enabled:
                 continue
             identifier = source.identifier.strip()
+            if identifier.startswith("@"):
+                self._source_identifiers_by_username[identifier.lstrip("@").casefold()] = identifier
             if identifier.startswith("-") and identifier[1:].isdigit():
                 chats.append(int(identifier))
             elif identifier.isdigit():
@@ -126,7 +129,10 @@ class TelethonClientAdapter(TelegramClientAdapter):
 
     async def _handle_deleted_message(self, event: Any) -> None:
         source_channel_id = str(getattr(event, "chat_id", "") or getattr(event, "peer_id", ""))
-        source_identifier, source_username = self._source_metadata(source_channel_id)
+        source_identifier, source_username = self._source_metadata(
+            source_channel_id,
+            source_username=_event_source_username(event),
+        )
         occurred_at = datetime.now(UTC)
         for message_id in getattr(event, "deleted_ids", []):
             await self._updates.put(
@@ -143,7 +149,10 @@ class TelethonClientAdapter(TelegramClientAdapter):
     def _message_event_to_update(self, event: Any, update_type: str) -> TelegramUpdate:
         message = event.message
         source_channel_id = str(getattr(event, "chat_id", "") or getattr(message, "chat_id", ""))
-        source_identifier, source_username = self._source_metadata(source_channel_id)
+        source_identifier, source_username = self._source_metadata(
+            source_channel_id,
+            source_username=_event_source_username(event),
+        )
         return TelegramUpdate(
             update_type="edited" if update_type == "edited" else "created",
             source_channel_id=source_channel_id,
@@ -157,12 +166,38 @@ class TelethonClientAdapter(TelegramClientAdapter):
             source_username=source_username,
         )
 
-    def _source_metadata(self, source_channel_id: str) -> tuple[str, str | None]:
+    def _source_metadata(
+        self,
+        source_channel_id: str,
+        *,
+        source_username: str | None = None,
+    ) -> tuple[str, str | None]:
         identifier = self._source_identifiers_by_chat_id.get(source_channel_id, source_channel_id)
         username = self._source_usernames_by_chat_id.get(source_channel_id)
+        normalized_username = (source_username or "").strip().lstrip("@").casefold()
+        if identifier == source_channel_id and normalized_username:
+            configured_identifier = self._source_identifiers_by_username.get(normalized_username)
+            if configured_identifier is not None:
+                identifier = configured_identifier
+                username = source_username.strip().lstrip("@") if source_username else None
+                self._source_identifiers_by_chat_id[source_channel_id] = identifier
+                if username is not None:
+                    self._source_usernames_by_chat_id[source_channel_id] = username
         if username is None and identifier.startswith("@"):
             username = identifier.lstrip("@")
         return identifier, username
+
+
+def _event_source_username(event: Any) -> str | None:
+    message = getattr(event, "message", None)
+    for entity in (
+        getattr(event, "chat", None),
+        getattr(message, "chat", None),
+    ):
+        username = getattr(entity, "username", None)
+        if isinstance(username, str) and username.strip():
+            return username.strip().lstrip("@")
+    return None
 
 
 def _message_datetime(message: Any) -> datetime:

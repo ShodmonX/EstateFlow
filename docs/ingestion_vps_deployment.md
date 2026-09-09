@@ -26,10 +26,16 @@ worker-dedup -> PostgreSQL announcements
 
 The standalone stack contains Redis, RabbitMQ, the one-shot `migrate` and
 `bootstrap` jobs, plus `listener`, `worker-pre-ai`, `worker-ai`, and `worker-dedup`.
-PostgreSQL is the pre-existing DigitalOcean service, reached through `DB_HOST`/
+PostgreSQL is supplied separately, reached through `DB_HOST`/
 `DB_PORT`; no PostgreSQL container or host port is created. No HTTP port is
 published. Infrastructure is reachable only on the Docker `estateflow-backbone`
 network.
+
+The sample targets PostgreSQL on the same VPS host, not a provisioned managed database.
+See [deployment](deployment.md) for host networking and external-database limitations.
+For host-side `psql` / `pg_dump`, export matching connection variables (use the host-reachable
+address, usually `localhost`) and configure a private PostgreSQL password file. Compose
+loading an env file does not export it into your shell.
 
 ## 1. Prepare the VPS
 
@@ -50,7 +56,7 @@ while keeping their original values in `RABBITMQ_USER` and `RABBITMQ_PASSWORD`.
 `INGESTION_SOURCES_JSON` is the operator-controlled source list. Example:
 
 ```dotenv
-INGESTION_SOURCES_JSON=[{"source_type":"telegram_channel","identifier":"@example_channel","name":"Example channel","adapter_name":"telegram_telethon","source_profile":"default","session_name":"acc_9889"}]
+INGESTION_SOURCES_JSON=[{"source_type":"telegram_channel","identifier":"@example_channel","name":"Example channel","adapter_name":"telegram_telethon","source_profile":"default","session_name":"acc_example"}]
 ```
 
 Bootstrap inserts or re-enables these rows idempotently. It fails if the
@@ -62,8 +68,8 @@ Authorize sessions interactively on a trusted machine, not in an unattended
 production container. Copy both independent session files:
 
 ```bash
-scp data/sessions/acc_9889.session deploy@vps:/srv/estateflow/data/sessions/
-scp data/sessions/media-acc_9889.session deploy@vps:/srv/estateflow/data/sessions/
+scp data/sessions/acc_example.session deploy@vps:/srv/estateflow/data/sessions/
+scp data/sessions/media-example.session deploy@vps:/srv/estateflow/data/sessions/
 ssh deploy@vps 'chmod 600 /srv/estateflow/data/sessions/*.session'
 ```
 
@@ -95,7 +101,7 @@ after migration and their infrastructure dependencies are healthy.
 docker compose --env-file .env.ingestion -f docker-compose.ingestion.yml logs --tail=200 listener
 docker compose --env-file .env.ingestion -f docker-compose.ingestion.yml logs --tail=200 worker-ai worker-dedup
 docker compose --env-file .env.ingestion -f docker-compose.ingestion.yml exec rabbitmq rabbitmqctl list_queues name messages_ready messages_unacknowledged
-psql "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -c "select count(*) from announcements;"
+psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "select count(*) from announcements;"
 ```
 
 Listener logs must contain `telegram_listener.subscribed`. New input should move
@@ -108,7 +114,7 @@ Create a PostgreSQL backup before every update and at least daily:
 
 ```bash
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
-pg_dump "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -Fc > "backups/estateflow-${stamp}.dump"
+pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -Fc > "backups/estateflow-${stamp}.dump"
 sha256sum "backups/estateflow-${stamp}.dump" > "backups/estateflow-${stamp}.dump.sha256"
 ```
 
@@ -123,21 +129,21 @@ docker compose --env-file .env.ingestion -f docker-compose.ingestion.yml up -d
 docker compose --env-file .env.ingestion -f docker-compose.ingestion.yml ps -a
 ```
 
-RabbitMQ messages and database records survive container recreation through
-named volumes. Never run `docker compose down -v`; `-v` deletes the dataset.
+RabbitMQ messages survive container recreation through
+named volumes; PostgreSQL has its own external persistence. Never run `docker compose down -v`; `-v` deletes the dataset.
 Deploy reviewed Git commits or immutable image tags so code rollback does not
 require rolling the database backward.
 
 ## Local/default Compose profiles
 
 The original `docker-compose.yml` now starts infrastructure and ingestion by
-default. Unfinished applications require an explicit profile:
+default. User-facing applications require an explicit profile:
 
 ```bash
 # Ingestion only
 docker compose up -d --build
 
-# Explicitly include future Mini App/admin/bot services
+# Explicitly include Mini App/admin/bot services
 docker compose --profile applications up -d --build
 ```
 

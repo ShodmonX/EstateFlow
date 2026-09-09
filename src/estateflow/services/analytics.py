@@ -37,6 +37,7 @@ TechnicalMetricName = Literal[
     "notification_retry",
     "notification_error",
     "listener_health",
+    "source_parser_decision",
 ]
 
 TECHNICAL_METRIC_NAMES: frozenset[TechnicalMetricName] = frozenset(
@@ -48,6 +49,7 @@ TECHNICAL_METRIC_NAMES: frozenset[TechnicalMetricName] = frozenset(
         "notification_retry",
         "notification_error",
         "listener_health",
+        "source_parser_decision",
     }
 )
 
@@ -92,6 +94,9 @@ class TechnicalMetricSnapshot:
     notification_retry_count: int
     notification_error_count: int
     listener_health_counts: dict[str, int]
+    source_parser_decision_count: int
+    source_parser_decision_counts: dict[str, int]
+    source_parser_source_counts: dict[str, dict[str, int]]
 
 
 @dataclass(frozen=True)
@@ -389,6 +394,15 @@ def technical_snapshot(events: list[TechnicalMetricEvent]) -> TechnicalMetricSna
     listener_health_counts: dict[str, int] = {}
     for status in listener_latest.values():
         listener_health_counts[status] = listener_health_counts.get(status, 0) + 1
+    parser_events = [event for event in events if event.metric_name == "source_parser_decision"]
+    parser_decision_counts: dict[str, int] = {}
+    parser_source_counts: dict[str, dict[str, int]] = {}
+    for event in parser_events:
+        decision = event.metadata.get("decision", "unknown")
+        parser_decision_counts[decision] = parser_decision_counts.get(decision, 0) + 1
+        source_id = event.metadata.get("source_id") or event.subject_id or "unknown"
+        source_counts = parser_source_counts.setdefault(source_id, {})
+        source_counts[decision] = source_counts.get(decision, 0) + 1
     dedup_total = len(dedup_events)
     return TechnicalMetricSnapshot(
         queue_delay_avg_ms=(None if not queue_delays else sum(queue_delays) / len(queue_delays)),
@@ -407,6 +421,9 @@ def technical_snapshot(events: list[TechnicalMetricEvent]) -> TechnicalMetricSna
             1 for event in events if event.metric_name == "notification_error"
         ),
         listener_health_counts=listener_health_counts,
+        source_parser_decision_count=len(parser_events),
+        source_parser_decision_counts=parser_decision_counts,
+        source_parser_source_counts=parser_source_counts,
     )
 
 

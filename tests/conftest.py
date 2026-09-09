@@ -24,6 +24,9 @@ FLOW_MARKERS_BY_FILE: dict[str, tuple[str, ...]] = {
     "test_telegram_listener.py": ("unit", "ingestion"),
     "test_media_buffer_queue.py": ("integration", "ingestion"),
     "test_pre_ai_dedup.py": ("unit", "pre_ai_dedup"),
+    "test_source_config.py": ("unit", "ingestion"),
+    "test_source_parser_benchmark_cli.py": ("unit", "ingestion"),
+    "test_source_parsing.py": ("unit", "integration", "ingestion", "pre_ai_dedup"),
     "test_sprint1_integration.py": ("integration", "ingestion", "pre_ai_dedup"),
     "test_sprint2_ai_client.py": ("unit", "ai_extraction"),
     "test_sprint2_extraction.py": ("unit", "ai_extraction"),
@@ -119,6 +122,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 @pytest.fixture(autouse=True)
 def deterministic_test_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("ENVIRONMENT", "test")
+    monkeypatch.setenv("ESTATEFLOW_DEBUG", "false")
     monkeypatch.setenv("ADMIN_API_TOKEN", "test-admin-token")
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
     monkeypatch.delenv("OPS_BOT_TOKEN", raising=False)

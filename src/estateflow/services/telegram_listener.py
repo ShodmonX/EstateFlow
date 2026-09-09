@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import AsyncIterator
+from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any, Literal, Protocol, cast
@@ -13,8 +14,13 @@ from estateflow.application.core.correlation import new_correlation_id
 from estateflow.services.listener_pool import ListenerAssignmentService
 from estateflow.services.ops_notifications import OpsNotificationService
 from estateflow.services.queue import RAW_ANNOUNCEMENT_QUEUE, PublishingQueue, QueueMessage
-from estateflow.services.source_config import SourceConfig
-from estateflow.services.telegram_profiles import build_telegram_extraction_strategy
+from estateflow.services.source_config import (
+    DEFAULT_PARSER_KEY,
+    DEFAULT_PARSER_VERSION,
+    ParserMode,
+    SourceConfig,
+    normalize_parser_mode,
+)
 
 RAW_EVENT_SCHEMA_VERSION = "telegram.raw.v1"
 logger = logging.getLogger(__name__)
@@ -72,6 +78,12 @@ class RawTelegramEvent:
     media_group_id: str | None = None
     source_message_ids: list[str] = field(default_factory=list)
     source_url: str | None = None
+    parser_key: str | None = None
+    parser_version: str | None = None
+    parser_config: dict[str, Any] = field(default_factory=dict)
+    parser_mode: ParserMode = "active"
+    parser_diagnostics: dict[str, Any] = field(default_factory=dict)
+    parser_provenance: dict[str, Any] = field(default_factory=dict)
 
     def to_queue_payload(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -102,6 +114,12 @@ class RawTelegramEvent:
             media_group_id=payload.get("media_group_id"),
             source_message_ids=[str(item) for item in payload.get("source_message_ids", [])],
             source_url=payload.get("source_url"),
+            parser_key=_optional_payload_text(payload.get("parser_key")),
+            parser_version=_optional_payload_text(payload.get("parser_version")),
+            parser_config=_payload_object(payload.get("parser_config")),
+            parser_mode=normalize_parser_mode(str(payload.get("parser_mode") or "active")),
+            parser_diagnostics=_payload_object(payload.get("parser_diagnostics")),
+            parser_provenance=_payload_object(payload.get("parser_provenance")),
         )
 
 
@@ -172,7 +190,6 @@ class TelegramAccountListener:
         account_key: str,
         client: TelegramClientAdapter,
         sources: list[SourceConfig],
-        extraction_strategy: object | None = None,
         event_publisher: RawTelegramEventPublisher | None = None,
         queue: PublishingQueue | None = None,
         idempotency_store: IdempotencyStore,
@@ -182,11 +199,11 @@ class TelegramAccountListener:
         self._account_key = account_key
         self._client = client
         self._sources = [source for source in sources if source.enabled]
-        self._source_by_identifier = {source.identifier: source for source in self._sources}
-        profile_name = self._resolve_profile_name(self._sources)
-        self._extraction_strategy = extraction_strategy or build_telegram_extraction_strategy(
-            profile_name
-        )
+        self._source_by_identifier = {
+            _source_lookup_key(identifier): source
+            for source in self._sources
+            for identifier in (source.identifier, source.source_id)
+        }
         self._event_publisher = event_publisher or QueueRawTelegramEventPublisher(
             queue=_require_queue(queue),
             idempotency_store=idempotency_store,
@@ -195,7 +212,10 @@ class TelegramAccountListener:
         self._assignment_service = assignment_service
         self._ops_notifier = ops_notifier
         self._stop_requested = False
-        self._source_profile = profile_name or "default"
+        self._parser_keys = tuple(
+            sorted({source.effective_parser_key for source in self._sources})
+        )
+        self._parser_modes = tuple(sorted({source.parser_mode for source in self._sources}))
 
     async def run(self) -> None:
         try:
@@ -205,7 +225,8 @@ class TelegramAccountListener:
                     "event": "telegram_listener.starting",
                     "account_key": self._account_key,
                     "source_count": len(self._sources),
-                    "source_profile": self._source_profile,
+                    "parser_keys": self._parser_keys,
+                    "parser_modes": self._parser_modes,
                 },
             )
             await self._client.connect()
@@ -220,7 +241,8 @@ class TelegramAccountListener:
                     "event": "telegram_listener.subscribed",
                     "account_key": self._account_key,
                     "source_count": len(self._sources),
-                    "source_profile": self._source_profile,
+                    "parser_keys": self._parser_keys,
+                    "parser_modes": self._parser_modes,
                 },
             )
             async for update in self._client.iter_updates():
@@ -269,7 +291,8 @@ class TelegramAccountListener:
                     "event": "telegram_listener.stopped",
                     "account_key": self._account_key,
                     "source_count": len(self._sources),
-                    "source_profile": self._source_profile,
+                    "parser_keys": self._parser_keys,
+                    "parser_modes": self._parser_modes,
                 },
             )
 
@@ -281,13 +304,15 @@ class TelegramAccountListener:
                 "event": "telegram_listener.stop_requested",
                 "account_key": self._account_key,
                 "source_count": len(self._sources),
-                "source_profile": self._source_profile,
+                "parser_keys": self._parser_keys,
+                "parser_modes": self._parser_modes,
             },
         )
         await self._flush_event_publisher()
         await self._client.disconnect()
 
     async def handle_update(self, update: TelegramUpdate) -> RawTelegramEvent | None:
+        source = self._resolve_source(update)
         logger.info(
             "Telegram update received",
             extra={
@@ -299,13 +324,14 @@ class TelegramAccountListener:
                 "update_type": update.update_type,
                 "media_count": len(update.media),
                 "media_group_id": update.media_group_id,
-                "source_profile": self._source_profile,
+                "source_id": source.source_id if source is not None else None,
+                "parser_key": (
+                    source.effective_parser_key if source is not None else DEFAULT_PARSER_KEY
+                ),
+                "parser_mode": source.parser_mode if source is not None else "active",
             },
         )
-        extractor = getattr(self._extraction_strategy, "extract", None)
-        if callable(extractor):
-            update = extractor(update)
-        raw_event = self._build_raw_event(update)
+        raw_event = self._build_raw_event(update, source=source)
         if await self._idempotency_store.seen(raw_event.idempotency_key):
             logger.info(
                 "Telegram update skipped as duplicate",
@@ -314,7 +340,8 @@ class TelegramAccountListener:
                     "account_key": self._account_key,
                     "idempotency_key": raw_event.idempotency_key,
                     "source_identifier": update.source_identifier,
-                    "source_profile": self._source_profile,
+                    "parser_key": raw_event.parser_key,
+                    "parser_mode": raw_event.parser_mode,
                 },
             )
             return None
@@ -331,13 +358,20 @@ class TelegramAccountListener:
                 "source_id": raw_event.source_id,
                 "source_message_id": raw_event.source_message_id,
                 "media_group_id": raw_event.media_group_id,
-                "source_profile": self._source_profile,
+                "parser_key": raw_event.parser_key,
+                "parser_version": raw_event.parser_version,
+                "parser_mode": raw_event.parser_mode,
             },
         )
         return raw_event
 
-    def _build_raw_event(self, update: TelegramUpdate) -> RawTelegramEvent:
-        source = self._source_by_identifier.get(update.source_identifier)
+    def _build_raw_event(
+        self,
+        update: TelegramUpdate,
+        *,
+        source: SourceConfig | None = None,
+    ) -> RawTelegramEvent:
+        source = source or self._resolve_source(update)
         source_id = source.source_id if source is not None else update.source_identifier
         idempotency_key = build_telegram_idempotency_key(
             event_type=update.update_type,
@@ -369,22 +403,39 @@ class TelegramAccountListener:
                 ),
                 update.source_message_id,
             ),
+            parser_key=(
+                source.effective_parser_key if source is not None else DEFAULT_PARSER_KEY
+            ),
+            parser_version=(
+                source.effective_parser_version
+                if source is not None
+                else DEFAULT_PARSER_VERSION
+            ),
+            parser_config=deepcopy(source.parser_config) if source is not None else {},
+            parser_mode=source.parser_mode if source is not None else "active",
+            parser_provenance={
+                "source_binding": "configured" if source is not None else "unresolved",
+                "binding_source_id": source.source_id if source is not None else source_id,
+                **(
+                    {"legacy_source_profile": source.source_profile}
+                    if source is not None and source.source_profile
+                    else {}
+                ),
+            },
         )
 
-    @staticmethod
-    def _resolve_profile_name(sources: list[SourceConfig]) -> str | None:
-        profiles = {
-            source.source_profile.strip()
-            for source in sources
-            if source.source_profile and source.source_profile.strip()
-        }
-        if not profiles:
-            return None
-        if len(profiles) > 1:
-            raise ValueError(
-                "TelegramAccountListener requires a single source_profile per listener."
-            )
-        return next(iter(profiles))
+    def _resolve_source(self, update: TelegramUpdate) -> SourceConfig | None:
+        username = (update.source_username or "").strip().lstrip("@")
+        identifiers = (
+            update.source_identifier,
+            update.source_channel_id,
+            f"@{username}" if username else "",
+        )
+        for identifier in identifiers:
+            source = self._source_by_identifier.get(_source_lookup_key(identifier))
+            if source is not None:
+                return source
+        return None
 
     async def _flush_event_publisher(self) -> None:
         flush_all = getattr(self._event_publisher, "flush_all", None)
@@ -459,6 +510,9 @@ class QueueRawTelegramEventPublisher:
                     "event_type": event.event_type,
                     "source_id": event.source_id,
                     "schema_version": event.schema_version,
+                    "parser_key": event.parser_key or "",
+                    "parser_version": event.parser_version or "",
+                    "parser_mode": event.parser_mode,
                 },
             )
         )
@@ -475,6 +529,23 @@ def _telegram_update_type(value: str) -> TelegramUpdateType:
     if value not in {"created", "edited", "deleted"}:
         raise ValueError(f"Unknown Telegram update type: {value}")
     return cast(TelegramUpdateType, value)
+
+
+def _source_lookup_key(value: str) -> str:
+    return value.strip().casefold()
+
+
+def _optional_payload_text(value: object) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip()
+    return normalized or None
+
+
+def _payload_object(value: object) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    return dict(value)
 
 
 def _forward_metadata_from_payload(value: object) -> TelegramForwardMetadata | None:

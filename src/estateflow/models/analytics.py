@@ -73,7 +73,8 @@ class TechnicalMetricEventRecord(CreatedAtMixin, Base):
         UniqueConstraint("idempotency_key", name="uq_technical_metric_events_idempotency_key"),
         CheckConstraint(
             "metric_name in ('queue_delay_ms', 'ai_fallback_attempt', 'ai_validation_failure', 'dedup_decision', "
-            "'notification_retry', 'notification_error', 'listener_health')",
+            "'notification_retry', 'notification_error', 'listener_health', "
+            "'source_parser_decision')",
             name="ck_technical_metric_events_metric_name",
         ),
         Index("ix_technical_metric_events_name_time", "metric_name", "occurred_at"),

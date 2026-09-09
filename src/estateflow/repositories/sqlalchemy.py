@@ -56,7 +56,12 @@ from estateflow.services.referrals import (
     ReferralActivationResult,
     ReferralEvent,
 )
-from estateflow.services.source_config import SourceConfig
+from estateflow.services.source_config import (
+    ParserMode,
+    SourceConfig,
+    merge_source_parser_binding,
+    validate_source_config_parser_binding,
+)
 from estateflow.services.saved_filters import UserFilter
 from estateflow.services.search import SearchCriteria, SearchMetadata, SearchResult
 from estateflow.services.post_ai_dedup import StructuredAnnouncement
@@ -289,6 +294,10 @@ class SQLAlchemySourceConfigRepository:
         name: str,
         adapter_name: str | None = None,
         source_profile: str | None = None,
+        parser_key: str | None = None,
+        parser_version: str | None = None,
+        parser_config: dict[str, Any] | None = None,
+        parser_mode: ParserMode | None = None,
         session_name: str | None = None,
     ) -> tuple[SourceConfig, bool]:
         source_id = f"{source_type}:{identifier}"
@@ -313,26 +322,63 @@ class SQLAlchemySourceConfigRepository:
                 select(IngestionSourceRecord).where(IngestionSourceRecord.source_id == source_id)
             )
             created = row is None
+            existing_source = _source_config_from_record(row) if row is not None else None
+            resolved_source_profile = (
+                source_profile
+                if source_profile is not None
+                else existing_source.source_profile if existing_source is not None else None
+            )
+            binding = merge_source_parser_binding(
+                existing_source,
+                source_profile=resolved_source_profile,
+                parser_key=parser_key,
+                parser_version=parser_version,
+                parser_config=parser_config,
+                parser_mode=parser_mode,
+            )
+            source = SourceConfig(
+                source_id=source_id,
+                name=name,
+                source_type=source_type,
+                identifier=identifier,
+                enabled=True,
+                adapter_name=(
+                    adapter_name if adapter_name is not None else row.adapter_name if row else None
+                ),
+                source_profile=resolved_source_profile,
+                listener_account_key=listener_key,
+                parser_key=binding.parser_key,
+                parser_version=binding.parser_version,
+                parser_config=binding.parser_config,
+                parser_mode=binding.parser_mode,
+            )
+            validate_source_config_parser_binding(source)
             if row is None:
                 row = IngestionSourceRecord(
-                    source_id=source_id,
-                    name=name,
-                    source_type=cast(Any, source_type),
-                    identifier=identifier,
-                    enabled=True,
-                    adapter_name=adapter_name,
-                    source_profile=source_profile,
-                    listener_account_key=listener_key,
+                    source_id=source.source_id,
+                    name=source.name,
+                    source_type=cast(Any, source.source_type),
+                    identifier=source.identifier,
+                    enabled=source.enabled,
+                    adapter_name=source.adapter_name,
+                    source_profile=source.source_profile,
+                    parser_key=source.parser_key,
+                    parser_version=source.parser_version,
+                    parser_config=source.parser_config,
+                    parser_mode=source.parser_mode,
+                    listener_account_key=source.listener_account_key,
                 )
                 session.add(row)
             else:
-                row.enabled = True
-                row.name = name
-                if adapter_name is not None:
-                    row.adapter_name = adapter_name
-                if source_profile is not None:
-                    row.source_profile = source_profile
-                row.listener_account_key = listener_key
+                row.enabled = source.enabled
+                row.name = source.name
+                row.adapter_name = source.adapter_name
+                row.source_profile = source.source_profile
+                row.parser_key = source.parser_key
+                row.parser_version = source.parser_version
+                row.parser_config = source.parser_config
+                row.parser_mode = source.parser_mode
+                row.listener_account_key = source.listener_account_key
             await session.commit()
             await session.refresh(row)
             return _source_config_from_record(row), created
@@ -1329,6 +1375,10 @@ def _source_config_from_record(record: IngestionSourceRecord) -> SourceConfig:
         adapter_name=record.adapter_name,
         source_profile=record.source_profile,
         listener_account_key=record.listener_account_key,
+        parser_key=record.parser_key,
+        parser_version=record.parser_version,
+        parser_config=record.parser_config or {},
+        parser_mode=cast(ParserMode, record.parser_mode),
     )
 
 
@@ -1464,6 +1514,7 @@ def _announcement_from_record(record: AnnouncementRecord) -> Any:
         source_id=record.source_id,
         source_channel_id=record.source_channel_id or "",
         source_message_id=record.source_message_id or "",
+        source_message_ids=tuple(record.source_message_ids or ()),
         occurred_at=record.occurred_at,
         canonical=canonical,
         source_url=record.source_url,

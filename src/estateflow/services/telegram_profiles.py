@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from estateflow.services.source_config import parser_key_from_legacy_profile
+
 
 @dataclass(frozen=True)
 class TelegramSourceProfile:
@@ -69,7 +71,9 @@ def build_telegram_extraction_strategy(profile_name: str | None) -> TelegramExtr
         return CaptionFirstTelegramExtractionStrategy()
     if normalized == "album_text_merge":
         return AlbumTextMergeTelegramExtractionStrategy()
-    return PassthroughTelegramExtractionStrategy(profile_name=normalized)
+    return PassthroughTelegramExtractionStrategy(
+        profile_name=parser_key_from_legacy_profile(normalized)
+    )
 
 
 def _replace_update(update: Any, **changes: Any) -> Any:
@@ -83,6 +87,7 @@ def _replace_update(update: Any, **changes: Any) -> Any:
         "forward_metadata": getattr(update, "forward_metadata", None),
         "media": getattr(update, "media", []),
         "media_group_id": getattr(update, "media_group_id", None),
+        "source_username": getattr(update, "source_username", None),
     }
     fields.update(changes)
     return type(update)(**fields)

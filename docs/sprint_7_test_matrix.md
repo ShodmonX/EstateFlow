@@ -1,6 +1,6 @@
-# Sprint 7 Test Foundation and Matrix
+# Test Foundation and Flow Matrix
 
-Status: local deterministic test foundation. No production deploy, no real Telegram sends, and no beta user mutation.
+This engineering reference retains its established filename because regression tests read its migration inventory. See [testing](testing.md) for current commands and CI.
 
 ## Deterministic Environment
 
@@ -46,6 +46,7 @@ Static quality:
 | Core flow | Unit tests | Integration tests | E2E/full fake stack |
 |---|---|---|---|
 | Ingestion/listener pool/raw queue | `test_listener_pool.py`, `test_telegram_listener.py` | `test_media_buffer_queue.py`, `test_sprint1_integration.py` | `test_sprint3_final_flow.py`, `test_sprint7_e2e_regression.py` |
+| Source parsing | `test_source_config.py`, `test_source_parsing.py`, `test_source_parser_benchmark_cli.py` | `test_source_parsing.py`, `test_admin_sources_enable.py` | Labeled synthetic replay CLI |
 | Pre-AI filter | `test_pre_ai_dedup.py` | `test_sprint1_integration.py` | `test_sprint3_final_flow.py`, `test_sprint7_e2e_regression.py` |
 | AI extraction/media/R2 | `test_sprint2_ai_client.py`, `test_sprint2_extraction.py` | `test_sprint2_media_and_worker.py` | `test_sprint3_final_flow.py`, `test_sprint6_integration_handoff.py`, `test_sprint7_e2e_regression.py` |
 | Post-AI dedup | `test_post_ai_dedup.py` | `test_sprint2_media_and_worker.py` | `test_sprint3_final_flow.py`, `test_sprint7_e2e_regression.py` |
@@ -60,7 +61,7 @@ Static quality:
 
 ## Migration Strategy
 
-Migration files tracked by the Sprint 7 foundation:
+Legacy SQL files retained for bridge/reference coverage (Alembic is the current migration path):
 
 - `001_listener_pool.sql`
 - `002_mvp_schema_and_post_ai_dedup.sql`
@@ -74,22 +75,8 @@ Migration files tracked by the Sprint 7 foundation:
 - `010_sprint7_technical_metric_events.sql`
 - `011_media_per_announcement.sql`
 
-Recommended local smoke pattern:
+For current schema verification, run the Docker-backed Alembic and runtime tests described in [testing](testing.md). The local PostgreSQL container is started separately by `scripts/start_local_postgres.ps1`; there is no `postgres` service in Compose. `scripts/migration_smoke.py` checks the current Alembic contract on an isolated schema. See [database migrations](database-migrations.md) before any upgrade or bridge stamp.
 
-1. Start only local containers: `docker compose up -d postgres redis`.
-2. Apply migrations to a throwaway schema/database.
-3. Run smoke inserts for listener account, source, users/referrals, canonical parent/child announcement, media, notification, admin audit, content, analytics event, and technical metric event.
-4. Roll back by dropping the throwaway schema/database.
+## CI
 
-The existing `scripts/migration_smoke.py` checks early schema contracts. Sprint 7 adds static migration inventory coverage in `test_sprint7_test_foundation.py`; full DB apply remains a local container smoke step because CI credentials/DSN are environment-specific.
-
-## CI Recommendation
-
-```powershell
-.venv\Scripts\python.exe -m ruff check .
-.venv\Scripts\python.exe -m mypy src
-.venv\Scripts\python.exe -m pytest -m unit
-.venv\Scripts\python.exe -m pytest -m "integration or e2e"
-```
-
-Keep real external credentials absent in CI. If a future test needs a local container, mark it with `allow_network` and keep the target on localhost only.
+The workflow in `.github/workflows/ci.yml` runs Ruff, MyPy, and the full pytest suite with a RabbitMQ service. Database/runtime tests use disposable Docker infrastructure when available. Infrastructure skips must be reported separately from passing tests.

@@ -4,11 +4,11 @@ from __future__ import annotations
 import base64
 import secrets
 from dataclasses import asdict
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any, Literal, cast
 
 from fastapi import APIRouter, File, Form, Header, Request, UploadFile
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from estateflow.adapters.contracts import AdapterLoadResult, AdapterReloadReport
 from estateflow.adapters.registry import AdapterRegistry
@@ -56,8 +56,23 @@ from estateflow.services.telegram_sessions import (
     TelegramSessionInspection,
     TelegramSessionInventoryService,
 )
-from estateflow.services.source_config import SourceType
+from estateflow.services.source_config import (
+    ParserMode,
+    SourceType,
+    normalize_parser_key,
+    normalize_parser_version,
+    validate_parser_config,
+)
 from estateflow.services.source_suggestions import SourceSuggestion, SourceSuggestionService
+from estateflow.services.source_parsing import (
+    SourceParserRouter,
+    validate_source_parser_binding,
+)
+from estateflow.services.telegram_listener import (
+    RAW_EVENT_SCHEMA_VERSION,
+    RawTelegramEvent,
+    TelegramMediaReference,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -109,6 +124,27 @@ class SourceEnableRequest(BaseModel):
     session_name: str | None = Field(default=None, min_length=3, max_length=80)
     adapter_name: str | None = None
     source_profile: str | None = None
+    parser_key: str | None = None
+    parser_version: str | None = None
+    parser_config: dict[str, Any] | None = None
+    parser_mode: ParserMode | None = None
+
+    @field_validator("parser_key")
+    @classmethod
+    def validate_parser_key(cls, value: str | None) -> str | None:
+        return normalize_parser_key(value)
+
+    @field_validator("parser_version")
+    @classmethod
+    def validate_parser_version(cls, value: str | None) -> str | None:
+        return normalize_parser_version(value)
+
+    @field_validator("parser_config")
+    @classmethod
+    def validate_parser_config_object(
+        cls, value: dict[str, Any] | None
+    ) -> dict[str, Any] | None:
+        return validate_parser_config(value) if value is not None else None
 
 
 class SourceEnableResponse(BaseModel):
@@ -122,9 +158,72 @@ class SourceEnableResponse(BaseModel):
     session_name: str | None
     adapter_name: str | None
     source_profile: str | None
+    parser_key: str | None
+    parser_version: str | None
+    parser_config: dict[str, Any]
+    parser_mode: ParserMode
     listener_account_key: str | None
     created: bool
     refresh_version: int
+
+
+class SourceParserPreviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: str = Field(default="admin-parser-preview", min_length=1, max_length=200)
+    text: str | None = Field(default=None, max_length=100_000)
+    media_count: int = Field(default=0, ge=0, le=20)
+    parser_key: str | None = None
+    parser_version: str | None = None
+    parser_config: dict[str, Any] = Field(default_factory=dict)
+    parser_mode: ParserMode = "active"
+
+    @field_validator("parser_key")
+    @classmethod
+    def validate_preview_parser_key(cls, value: str | None) -> str | None:
+        return normalize_parser_key(value)
+
+    @field_validator("parser_version")
+    @classmethod
+    def validate_preview_parser_version(cls, value: str | None) -> str | None:
+        return normalize_parser_version(value)
+
+    @field_validator("parser_config")
+    @classmethod
+    def validate_preview_parser_config(cls, value: dict[str, Any]) -> dict[str, Any]:
+        return validate_parser_config(value)
+
+
+class SourceParserCandidatePreview(BaseModel):
+    candidate_id: str
+    idempotency_key: str
+    index: int
+    cleaned_text: str | None
+    score: float
+    reasons: list[str]
+    signals: list[str]
+    include_media: bool
+
+
+class SourceParserQuarantinedCandidatePreview(BaseModel):
+    candidate_id: str
+    index: int
+    cleaned_text: str | None
+    reason: str
+    score: float
+
+
+class SourceParserPreviewResponse(BaseModel):
+    decision: str
+    parser_key: str
+    parser_version: str
+    parser_family: str
+    mode: str
+    score: float
+    reasons: list[str]
+    diagnostics: dict[str, Any]
+    candidates: list[SourceParserCandidatePreview]
+    quarantined_candidates: list[SourceParserQuarantinedCandidatePreview]
 
 
 class ListenerRefreshResponse(BaseModel):
@@ -134,6 +233,9 @@ class ListenerRefreshResponse(BaseModel):
 class ListenerTopologyGroupResponse(BaseModel):
     adapter_name: str
     source_profile: str | None
+    session_name: str | None
+    parser_keys: list[str]
+    parser_modes: list[str]
     source_count: int
     source_ids: list[str]
     source_identifiers: list[str]
@@ -183,6 +285,10 @@ class ListenerSourceStatusResponse(BaseModel):
     enabled: bool
     adapter_name: str | None
     source_profile: str | None
+    parser_key: str | None
+    parser_version: str | None
+    parser_config: dict[str, Any]
+    parser_mode: str
     listener_account_key: str | None
     assigned_account_key: str | None
     assignment_active: bool
@@ -377,6 +483,10 @@ class TelegramSessionSourceBindingResponse(BaseModel):
     identifier: str
     name: str
     source_profile: str | None
+    parser_key: str | None
+    parser_version: str | None
+    parser_config: dict[str, Any]
+    parser_mode: str
     enabled: bool
     session_name: str
 
@@ -1066,6 +1176,21 @@ async def enable_source(
     x_admin_token: str | None = Header(default=None),
 ) -> SourceEnableResponse:
     _admin_auth(request=request, token=x_admin_token)
+    if body.parser_key is not None:
+        try:
+            validate_source_parser_binding(
+                source_id=f"{body.source_type}:{body.identifier}",
+                parser_key=body.parser_key,
+                parser_version=body.parser_version,
+                parser_config=body.parser_config,
+                parser_mode=body.parser_mode or "active",
+            )
+        except (TypeError, ValueError) as exc:
+            raise EstateFlowError(
+                code="invalid_source_parser_binding",
+                message=str(exc),
+                status_code=422,
+            ) from exc
     session_name = body.session_name.strip() if body.session_name else None
     if body.source_type in {"telegram_channel", "telegram_group"} and not session_name:
         raise EstateFlowError(
@@ -1090,14 +1215,25 @@ async def enable_source(
                 status_code=403,
             ) from exc
     registry = _source_registry(request)
-    source, created = await registry.create_or_enable_source(
-        source_type=body.source_type,
-        identifier=target_identifier,
-        name=body.name,
-        adapter_name=body.adapter_name,
-        source_profile=body.source_profile,
-        session_name=session_name,
-    )
+    try:
+        source, created = await registry.create_or_enable_source(
+            source_type=body.source_type,
+            identifier=target_identifier,
+            name=body.name,
+            adapter_name=body.adapter_name,
+            source_profile=body.source_profile,
+            parser_key=body.parser_key,
+            parser_version=body.parser_version,
+            parser_config=body.parser_config,
+            parser_mode=body.parser_mode,
+            session_name=session_name,
+        )
+    except (TypeError, ValueError) as exc:
+        raise EstateFlowError(
+            code="invalid_source_parser_binding",
+            message=str(exc),
+            status_code=422,
+        ) from exc
     refresh_store = _listener_refresh_store(request)
     refresh_version = await refresh_store.signal()
     return SourceEnableResponse(
@@ -1109,9 +1245,89 @@ async def enable_source(
         session_name=source.listener_account_key,
         adapter_name=source.adapter_name,
         source_profile=getattr(source, "source_profile", None),
+        parser_key=source.effective_parser_key,
+        parser_version=source.effective_parser_version,
+        parser_config=dict(source.parser_config),
+        parser_mode=source.parser_mode,
         listener_account_key=source.listener_account_key,
         created=created,
         refresh_version=refresh_version,
+    )
+
+
+@router.post(
+    "/source-parser/preview",
+    response_model=SourceParserPreviewResponse,
+)
+async def preview_source_parser(
+    request: Request,
+    body: SourceParserPreviewRequest,
+    x_admin_token: str | None = Header(default=None),
+) -> SourceParserPreviewResponse:
+    """Run deterministic source parsing without queue, DB, or AI side effects."""
+
+    _admin_auth(request=request, token=x_admin_token)
+    now = datetime.now(UTC)
+    event = RawTelegramEvent(
+        schema_version=RAW_EVENT_SCHEMA_VERSION,
+        event_type="created",
+        idempotency_key=f"admin-parser-preview:{body.source_id}",
+        account_key="admin-parser-preview",
+        source_id=body.source_id,
+        source_channel_id="admin-parser-preview",
+        source_message_id="preview",
+        source_identifier=body.source_id,
+        occurred_at=now,
+        correlation_id=new_correlation_id(),
+        text=body.text,
+        forward_metadata=None,
+        media=[
+            TelegramMediaReference(
+                media_id=f"preview-media-{index + 1}",
+                media_type="photo",
+                mime_type="image/jpeg",
+            )
+            for index in range(body.media_count)
+        ],
+        source_message_ids=["preview"],
+        parser_key=body.parser_key,
+        parser_version=body.parser_version,
+        parser_config=body.parser_config,
+        parser_mode=body.parser_mode,
+    )
+    outcome = SourceParserRouter().parse(event)
+    return SourceParserPreviewResponse(
+        decision=outcome.decision,
+        parser_key=outcome.parser_key,
+        parser_version=outcome.parser_version,
+        parser_family=outcome.parser_family,
+        mode=outcome.mode,
+        score=outcome.score,
+        reasons=list(outcome.reasons),
+        diagnostics=dict(outcome.diagnostics),
+        candidates=[
+            SourceParserCandidatePreview(
+                candidate_id=candidate.candidate_id,
+                idempotency_key=candidate.idempotency_key,
+                index=candidate.index,
+                cleaned_text=candidate.cleaned_text,
+                score=candidate.score,
+                reasons=list(candidate.reasons),
+                signals=list(candidate.signals),
+                include_media=candidate.include_media,
+            )
+            for candidate in outcome.candidates
+        ],
+        quarantined_candidates=[
+            SourceParserQuarantinedCandidatePreview(
+                candidate_id=candidate.candidate_id,
+                index=candidate.index,
+                cleaned_text=candidate.cleaned_text,
+                reason=candidate.reason,
+                score=candidate.score,
+            )
+            for candidate in outcome.quarantined_candidates
+        ],
     )
 
 
@@ -1387,6 +1603,9 @@ def _technical_snapshot(snapshot: TechnicalMetricSnapshot) -> dict[str, object]:
         "notification_retry_count": snapshot.notification_retry_count,
         "notification_error_count": snapshot.notification_error_count,
         "listener_health_counts": snapshot.listener_health_counts,
+        "source_parser_decision_count": snapshot.source_parser_decision_count,
+        "source_parser_decision_counts": snapshot.source_parser_decision_counts,
+        "source_parser_source_counts": snapshot.source_parser_source_counts,
     }
 
 
@@ -1610,6 +1829,9 @@ def _listener_topology_response(status: ListenerTopologyStatus) -> ListenerTopol
                     ListenerTopologyGroupResponse(
                         adapter_name=group.adapter_name,
                         source_profile=group.source_profile,
+                        session_name=group.session_name,
+                        parser_keys=list(group.parser_keys),
+                        parser_modes=list(group.parser_modes),
                         source_count=group.source_count,
                         source_ids=list(group.source_ids),
                         source_identifiers=list(group.source_identifiers),
@@ -1632,6 +1854,10 @@ def _listener_topology_response(status: ListenerTopologyStatus) -> ListenerTopol
                 enabled=source.enabled,
                 adapter_name=source.adapter_name,
                 source_profile=source.source_profile,
+                parser_key=source.parser_key,
+                parser_version=source.parser_version,
+                parser_config=dict(source.parser_config or {}),
+                parser_mode=source.parser_mode,
                 listener_account_key=source.listener_account_key,
                 assigned_account_key=source.assigned_account_key,
                 assignment_active=source.assignment_active,
@@ -1697,6 +1923,10 @@ def _telegram_session_status_response(
                 identifier=binding.identifier,
                 name=binding.name,
                 source_profile=binding.source_profile,
+                parser_key=getattr(binding, "parser_key", None),
+                parser_version=getattr(binding, "parser_version", None),
+                parser_config=dict(getattr(binding, "parser_config", None) or {}),
+                parser_mode=str(getattr(binding, "parser_mode", "active")),
                 enabled=bool(binding.enabled),
                 session_name=binding.session_name,
             )

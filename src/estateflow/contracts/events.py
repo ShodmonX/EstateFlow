@@ -5,6 +5,7 @@ from typing import Any
 
 RAW_ANNOUNCEMENT_QUEUE = "ingestion.raw_announcements"
 RAW_ANNOUNCEMENT_DLQ = "ingestion.raw_announcements.dlq"
+SOURCE_PARSER_QUARANTINE_QUEUE = "ingestion.source_parser.quarantine"
 AI_PROCESSING_QUEUE = "ai.processing.raw_announcements"
 POST_AI_DEDUP_QUEUE = "dedup.post_ai.structured_announcements"
 ANNOUNCEMENT_PERSISTED_QUEUE = "announcement.persisted"

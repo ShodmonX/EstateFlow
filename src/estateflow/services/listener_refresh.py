@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import importlib
+import json
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
@@ -197,6 +198,12 @@ class TelegramListenerCoordinator:
         telegram_sources = [
             source for source in sources if source.source_type in TELEGRAM_SOURCE_TYPES
         ]
+        configured_session_names = {
+            session_name
+            for source in telegram_sources
+            if (session_name := self._resolve_session_name(source)) is not None
+        }
+        await self._assignment_service.ensure_accounts(configured_session_names)
         adapter_names = sorted({self._resolve_adapter_name(source) for source in telegram_sources})
         fingerprint = _fingerprint(
             telegram_sources,
@@ -361,7 +368,7 @@ class TelegramListenerCoordinator:
         listeners: list[TelegramAccountListener] = []
         failures: list[str] = []
         group_summaries: list[ListenerTopologyGroup] = []
-        grouped: dict[tuple[str, str | None, str], list[SourceConfig]] = defaultdict(list)
+        grouped: dict[tuple[str, str], list[SourceConfig]] = defaultdict(list)
         for source in sources:
             session_name = self._resolve_session_name(source)
             if session_name is None:
@@ -371,31 +378,36 @@ class TelegramListenerCoordinator:
                 continue
             group_key = (
                 self._resolve_adapter_name(source),
-                self._resolve_profile_name(source),
                 session_name,
             )
             grouped[group_key].append(source)
-        for adapter_name, profile_name, session_name in sorted(
-            grouped,
-            key=lambda item: (item[0], item[1] or "", item[2]),
-        ):
+        for adapter_name, session_name in sorted(grouped):
             try:
                 plugin = self._telegram_plugin(adapter_name, session_name=session_name)
-                source_group = grouped[(adapter_name, profile_name, session_name)]
+                source_group = grouped[(adapter_name, session_name)]
+                parser_keys = tuple(
+                    sorted({item.effective_parser_key for item in source_group})
+                )
+                parser_modes = tuple(sorted({item.parser_mode for item in source_group}))
                 summary = ListenerTopologyGroup(
                     adapter_name=adapter_name,
-                    source_profile=profile_name,
+                    source_profile=_shared_source_profile(source_group),
                     source_count=len(source_group),
                     source_ids=tuple(item.source_id for item in source_group),
                     source_identifiers=tuple(item.identifier for item in source_group),
                     source_names=tuple(item.name for item in source_group),
+                    parser_keys=parser_keys,
+                    parser_modes=parser_modes,
+                    session_name=session_name,
                 )
                 logger.info(
                     "Building Telegram listener group",
                     extra={
                         "event": "listener_refresh.group_building",
                         "adapter_name": adapter_name,
-                        "source_profile": profile_name or "default",
+                        "session_name": session_name,
+                        "parser_keys": parser_keys,
+                        "parser_modes": parser_modes,
                         "source_count": len(source_group),
                     },
                 )
@@ -408,10 +420,9 @@ class TelegramListenerCoordinator:
                 )
                 listeners.append(
                     TelegramAccountListener(
-                        account_key=self._listener_account_key,
+                        account_key=session_name,
                         client=plugin,
                         sources=source_group,
-                        extraction_strategy=self._extraction_strategy(profile_name),
                         event_publisher=event_publisher,
                         idempotency_store=self._idempotency_store,
                         assignment_service=self._assignment_service,
@@ -424,22 +435,30 @@ class TelegramListenerCoordinator:
                     extra={
                         "event": "listener_refresh.group_built",
                         "adapter_name": adapter_name,
-                        "source_profile": profile_name or "default",
                         "session_name": session_name,
+                        "parser_keys": parser_keys,
+                        "parser_modes": parser_modes,
                         "source_count": len(source_group),
                     },
                 )
             except Exception as exc:
                 failures.append(f"{adapter_name}:{session_name}:{type(exc).__name__}:{exc}")
-                source_group = grouped[(adapter_name, profile_name, session_name)]
+                source_group = grouped[(adapter_name, session_name)]
                 group_summaries.append(
                     ListenerTopologyGroup(
                         adapter_name=adapter_name,
-                        source_profile=profile_name,
+                        source_profile=_shared_source_profile(source_group),
                         source_count=len(source_group),
                         source_ids=tuple(item.source_id for item in source_group),
                         source_identifiers=tuple(item.identifier for item in source_group),
                         source_names=tuple(item.name for item in source_group),
+                        parser_keys=tuple(
+                            sorted({item.effective_parser_key for item in source_group})
+                        ),
+                        parser_modes=tuple(
+                            sorted({item.parser_mode for item in source_group})
+                        ),
+                        session_name=session_name,
                         runnable=False,
                         error=str(exc),
                     )
@@ -449,8 +468,10 @@ class TelegramListenerCoordinator:
                     extra={
                         "event": "listener_refresh.group_failed",
                         "adapter_name": adapter_name,
-                        "source_profile": profile_name or "default",
                         "session_name": session_name,
+                        "parser_keys": tuple(
+                            sorted({item.effective_parser_key for item in source_group})
+                        ),
                         "error": str(exc),
                     },
                 )
@@ -488,21 +509,9 @@ class TelegramListenerCoordinator:
         adapter_name = source.adapter_name.strip() if source.adapter_name else ""
         return adapter_name or self._default_adapter_name
 
-    def _resolve_profile_name(self, source: SourceConfig) -> str | None:
-        profile_name = source.source_profile.strip() if source.source_profile else ""
-        return profile_name or None
-
     def _resolve_session_name(self, source: SourceConfig) -> str | None:
         session_name = source.listener_account_key.strip() if source.listener_account_key else ""
         return session_name or self._listener_account_key
-
-    @staticmethod
-    def _extraction_strategy(profile_name: str | None) -> object | None:
-        if profile_name is None:
-            return None
-        from estateflow.services.telegram_profiles import build_telegram_extraction_strategy
-
-        return build_telegram_extraction_strategy(profile_name)
 
     async def _stop_supervisor(self) -> None:
         supervisor = self._supervisor
@@ -617,6 +626,9 @@ def _fingerprint(
                 f"{source.source_id}:{source.enabled}:"
                 f"{source.adapter_name or default_adapter_name}:"
                 f"{source.source_profile or 'default'}:"
+                f"{source.effective_parser_key}:{source.effective_parser_version}:"
+                f"{source.parser_mode}:"
+                f"{json.dumps(source.parser_config, sort_keys=True, separators=(',', ':'))}:"
                 f"{source.listener_account_key or 'missing'}:"
                 f"{source.identifier}"
             )
@@ -624,6 +636,15 @@ def _fingerprint(
         )
         + f"|adapters:{adapter_fingerprint}"
     )
+
+
+def _shared_source_profile(sources: list[SourceConfig]) -> str | None:
+    profiles = {
+        source.source_profile.strip()
+        for source in sources
+        if source.source_profile and source.source_profile.strip()
+    }
+    return next(iter(profiles)) if len(profiles) == 1 else None
 
 
 def _adapter_fingerprint(registry: AdapterRegistry, adapter_names: list[str]) -> str:

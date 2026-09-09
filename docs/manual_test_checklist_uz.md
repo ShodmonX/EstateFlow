@@ -11,7 +11,7 @@ Natijani har band uchun PASS, FAIL yoki N/A deb yozing.
 ## 1. Kod va konfiguratsiya
 
 ~~~powershell
-Set-Location C:\Users\shodmon\projects\EstateFlow
+Set-Location C:\path\to\EstateFlow
 docker compose config --quiet
 .venv\Scripts\ruff.exe check src apps services scripts tests
 .venv\Scripts\python.exe -m pytest -q

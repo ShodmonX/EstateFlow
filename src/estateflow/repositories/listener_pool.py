@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from typing import Any, cast
 
@@ -12,7 +13,13 @@ from estateflow.services.listener_pool import (
     ListenerAccountMetadata,
     ListenerHealthStatus,
 )
-from estateflow.services.source_config import SourceConfig, SourceType
+from estateflow.services.source_config import (
+    ParserMode,
+    SourceConfig,
+    SourceType,
+    merge_source_parser_binding,
+    validate_source_config_parser_binding,
+)
 
 
 class AsyncpgListenerAccountRepository:
@@ -65,7 +72,8 @@ class AsyncpgSourceConfigRepository:
         records = await self._pool.fetch(
             """
             select source_id, name, source_type, identifier, enabled, adapter_name,
-                   source_profile, listener_account_key
+                   source_profile, parser_key, parser_version, parser_config,
+                   parser_mode, listener_account_key
             from ingestion_sources
             where enabled = true
             order by source_id
@@ -81,10 +89,59 @@ class AsyncpgSourceConfigRepository:
         name: str,
         adapter_name: str | None = None,
         source_profile: str | None = None,
+        parser_key: str | None = None,
+        parser_version: str | None = None,
+        parser_config: dict[str, Any] | None = None,
+        parser_mode: ParserMode | None = None,
         session_name: str | None = None,
     ) -> tuple[SourceConfig, bool]:
         source_id = f"{source_type}:{identifier}"
         listener_key = session_name or "acc_9889"
+        existing_record = await self._pool.fetchrow(
+            """
+            select source_id, name, source_type, identifier, enabled, adapter_name,
+                   source_profile, parser_key, parser_version, parser_config,
+                   parser_mode, listener_account_key
+            from ingestion_sources
+            where source_id = $1
+            """,
+            source_id,
+        )
+        existing_source = (
+            _source_from_record(existing_record) if existing_record is not None else None
+        )
+        resolved_source_profile = (
+            source_profile
+            if source_profile is not None
+            else existing_source.source_profile if existing_source is not None else None
+        )
+        binding = merge_source_parser_binding(
+            existing_source,
+            source_profile=resolved_source_profile,
+            parser_key=parser_key,
+            parser_version=parser_version,
+            parser_config=parser_config,
+            parser_mode=parser_mode,
+        )
+        source = SourceConfig(
+            source_id=source_id,
+            name=name,
+            source_type=source_type,
+            identifier=identifier,
+            enabled=True,
+            adapter_name=(
+                adapter_name
+                if adapter_name is not None
+                else existing_source.adapter_name if existing_source is not None else None
+            ),
+            source_profile=resolved_source_profile,
+            listener_account_key=listener_key,
+            parser_key=binding.parser_key,
+            parser_version=binding.parser_version,
+            parser_config=binding.parser_config,
+            parser_mode=binding.parser_mode,
+        )
+        validate_source_config_parser_binding(source)
         record = await self._pool.fetchrow(
             """
             insert into ingestion_sources (
@@ -95,32 +152,44 @@ class AsyncpgSourceConfigRepository:
                 enabled,
                 adapter_name,
                 source_profile,
+                parser_key,
+                parser_version,
+                parser_config,
+                parser_mode,
                 listener_account_key,
                 updated_at
             )
-            values ($1, $2, $3, $4, true, $5, $6, $7, now())
+            values (
+                $1, $2, $3, $4, true, $5, $6, $7, $8, $9::jsonb, $10, $11, now()
+            )
             on conflict (source_id) do update set
                 enabled = true,
                 name = excluded.name,
-                adapter_name = coalesce(excluded.adapter_name, ingestion_sources.adapter_name),
-                source_profile = coalesce(
-                    excluded.source_profile,
-                    ingestion_sources.source_profile,
-                ),
+                adapter_name = excluded.adapter_name,
+                source_profile = excluded.source_profile,
+                parser_key = excluded.parser_key,
+                parser_version = excluded.parser_version,
+                parser_config = excluded.parser_config,
+                parser_mode = excluded.parser_mode,
                 listener_account_key = excluded.listener_account_key,
                 updated_at = now()
             returning
                 source_id, name, source_type, identifier, enabled, adapter_name,
-                source_profile, listener_account_key,
+                source_profile, parser_key, parser_version, parser_config,
+                parser_mode, listener_account_key,
                 (xmax = 0) as inserted
             """,
-            source_id,
-            name,
-            source_type,
-            identifier,
-            adapter_name,
-            source_profile,
-            listener_key,
+            source.source_id,
+            source.name,
+            source.source_type,
+            source.identifier,
+            source.adapter_name,
+            source.source_profile,
+            source.parser_key,
+            source.parser_version,
+            json.dumps(source.parser_config, sort_keys=True),
+            source.parser_mode,
+            source.listener_account_key,
         )
         assert record is not None
         return _source_from_record(record), bool(record["inserted"])
@@ -232,7 +301,31 @@ def _source_from_record(record: Any) -> SourceConfig:
         adapter_name=record["adapter_name"],
         source_profile=record["source_profile"],
         listener_account_key=record["listener_account_key"],
+        parser_key=_record_value(record, "parser_key"),
+        parser_version=_record_value(record, "parser_version"),
+        parser_config=_record_json_object(record, "parser_config"),
+        parser_mode=cast(ParserMode, _record_value(record, "parser_mode") or "active"),
     )
+
+
+def _record_value(record: Any, key: str) -> Any:
+    try:
+        return record[key]
+    except (KeyError, TypeError):
+        return None
+
+
+def _record_json_object(record: Any, key: str) -> dict[str, Any]:
+    value = _record_value(record, key)
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
+    return {}
 
 
 def _assignment_from_record(record: Any) -> ChannelAssignment:

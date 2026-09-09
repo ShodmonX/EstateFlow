@@ -154,6 +154,21 @@ class ListenerAssignmentService:
         self._ops_notifier = ops_notifier
         self._technical_recorder = technical_recorder
 
+    async def ensure_accounts(self, account_keys: Iterable[str]) -> list[ListenerAccountMetadata]:
+        """Ensure every configured Telegram session has health/assignment state."""
+
+        requested_keys = sorted({key.strip() for key in account_keys if key.strip()})
+        accounts = await self._account_repository.list_accounts()
+        existing_keys = {account.account_key for account in accounts}
+        for account_key in requested_keys:
+            if account_key in existing_keys:
+                continue
+            await self._account_repository.save_account(
+                ListenerAccountMetadata(account_key=account_key)
+            )
+            existing_keys.add(account_key)
+        return await self._account_repository.list_accounts()
+
     async def reconcile(self, sources: list[SourceConfig]) -> list[ChannelAssignment]:
         accounts = await self._account_repository.list_accounts()
         account_by_key = {account.account_key: account for account in accounts}

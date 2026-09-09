@@ -15,6 +15,7 @@ from estateflow.services.queue import (
 
 if TYPE_CHECKING:
     from estateflow.services.ai_worker import AiExtractionWorker
+    from estateflow.services.analytics import TechnicalMetricRecorder
     from estateflow.services.audience_tags import AudienceTagService
     from estateflow.services.ingestion_pipeline import PreAiIngestionProcessor
     from estateflow.services.notifications import NotificationDeliveryWorker
@@ -204,6 +205,7 @@ def create_queue_consumer_worker(
     redis_event_queue: EventQueue,
     post_ai_processor: PostAiDedupProcessor,
     ops_notifier: OpsNotificationService,
+    technical_recorder: TechnicalMetricRecorder | None = None,
     audience_tag_service: AudienceTagService | None = None,
     notification_worker: NotificationDeliveryWorker | None = None,
     release_controls: Any = None,
@@ -219,20 +221,18 @@ def create_queue_consumer_worker(
     )
     from estateflow.services.ingestion_pipeline import PreAiIngestionProcessor
     from estateflow.services.media_storage import (
-        InMemoryObjectStorage,
         MediaProcessor,
         MediaStorageService,
         ObjectStorage,
         SmartMediaResolver,
-        StorageUploadError,
-        create_r2_object_storage,
+        configured_object_storage_from_settings,
         media_processing_config_from_settings,
     )
     from estateflow.services.pre_ai_dedup import (
         InMemoryPreAiDedupSignalStore,
-        PreAiDedupConfig,
         PreAiDedupFilter,
         StableMediaReferencePHashProvider,
+        pre_ai_dedup_config_from_settings,
     )
 
     signal_store = InMemoryPreAiDedupSignalStore()
@@ -241,27 +241,21 @@ def create_queue_consumer_worker(
         signal_store=signal_store,
         phash_provider=phash_provider,
         ops_notifier=ops_notifier,
-        config=PreAiDedupConfig(
-            near_text_threshold=settings.pre_ai_near_text_threshold,
-            phash_hamming_threshold=settings.media_phash_hamming_threshold,
-        ),
+        config=pre_ai_dedup_config_from_settings(settings),
     )
     pre_ai_processor = PreAiIngestionProcessor(
         dedup_filter=dedup_filter,
         ai_queue=redis_event_queue,
         signal_store=signal_store,
         phash_provider=phash_provider,
+        technical_recorder=technical_recorder,
     )
 
     ai_worker: AiExtractionWorker | None = None
     if settings.openrouter_api_key is not None:
         try:
             llm_client = create_openrouter_llm_client(settings=settings, ops_notifier=ops_notifier)
-            storage: ObjectStorage
-            try:
-                storage = create_r2_object_storage(settings)
-            except (StorageUploadError, ModuleNotFoundError, ImportError):
-                storage = InMemoryObjectStorage()
+            storage: ObjectStorage = configured_object_storage_from_settings(settings)
 
             media_service = MediaStorageService(
                 resolver=SmartMediaResolver(settings=settings),
@@ -279,6 +273,7 @@ def create_queue_consumer_worker(
                 min_confidence=settings.ai_min_confidence,
                 rental_min_confidence=settings.rental_min_confidence,
                 audience_tag_service=audience_tag_service,
+                technical_recorder=technical_recorder,
                 release_controls=release_controls,
                 ai_vision_enabled=settings.feature_ai_vision_enabled,
             )

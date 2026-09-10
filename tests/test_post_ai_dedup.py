@@ -476,6 +476,14 @@ async def test_manual_review_reject_and_mark_as_new_are_idempotent() -> None:
     approved = await admin.mark_as_new(duplicate_item.review_id)
     approved_again = await admin.mark_as_new(duplicate_item.review_id)
 
+    # A replay must not append another action even on clocks whose timestamps
+    # have too little resolution to distinguish consecutive calls.
+    assert [entry["action"] for entry in review_queue.audit_log] == [
+        "enqueue",
+        "enqueue",
+        "reject",
+        "approve_as_new",
+    ]
     assert rejected == rejected_again
     assert rejected.status == "rejected"
     assert approved == approved_again

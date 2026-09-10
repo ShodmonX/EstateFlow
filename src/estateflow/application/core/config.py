@@ -27,7 +27,8 @@ class Settings(BaseSettings):
         env_file=".env",
         case_sensitive=False,
         extra="ignore",
-        populate_by_name=True,
+        # Aliased fields must not also read generic environment names (DEBUG).
+        populate_by_name=False,
     )
 
     environment: Environment = "development"

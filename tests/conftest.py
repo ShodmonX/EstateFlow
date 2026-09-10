@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from estateflow.application.core.config import Settings
 from tests.fixtures import FROZEN_NOW, TelegramPostFixture, representative_posts
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -121,6 +122,8 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
 @pytest.fixture(autouse=True)
 def deterministic_test_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Local credentials must not supply configuration that is absent in CI.
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
     monkeypatch.setenv("ENVIRONMENT", "test")
     monkeypatch.setenv("ESTATEFLOW_DEBUG", "false")
     monkeypatch.setenv("ADMIN_API_TOKEN", "test-admin-token")

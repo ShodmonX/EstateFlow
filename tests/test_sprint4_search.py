@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
 from estateflow.api.app import create_app
 from estateflow.application.core.config import Settings
@@ -207,7 +208,9 @@ def test_search_api_contract_and_validation() -> None:
 
 
 def test_webapp_announcement_detail_includes_source_link() -> None:
-    app = create_app(Settings(environment="test"))
+    app = create_app(
+        Settings(environment="test", app_secret_key=SecretStr("test-webapp-signing-secret"))
+    )
     app.state.search_service = SearchService(InMemorySearchRepository([_announcement("detail")]))
     session = app.state.webapp_auth_service.issue_session(TelegramWebAppIdentity(user_id=42))
 

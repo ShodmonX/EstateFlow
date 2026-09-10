@@ -1051,6 +1051,8 @@ class ManualReviewQueueService:
                 expected_status=expected_status,
                 admin_user_id=admin_user_id,
             )
+            if item.status == "approved":
+                return item
             await self._repository.activate_announcement(item.announcement_id)
             updated = replace(item, status="approved", decided_at=datetime.now(UTC))
             await self._store_updated_item(updated)

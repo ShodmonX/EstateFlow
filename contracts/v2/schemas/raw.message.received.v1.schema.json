@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/raw.message.received.v1.schema.json",
+  "title": "DRAFT raw.message.received v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "raw.message.received"
+        },
+        "producer": {
+          "const": "listener"
+        },
+        "aggregate_kind": {
+          "const": "source_message"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/source"
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "observed_order": {
+              "enum": [
+                "confirmed",
+                "uncertain"
+              ]
+            },
+            "platform_revision_token": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 256
+            },
+            "album_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "policy": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/policy"
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 32000
+            },
+            "media_capture_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "content_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "media_required": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "source",
+            "source_revision",
+            "observed_order",
+            "platform_revision_token",
+            "album_id",
+            "policy",
+            "text",
+            "media_capture_refs",
+            "content_sha256"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

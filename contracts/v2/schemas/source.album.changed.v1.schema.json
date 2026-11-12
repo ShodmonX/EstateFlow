@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/source.album.changed.v1.schema.json",
+  "title": "DRAFT source.album.changed v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "source.album.changed"
+        },
+        "producer": {
+          "const": "listener"
+        },
+        "aggregate_kind": {
+          "const": "album"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "album_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "album_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "message_uid": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "state": {
+                    "enum": [
+                      "active",
+                      "retracted"
+                    ]
+                  }
+                },
+                "required": [
+                  "message_uid",
+                  "source_revision",
+                  "state"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "assembly_state": {
+              "enum": [
+                "settling",
+                "settled"
+              ]
+            },
+            "change_reason": {
+              "enum": [
+                "initial",
+                "late_member",
+                "member_edited",
+                "member_deleted"
+              ]
+            }
+          },
+          "required": [
+            "album_id",
+            "album_revision",
+            "members",
+            "assembly_state",
+            "change_reason"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "synthetic": true,
+  "scenario_id": "19-precheck-duplicate-evidence",
+  "description": "SYNTHETIC 19-precheck-duplicate-evidence",
+  "steps": [
+    {
+      "schema_file": "candidate.prechecked.v1.schema.json",
+      "event": {
+        "event_id": "19b705fa-22d9-5605-b1e8-b26b5997953f",
+        "event_type": "candidate.prechecked",
+        "event_version": 1,
+        "producer": "pre_ai",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "candidate",
+        "aggregate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+        "aggregate_version": 1,
+        "payload": {
+          "lineage": {
+            "batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+            "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "candidate_version": 1,
+            "slot_key": "synthetic-slot-0",
+            "generation": 1,
+            "source_refs": [
+              {
+                "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+                "source_revision": 1
+              }
+            ],
+            "album_id": null,
+            "album_revision": null,
+            "policy": {
+              "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+              "policy_revision": 1,
+              "recipe_key": "synthetic.single",
+              "recipe_version": "1",
+              "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "snapshot_ref": "policy/synthetic/1"
+            }
+          },
+          "decision": "duplicate",
+          "duplicate_of_candidate_id": "abdab617-c904-5f94-aa3c-e47362ab497b",
+          "signal_revision": 1,
+          "reason_code": "synthetic_no_match",
+          "parsed_event_id": "f6f7839c-0344-5386-b21e-a393811e7a86",
+          "text": "SYNTHETIC candidate A",
+          "media_capture_refs": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "catalog",
+      "expected": "reconcile",
+      "assertion": "Attach duplicate source evidence through candidate lineage; do not rerun AI or erase source retraction mapping.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "Canonical evidence remains retractable even though AI was skipped.",
+  "requires_decision": []
+}

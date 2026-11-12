@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/lab.synthetic.changed.v1.schema.json",
+  "title": "LAB_PROVISIONAL lab.synthetic.changed",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "lab.synthetic.changed"
+        },
+        "producer": {
+          "const": "lab_producer"
+        },
+        "aggregate_kind": {
+          "const": "synthetic"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

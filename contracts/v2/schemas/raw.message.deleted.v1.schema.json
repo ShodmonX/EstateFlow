@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/raw.message.deleted.v1.schema.json",
+  "title": "DRAFT raw.message.deleted v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "raw.message.deleted"
+        },
+        "producer": {
+          "const": "listener"
+        },
+        "aggregate_kind": {
+          "const": "source_message"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/source"
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "observed_order": {
+              "enum": [
+                "confirmed",
+                "uncertain"
+              ]
+            },
+            "platform_revision_token": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 256
+            },
+            "album_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "policy": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/policy"
+            },
+            "reason": {
+              "enum": [
+                "platform_delete",
+                "authorized_retraction"
+              ]
+            }
+          },
+          "required": [
+            "source",
+            "source_revision",
+            "observed_order",
+            "platform_revision_token",
+            "album_id",
+            "policy",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

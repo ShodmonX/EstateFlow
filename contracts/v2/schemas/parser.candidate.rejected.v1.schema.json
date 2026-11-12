@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/parser.candidate.rejected.v1.schema.json",
+  "title": "DRAFT parser.candidate.rejected v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "parser.candidate.rejected"
+        },
+        "producer": {
+          "const": "source_parser"
+        },
+        "aggregate_kind": {
+          "const": "parser_batch"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "batch_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "source_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "message_uid": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "source_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "message_uid",
+                  "source_revision"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "policy": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/policy"
+            },
+            "disposition": {
+              "enum": [
+                "drop",
+                "quarantine",
+                "buffer"
+              ]
+            },
+            "reason_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "quarantine_ref": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "batch_id",
+            "source_refs",
+            "policy",
+            "disposition",
+            "reason_code",
+            "quarantine_ref"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "disposition": {
+                    "const": "quarantine"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "quarantine_ref": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 512
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

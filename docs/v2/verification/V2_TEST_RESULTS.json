@@ -1,0 +1,2497 @@
+{
+  "generated_at": "2026-11-10",
+  "outcome": "PARTIALLY_VERIFIED",
+  "branch": "main",
+  "head": "addb856a99d24946ef127384121b99de371c017b",
+  "project": "estateflow-v2-isolated-verify20261110",
+  "providers": "FAKE_ONLY",
+  "v1_changes": false,
+  "summary": {
+    "pytest_passed": 146,
+    "pytest_failed": 0,
+    "pytest_skipped": 0,
+    "fnd_ids": 34,
+    "acceptance_ids": 41,
+    "schema_files": 37,
+    "strict_json_files": 62
+  },
+  "commands": {
+    "unit": "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+    "foundation": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+    "integration": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+    "e2e": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q",
+    "restarts": "python3 scripts/v2/lab-faults.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local",
+    "isolation": "python3 scripts/v2/inspect-lab.py",
+    "restore": "python3 scripts/v2/lab-restore.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local",
+    "contracts": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/v2/verify-contracts.py",
+    "build": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 build migrate",
+    "deploy": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 up -d --no-build",
+    "restart_search": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 restart search",
+    "ruff": "docker run --rm --network none --read-only --tmpfs /tmp estateflow-v2-lab:dev python -m ruff check --no-cache --config /app/v2/pyproject.toml /app/v2",
+    "mypy": "docker run --rm --network none --read-only --tmpfs /tmp estateflow-v2-lab:dev python -m mypy --config-file /app/v2/pyproject.toml --cache-dir /tmp/mypy /app/v2",
+    "pip_check": "docker run --rm --network none --read-only --tmpfs /tmp estateflow-v2-lab:dev python -m pip check"
+  },
+  "suites": [
+    {
+      "id": "unit",
+      "status": "PASS",
+      "command": "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+      "exit_code": 0,
+      "tests": 85,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.473,
+      "timestamp": "2026-11-10T15:29:23.713768+00:00",
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ]
+    },
+    {
+      "id": "foundation",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "tests": 53,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 7.726,
+      "timestamp": "2026-11-10T15:29:20.857261+00:00",
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ]
+    },
+    {
+      "id": "integration",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+      "exit_code": 0,
+      "tests": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 37.155,
+      "timestamp": "2026-11-10T15:31:45.837087+00:00",
+      "artifact_paths": [
+        ".artifacts/v2/final/integration.xml"
+      ]
+    },
+    {
+      "id": "e2e",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q",
+      "exit_code": 0,
+      "tests": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 9.741,
+      "timestamp": "2026-11-10T15:37:53.284895+00:00",
+      "artifact_paths": [
+        ".artifacts/v2/final/e2e.xml"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "FND-01",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd01_rollback"
+      ],
+      "assertions": [
+        "Neither synthetic entity mutation nor outbox event persists"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-02",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd02_commit_before_dispatch"
+      ],
+      "assertions": [
+        "Outbox pending; restart eventually publishes; one local consumer effect"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-03",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd03_producer_process_killed_after_commit"
+      ],
+      "assertions": [
+        "Accepted event remains durable and is dispatched after restart"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-04",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd04_confirm_before_mark_process_crash"
+      ],
+      "assertions": [
+        "Same event ID may be republished; consumer effect exactly once locally"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-05",
+      "status": "PASS",
+      "command": "python3 scripts/v2/lab-faults.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local",
+      "exit_code": 0,
+      "test_ids": [
+        "outage/after_outage"
+      ],
+      "assertions": [
+        "Outbox retry persists, lease expires/reclaims, no lost event"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/restarts.json"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-06",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd06_ambiguous_confirm_keeps_identity"
+      ],
+      "assertions": [
+        "Stable event ID across retry, no duplicate effect"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Exception injected after a genuine confirmed publish; no naturally induced half-open confirm timeout or deadline proof."
+      ]
+    },
+    {
+      "id": "FND-07",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd07_concurrent_dispatch_claim"
+      ],
+      "assertions": [
+        "Single active lease at a time; no concurrent claim; duplicate after lease expiry safe"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-08",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd08_lease_fencing"
+      ],
+      "assertions": [
+        "Fencing token rejects stale update"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-09",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd09_identical_duplicate"
+      ],
+      "assertions": [
+        "One inbox/effect; second ACK without effect"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-10",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd10_changed_payload_conflict"
+      ],
+      "assertions": [
+        "Durable payload conflict park and alert; no second effect"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-11",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd11_revision_conflict"
+      ],
+      "assertions": [
+        "Revision conflict parked, no overwrite"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-12",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd12_gap_replay"
+      ],
+      "assertions": [
+        "Future revision held; after revision 2 it is applied once in order or reconciled per documented policy"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-13",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd13_known_stale"
+      ],
+      "assertions": [
+        "No rollback of aggregate; ACK/no effect only with known lineage"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-14",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd14_33_consumer_crash_before_ack"
+      ],
+      "assertions": [
+        "Redelivery deduplicated; one local effect"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Real consumer process death closes its TCP connection before ACK; no Docker network-detach/blackhole experiment."
+      ]
+    },
+    {
+      "id": "FND-15",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd15_actual_deferred_commit_failure"
+      ],
+      "assertions": [
+        "No success ACK; no effect without inbox, safe redelivery"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-16",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd16_17_retry_durable_backoff"
+      ],
+      "assertions": [
+        "Retry intent persisted before original ACK; retry not executed before due time"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-17",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd17_retry_process_crash_before_ack"
+      ],
+      "assertions": [
+        "Duplicate original cannot bypass backoff or create duplicate retry intent"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-18",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd18_19_bounded_retry + test_fnd18_retry_delay_budget"
+      ],
+      "assertions": [
+        "Capped 6 total processing attempts; deterministic jitter within bounds"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-19",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd18_19_bounded_retry + test_fnd19_expired_park"
+      ],
+      "assertions": [
+        "Terminal record and DLQ/park; no silent discard or infinite retry"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-20",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd20_poison_durable"
+      ],
+      "assertions": [
+        "Durable parking, safe diagnostics, no business effect; no unbounded memory allocation"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-21",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd21_22_replay_authorization_audit + test_terminal_retry_authorized_replay_can_recover"
+      ],
+      "assertions": [
+        "Audit record, stable original event identity, no forced inbox deletion"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Local lab-operator string and application audit, not production RBAC/append-only database ACL."
+      ]
+    },
+    {
+      "id": "FND-22",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd21_22_replay_authorization_audit"
+      ],
+      "assertions": [
+        "Denied, audit denial, no publication"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Local lab-operator string and application audit, not production RBAC/append-only database ACL."
+      ]
+    },
+    {
+      "id": "FND-23",
+      "status": "PASS",
+      "command": "python3 scripts/v2/lab-faults.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local",
+      "exit_code": 0,
+      "test_ids": [
+        "prepare/after_broker"
+      ],
+      "assertions": [
+        "Durable message survives ordinary restart; no HA claim"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/restarts.json"
+      ],
+      "limitations": [
+        "Ordinary restart of one durable classic-queue RabbitMQ node; not HA or node/disk loss."
+      ]
+    },
+    {
+      "id": "FND-24",
+      "status": "PASS",
+      "command": "python3 scripts/v2/lab-faults.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local",
+      "exit_code": 0,
+      "test_ids": [
+        "after_db"
+      ],
+      "assertions": [
+        "Durable state survives ordinary restart; recovery proceeds"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/restarts.json"
+      ],
+      "limitations": [
+        "Ordinary container restart with retained volume; not PITR/disaster recovery."
+      ]
+    },
+    {
+      "id": "FND-25",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd25_cross_schema_denied"
+      ],
+      "assertions": [
+        "Permission denied; same for consumer accessing producer schema"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-26",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd26_owner_future_defaults"
+      ],
+      "assertions": [
+        "Unauthorized access denied; own-schema intended DML/sequence usage works"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-27",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd27_exchange_coexistence"
+      ],
+      "assertions": [
+        "Both coexist; no exchange-type redeclare; V1 live broker untouched"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-28",
+      "status": "PASS",
+      "command": "python3 scripts/v2/inspect-lab.py",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd28_private_compose + actual inspect-lab.py"
+      ],
+      "assertions": [
+        "No host ports, no host network, no existing EstateFlow volume/network, no Docker socket mount"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/isolation.json"
+      ],
+      "limitations": [
+        "Declared runtime containers inspected; ephemeral test clients intentionally mount V2 source/evidence."
+      ]
+    },
+    {
+      "id": "FND-29",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd29_safe_diagnostics"
+      ],
+      "assertions": [
+        "Logs and metrics contain redacted diagnostics, not payload or credentials"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-30",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd30_concurrent_duplicates"
+      ],
+      "assertions": [
+        "One committed effect; unique inbox constraint survives concurrency"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-31",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd31_gap_expiry"
+      ],
+      "assertions": [
+        "Event remains inspectable in terminal park; no out-of-order effect"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-32",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd32_repeat_bootstrap"
+      ],
+      "assertions": [
+        "Deterministic, no destructive/duplicate schema changes; roles/grants correct"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "FND-33",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd14_33_consumer_crash_before_ack"
+      ],
+      "assertions": [
+        "At-least-once delivery; idempotent local effect; no broker-level exactly-once claim"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Real consumer process death closes its TCP connection before ACK; no Docker network-detach/blackhole experiment."
+      ]
+    },
+    {
+      "id": "FND-34",
+      "status": "PASS",
+      "command": "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+      "exit_code": 0,
+      "test_ids": [
+        "test_fnd34_no_v1_imports + offline provider/unit guard + e2e private route"
+      ],
+      "assertions": [
+        "No real Telegram/OpenRouter/R2 integrations or V1 imports; no business data emitted"
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Foundation import check, explicit fake guards and private route proof; full live SDK/provider compatibility NOT_RUN."
+      ]
+    },
+    {
+      "id": "ISO-01",
+      "status": "PASS",
+      "command": [
+        "python3 scripts/v2/inspect-lab.py"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Isolated Compose"
+      ],
+      "assertions": [
+        "20 declared containers; internal project network; own volumes; no runtime bind mounts or host ports."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/isolation.json"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "ISO-02",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 build migrate",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 up -d --no-build",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Fresh deployment"
+      ],
+      "assertions": [
+        "Fresh named volumes bootstrap and repeat migrations, queues/workers/HTTP ready."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "ISO-03",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 restart search",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Independent deploy"
+      ],
+      "assertions": [
+        "Only search restarted; all deployed checks passed afterward."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Independent restart only; no per-owner packaging/rolling schema upgrade proof."
+      ]
+    },
+    {
+      "id": "ISO-04",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "DB role security"
+      ],
+      "assertions": [
+        "14 owners future defaults/sequence tests; 12 domain roles deny132foreign schema SELECTs, public CREATE and SET ROLE."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "ISO-05",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Messaging isolation"
+      ],
+      "assertions": [
+        "V1-named DIRECT declared only on lab broker alongside distinct V2 TOPIC; durable queues/parking/replay."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Shared broker principal is a known authorization gap."
+      ]
+    },
+    {
+      "id": "ISO-06",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "python3 scripts/v2/lab-faults.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Reliable outbox/inbox"
+      ],
+      "assertions": [
+        "FND01\u201334 exercised by53pytest cases plus genuine scoped restart/outage driver."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/restarts.json"
+      ],
+      "limitations": [
+        "See per-FND limitations; confirm blackhole deadline is unverified."
+      ]
+    },
+    {
+      "id": "EVT-01",
+      "status": "PASS",
+      "command": [
+        "PYTHONDONTWRITEBYTECODE=1 python3 scripts/v2/verify-contracts.py",
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Contract validity"
+      ],
+      "assertions": [
+        "37schemas meta/reference checks;62strict JSON files; original25scenario fixtures plus semantic/action negatives."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "EVT-02",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Ordering"
+      ],
+      "assertions": [
+        "Duplicate/hash/version/gap/replay tests, stale source/media generations and search rebuild concurrency."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "ING-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Raw listener"
+      ],
+      "assertions": [
+        "Synthetic create/two edits/empty delete/delete-before-create/tombstone workflow."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "No real Telegram account/session lease/fencing; uncertain transport reconciliation remains provisional."
+      ]
+    },
+    {
+      "id": "ING-02",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Albums"
+      ],
+      "assertions": [
+        "Album journal/late members/limits and stable canonical tested in owner-state harness."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "Actual worker kill while album settling and max-load buffer recovery NOT_RUN."
+      ]
+    },
+    {
+      "id": "ING-03",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Parser"
+      ],
+      "assertions": [
+        "Generic single/digest/album/mixed policy and reparse tests; buffered threads fail closed."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "Not a complete V1 recipe registry or full thread assembler."
+      ]
+    },
+    {
+      "id": "ING-04",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Quarantine"
+      ],
+      "assertions": [
+        "Durable owner input/quarantine design with explicit authorized release/reparse audit."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "No traffic-based quarantine global capacity/retention or dedicated process-kill test."
+      ]
+    },
+    {
+      "id": "DED-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Pre-AI"
+      ],
+      "assertions": [
+        "Confirmed active catalog signal required for cross-source suppression; failed unconfirmed extraction cannot suppress next source."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Near-text signals are hints; load/multi-replica/perceptual-image parity unproved."
+      ]
+    },
+    {
+      "id": "AI-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "AI extraction"
+      ],
+      "assertions": [
+        "Fake valid/invalid/rate-limit/timeout, owner run audit, schema and normalization gates."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Live LLM adapter/fallback/cost latency parity absent."
+      ]
+    },
+    {
+      "id": "MED-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Media"
+      ],
+      "assertions": [
+        "Actual JPEG/PNG/WebP transform/EXIF/bounds/hash; fake storage and media-only retry revision tests."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "Public object capability/expiry/multi-asset delivery and real storage absent."
+      ]
+    },
+    {
+      "id": "CAT-01",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Canonical catalog"
+      ],
+      "assertions": [
+        "Owner evidence/canonical snapshots/review/merge and atomic outbox; corrected pending review and empty batch approval."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "No full adversarial multi-owner merge load matrix."
+      ]
+    },
+    {
+      "id": "CAT-02",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Tombstone"
+      ],
+      "assertions": [
+        "Multi-source remaining evidence, last-source hide and stale tombstone behavior."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "CAT-03",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Reparse"
+      ],
+      "assertions": [
+        "Stale1/3/2generation refusal, approved two-to-one replacement, empty-generation approval and corrected-review rebinding."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "SEA-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Search"
+      ],
+      "assertions": [
+        "Price daily/monthly/one-time and visibility/query error tests over synthetic fixtures."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Complete V1 differential sorting/tags/location/media/UI matrix NOT_RUN."
+      ]
+    },
+    {
+      "id": "SEA-02",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Rebuild"
+      ],
+      "assertions": [
+        "Archive rebuild into new namespace, pointer switch and actual PostgreSQL serialization against live snapshot."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": []
+    },
+    {
+      "id": "NOT-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Matching"
+      ],
+      "assertions": [
+        "One initial job; replay/edit do not duplicate; identity/consent/premium/stale checks."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Full V1 matching matrix and long-lived entitlement refresh policy unproved."
+      ]
+    },
+    {
+      "id": "NOT-02",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Delivery"
+      ],
+      "assertions": [
+        "Fake success/unknown hold, retries/attempt states; deployed matcher/sender share owner data."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "No separately committed external-send intent/result crash protocol or exactly-once Telegram guarantee."
+      ]
+    },
+    {
+      "id": "IDN-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Identity"
+      ],
+      "assertions": [
+        "Identity owner activation/award projection and source reward saga executed."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Complete V1 referral/expiry/admin product semantics not established."
+      ]
+    },
+    {
+      "id": "CTL-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Control"
+      ],
+      "assertions": [
+        "Source saga waits configuration ACKs; failed dependency visible; flags/audit."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Already granted reward compensation is manual reconciliation."
+      ]
+    },
+    {
+      "id": "TAX-01",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Taxonomy"
+      ],
+      "assertions": [
+        "Owner tag event updates catalog/search/filter projections without foreign SQL."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Per-consumer operation ACK reconciliation under outage not fully exercised."
+      ]
+    },
+    {
+      "id": "CON-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Content"
+      ],
+      "assertions": [
+        "Command-driven schedule/fake publication, unknown hold and permanent-failure no-resend."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "No automatic publication scheduler process or real publish."
+      ]
+    },
+    {
+      "id": "ANL-01",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Analytics"
+      ],
+      "assertions": [
+        "Event-fed local counters plus actual manual record counter mutation."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Not full V1 beta analytics/dashboard metric parity."
+      ]
+    },
+    {
+      "id": "API-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "HTTP adapters"
+      ],
+      "assertions": [
+        "Synthetic HMAC auth, owner HTTP,202operations, explicit terminal failure and forbidden calls."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Full route/request/response/rate-limit parity absent; see V2_PARITY.md."
+      ]
+    },
+    {
+      "id": "BOT-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Bot"
+      ],
+      "assertions": [
+        "Synthetic /start,/search,/filters adapter exists."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "Full referral/dialog/retry workflow and real bot polling/sending absent; no dedicated deployed bot command workflow test."
+      ]
+    },
+    {
+      "id": "UI-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Frontends"
+      ],
+      "assertions": [
+        "Static public/admin HTML/JS/CSS served and smoke-tested over TestClient."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "No browser automation or complete original UI compatibility."
+      ]
+    },
+    {
+      "id": "E2E-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Happy path"
+      ],
+      "assertions": [
+        "Genuine owner DB/broker and deployed HTTP raw\u2192parse\u2192AI\u2192catalog\u2192search\u2192fake notification."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/integration.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Providers/storage/sender synthetic; no real external effect."
+      ]
+    },
+    {
+      "id": "E2E-02",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Mutation path"
+      ],
+      "assertions": [
+        "Deployed two edits/delete; album/digest/merge/review/reparse converge in owner harness."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Not all mutation variants rerun through deployed HTTP/crash boundaries."
+      ]
+    },
+    {
+      "id": "E2E-03",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "python3 scripts/v2/lab-faults.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Restart"
+      ],
+      "assertions": [
+        "Real process kills, broker/DB restarts, independent search restart then HTTP rerun."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/restarts.json",
+        ".artifacts/v2/final/e2e.xml"
+      ],
+      "limitations": [
+        "Not every business worker/album/reparse/send boundary killed in deployed stack."
+      ]
+    },
+    {
+      "id": "E2E-04",
+      "status": "NOT_RUN",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": null,
+      "test_ids": [
+        "Backfill"
+      ],
+      "assertions": [
+        "Executed subset: repeatable26table synthetic compatibility archive only."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Active entity/FK-to-event/backfill relation migration is not implemented; no full acceptance pass."
+      ]
+    },
+    {
+      "id": "SEC-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Privacy"
+      ],
+      "assertions": [
+        "Synthetic fixtures; redacted error-class diagnostics; scoped SQL and denied replay tests."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/unit.xml",
+        ".artifacts/v2/final/integration.xml"
+      ],
+      "limitations": [
+        "Shared broker producer authentication and append-only replay ACL remain gaps; historical lab-only credential incident documented."
+      ]
+    },
+    {
+      "id": "SEC-02",
+      "status": "PASS",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q",
+        "python3 scripts/v2/inspect-lab.py",
+        "docker run --rm --network none --read-only --tmpfs /tmp --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/contracts:/app/contracts:ro -v /home/deploy/projects/EstateFlow/tests/fixtures/v2:/app/tests/fixtures/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw estateflow-v2-lab:dev python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/unit.xml /app/v2/tests/unit -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Network"
+      ],
+      "assertions": [
+        "No default route, TEST-NET connect denied, internal runtime network and default-deny fake provider configuration."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/e2e.xml",
+        ".artifacts/v2/final/isolation.json",
+        ".artifacts/v2/final/unit.xml"
+      ],
+      "limitations": [
+        "No actual prohibited provider contacted; no live SDK compatibility/packet-capture certification."
+      ]
+    },
+    {
+      "id": "OPS-01",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -e EFV2_DEPLOYED_TESTS=1 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/e2e.xml /app/v2/tests/e2e -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Observability"
+      ],
+      "assertions": [
+        "DB/progress readiness and pending/age/retry/park counters."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/e2e.xml",
+        ".artifacts/v2/final/foundation.xml"
+      ],
+      "limitations": [
+        "Full projection lag dashboards, alerts/load/SLO observability absent."
+      ]
+    },
+    {
+      "id": "OPS-02",
+      "status": "MOCK_ONLY",
+      "command": [
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/v2:/app/v2:ro -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/foundation.xml /app/v2/tests/foundation -q",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 run --rm --no-deps --user 1000:1000 -v /home/deploy/projects/EstateFlow/.artifacts/v2/final:/evidence:rw v2-test-runner python -m pytest --tb=short -p no:cacheprovider -c /app/v2/pytest.ini --junitxml=/evidence/integration.xml /app/v2/tests/integration -q",
+        "python3 scripts/v2/lab-restore.py --project estateflow-v2-isolated-verify20261110 --env-file infra/v2/.env.verification.local"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Recovery"
+      ],
+      "assertions": [
+        "Replay underlying authorization/state + retry publication; rebuild and112table same-cluster restore."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/foundation.xml",
+        ".artifacts/v2/final/integration.xml",
+        ".artifacts/v2/final/restore.json"
+      ],
+      "limitations": [
+        "Full CLI operator flow, offhost/PITR and production RBAC not proven."
+      ]
+    },
+    {
+      "id": "OPS-03",
+      "status": "PASS",
+      "command": [
+        "python3 scripts/v2/inspect-lab.py"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Cleanup"
+      ],
+      "assertions": [
+        "Old project stopped and all volumes preserved; drivers restrict project names."
+      ],
+      "artifact_paths": [
+        ".artifacts/v2/final/isolation.json"
+      ],
+      "limitations": [
+        "No destructive cleanup command executed or authorized."
+      ]
+    },
+    {
+      "id": "QA-01",
+      "status": "PASS",
+      "command": [
+        "docker run --rm --network none --read-only --tmpfs /tmp estateflow-v2-lab:dev python -m ruff check --no-cache --config /app/v2/pyproject.toml /app/v2",
+        "docker run --rm --network none --read-only --tmpfs /tmp estateflow-v2-lab:dev python -m mypy --config-file /app/v2/pyproject.toml --cache-dir /tmp/mypy /app/v2",
+        "docker compose --env-file infra/v2/.env.verification.local -f infra/v2/compose.yaml -p estateflow-v2-isolated-verify20261110 build migrate",
+        "docker run --rm --network none --read-only --tmpfs /tmp estateflow-v2-lab:dev python -m pip check",
+        "PYTHONDONTWRITEBYTECODE=1 python3 scripts/v2/verify-contracts.py"
+      ],
+      "exit_code": 0,
+      "test_ids": [
+        "Static/build"
+      ],
+      "assertions": [
+        "Final image build/lint/type/dependency consistency and suites pass."
+      ],
+      "artifact_paths": [
+        "docs/v2/verification/V2_PARITY.md"
+      ],
+      "limitations": [
+        "Vulnerability database/SBOM and transitive hash lock audit NOT_RUN."
+      ]
+    },
+    {
+      "id": "QA-02",
+      "status": "PASS",
+      "command": [],
+      "exit_code": 0,
+      "test_ids": [
+        "V1 parity"
+      ],
+      "assertions": [
+        "Every inventoried V1 route/feature explicitly labeled in V2_PARITY.md."
+      ],
+      "artifact_paths": [
+        "docs/v2/verification/V2_PARITY.md"
+      ],
+      "limitations": [
+        "Inventory completeness is evidence-backed by Phase0 route list; statuses do not imply complete parity."
+      ]
+    },
+    {
+      "id": "LIVE-PROVIDERS",
+      "status": "NOT_RUN",
+      "command": [],
+      "exit_code": null,
+      "assertions": [],
+      "artifact_paths": [
+        "docs/v2/verification/V2_OPEN_ITEMS.md"
+      ],
+      "limitations": [
+        "Forbidden in this scope: no real Telegram/LLM/storage/send/provider validation."
+      ]
+    },
+    {
+      "id": "ACTIVE-BACKFILL",
+      "status": "NOT_RUN",
+      "command": [],
+      "exit_code": null,
+      "assertions": [],
+      "artifact_paths": [
+        "docs/v2/verification/V2_OPEN_ITEMS.md"
+      ],
+      "limitations": [
+        "Only archive importer exists; active entity and relationship conversion not implemented."
+      ]
+    },
+    {
+      "id": "DEPENDENCY-CVE-AUDIT",
+      "status": "NOT_RUN",
+      "command": [],
+      "exit_code": null,
+      "assertions": [],
+      "artifact_paths": [
+        "docs/v2/verification/V2_OPEN_ITEMS.md"
+      ],
+      "limitations": [
+        "No vulnerability database/SBOM or transitive hash audit; offline pip check only."
+      ]
+    },
+    {
+      "id": "BROWSER-AUTOMATION",
+      "status": "NOT_RUN",
+      "command": [],
+      "exit_code": null,
+      "assertions": [],
+      "artifact_paths": [
+        "docs/v2/verification/V2_OPEN_ITEMS.md"
+      ],
+      "limitations": [
+        "Static HTTP smoke executed; no browser runner installed/executed."
+      ]
+    },
+    {
+      "id": "CONFIRM-BLACKHOLE-DEADLINE",
+      "status": "NOT_RUN",
+      "command": [],
+      "exit_code": null,
+      "assertions": [],
+      "artifact_paths": [
+        "docs/v2/verification/V2_OPEN_ITEMS.md"
+      ],
+      "limitations": [
+        "10s socket/blocked timeout is not a proved independent publisher-confirm deadline."
+      ]
+    },
+    {
+      "id": "BROKER-FORGERY-NEGATIVE",
+      "status": "NOT_RUN",
+      "command": [],
+      "exit_code": null,
+      "assertions": [],
+      "artifact_paths": [
+        "docs/v2/verification/V2_OPEN_ITEMS.md"
+      ],
+      "limitations": [
+        "Known shared principal and self-asserted actor security gap; runtime forged-message denial test not implemented."
+      ]
+    }
+  ],
+  "pytest_cases": [
+    {
+      "id": "tests.unit.test_api::test_webapp_cannot_spoof_signed_subject_or_bypass_signature",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.019
+    },
+    {
+      "id": "tests.unit.test_api::test_admin_denies_user_token_and_real_session_starts",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.014
+    },
+    {
+      "id": "tests.unit.test_api::test_ui_static_artifacts_and_operation_error_are_explicit",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.039
+    },
+    {
+      "id": "tests.unit.test_contracts.Contracts::test_hash_not_dict_insertion_order",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_contracts.Contracts::test_lab_event_is_not_privileged_by_body",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.008
+    },
+    {
+      "id": "tests.unit.test_contracts.Contracts::test_original_fixture_decisions",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.107
+    },
+    {
+      "id": "tests.unit.test_contracts.Contracts::test_semantic_identity_mismatch_denied",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_domains.DomainTests::test_delete_before_create_blocks_delayed_creation",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.02
+    },
+    {
+      "id": "tests.unit.test_domains.DomainTests::test_full_pipeline_and_initial_notification_once",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.045
+    },
+    {
+      "id": "tests.unit.test_domains.DomainTests::test_other_active_source_keeps_merged_listing_visible",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.024
+    },
+    {
+      "id": "tests.unit.test_domains.DomainTests::test_two_edits_then_empty_delete_do_not_resurrect",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.036
+    },
+    {
+      "id": "tests.unit.test_domains.DomainTests::test_unknown_send_is_held_not_retried",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.015
+    },
+    {
+      "id": "tests.unit.test_domains.LifecycleTests::test_album_late_member_updates_same_canonical_and_keeps_members",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.024
+    },
+    {
+      "id": "tests.unit.test_domains.LifecycleTests::test_closed_buffer_quarantine_can_be_reparsed_with_audit",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.012
+    },
+    {
+      "id": "tests.unit.test_domains.LifecycleTests::test_content_unknown_does_not_republish",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.079
+    },
+    {
+      "id": "tests.unit.test_domains.LifecycleTests::test_digest_fanout_keeps_real_message_identity_and_reparse_held",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.023
+    },
+    {
+      "id": "tests.unit.test_domains.LifecycleTests::test_taxonomy_remap_updates_catalog_filter_and_projection",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.017
+    },
+    {
+      "id": "tests.unit.test_domains.AdditionalOwnerTests::test_ai_invalid_reply_is_audited_as_failed_without_catalog_event",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_domains.AdditionalOwnerTests::test_source_approval_has_acknowledged_saga_result",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.021
+    },
+    {
+      "id": "tests.unit.test_domains.DedupRecoveryTests::test_unconfirmed_signal_cannot_suppress_a_second_source_after_ai_failure",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.003
+    },
+    {
+      "id": "tests.unit.test_domains.SearchParityTests::test_daily_price_is_normalized_before_search_and_sale_is_hidden",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.016
+    },
+    {
+      "id": "tests.unit.test_domains.MediaReadinessTests::test_actual_codec_output_reaches_catalog_without_bytes_in_event",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.009
+    },
+    {
+      "id": "tests.unit.test_domains.MediaReadinessTests::test_required_failed_media_prevents_publication",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.01
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_emits_decodable_bounded_output_and_actual_hash[PNG-image/png]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.002
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_emits_decodable_bounded_output_and_actual_hash[JPEG-image/jpeg]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_emits_decodable_bounded_output_and_actual_hash[WEBP-image/webp]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.033
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_applies_exif_orientation_and_removes_metadata",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_shrinks_to_byte_budget_instead_of_returning_oversize_data",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.073
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_preserves_png_alpha",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_invalid_content_and_mime_disagreement[garbage-None]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_invalid_content_and_mime_disagreement[-None]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_invalid_content_and_mime_disagreement[\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00x\\x00\\x00\\x00<\\x08\\x02\\x00\\x00\\x00\"\\xcf\\xe9\\xff\\x00\\x00\\x00\\x9cIDATx\\x9c\\xed\\xd0A\\x11\\x00 \\x0c\\xc00\\xc0\\xbf\\xe7\\xe1\\xa2<H\\x14\\xf4\\xbagQ8\\xaf\\x03~at\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\x88\\xd1\\x11\\xa3#FG\\x8c\\x8e\\x18\\x1d1:bt\\xc4\\xe8\\xc8\\x05u\\xa9\\x01w\\n\\xeb\\x9cI\\x00\\x00\\x00\\x00IEND\\xaeB`\\x82-image/jpeg]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_unsupported_codec_and_animation",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_enforces_input_byte_and_pixel_limits_before_transformation",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_bad_limits_and_impossible_budget[limits0]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_bad_limits_and_impossible_budget[limits1]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_bad_limits_and_impossible_budget[limits2]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.003
+    },
+    {
+      "id": "tests.unit.test_media::test_codec_rejects_bad_limits_and_impossible_budget[limits3]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_immutable_keys_and_authorized_fake_fetch",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_fetch_and_store_reject_external_or_unsafe_references[https://example.invalid/image.png]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_fetch_and_store_reject_external_or_unsafe_references[file:///etc/passwd]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_fetch_and_store_reject_external_or_unsafe_references[offline://objects/../bad]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_fetch_and_store_reject_external_or_unsafe_references[offline://other/key]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[../a]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[/a]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[a//b]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[a?token=x]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[a#b]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[a\\\\b]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_object_store_rejects_noncanonical_keys[]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env0]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env1]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env2]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env3]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env4]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env5]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_rejects_any_nonempty_external_provider_configuration[env6]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_checks_current_environment_on_each_call",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_extraction_output_validates_against_existing_listing_schema[success]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_extraction_output_validates_against_existing_listing_schema[fallback]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_provider_recognizes_synthetic_amount_order_and_listing_period[SYNTHETIC rent 100 USD 2 rooms-100-USD-monthly]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_provider_recognizes_synthetic_amount_order_and_listing_period[SYNTHETIC sale USD 20000-20000-USD-one_time]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_media::test_fake_provider_recognizes_synthetic_amount_order_and_listing_period[SYNTHETIC daily 250000 UZS-250000-UZS-daily]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_guard_allows_only_explicitly_synthetic_bot_key_and_lab_credentials",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_provider_failures_are_explicit_and_deterministic[invalid-ProviderInvalidResponse]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_provider_failures_are_explicit_and_deterministic[rate_limit-ProviderRateLimit]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_provider_failures_are_explicit_and_deterministic[timeout-ProviderTimeout]",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_media::test_provider_caps_input_and_rejects_unsupported_modes_and_live_media",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_outcomes::test_permanent_command_failure_finishes_operation_without_retrying_forever",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.005
+    },
+    {
+      "id": "tests.unit.test_outcomes::test_failed_delegated_command_without_http_operation_still_emits_failure",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_catalog_delayed_older_generation_never_overwrites_newer_evidence",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.004
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_approved_digest_replacement_retracts_old_generation_atomically",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.021
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_action_specific_missing_merge_target_rejected_by_schema",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_terminal_content_failure_is_not_automatically_republished",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.002
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_search_rebuild_uses_event_archive_in_new_projection_namespace",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.002
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_empty_complete_generation_preserves_old_until_explicit_batch_review",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.004
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_failed_source_approval_saga_is_explicit_and_does_not_activate",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.002
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_media_retry_decodes_capture_without_repeating_extraction",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.01
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_stale_entitlement_parks_and_refresh_resumes_with_current_priority",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.011
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_analytics_record_changes_counter",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_media_revision_cannot_regress_after_a_newer_retry_result",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.003
+    },
+    {
+      "id": "tests.unit.test_review_regressions::test_corrected_generation_rebinds_pending_review_to_current_content",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.008
+    },
+    {
+      "id": "tests.unit.test_security.SecurityTests::test_real_provider_configuration_fails_closed",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.unit.test_security.SecurityTests::test_token_tampering_expiry_and_future_issued_rejected",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.unit.test_security.SecurityTests::test_webapp_signed_identity_with_bounded_clock_skew",
+      "status": "PASS",
+      "suite": "unit",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd03_producer_process_killed_after_commit",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.878
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd04_confirm_before_mark_process_crash",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.913
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd06_ambiguous_confirm_keeps_identity",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.172
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd07_concurrent_dispatch_claim",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.055
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd08_lease_fencing",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.09
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd14_33_consumer_crash_before_ack",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.992
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd18_retry_delay_budget",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.0
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd19_expired_park",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.047
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[listener]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.04
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[source_parser]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.036
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[pre_ai]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.035
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[ai]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.035
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[catalog]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.034
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[search]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.036
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[notifications]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.036
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[identity]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.036
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[control]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.037
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[taxonomy]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.036
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[content]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.035
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[analytics]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.037
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[lab_producer]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.038
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd26_owner_future_defaults[lab_consumer]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.043
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd27_exchange_coexistence",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.012
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd28_private_compose",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd32_repeat_bootstrap",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.836
+    },
+    {
+      "id": "tests.foundation.test_faults::test_retry_due_real_broker",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.186
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd17_retry_process_crash_before_ack",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.846
+    },
+    {
+      "id": "tests.foundation.test_faults::test_fnd15_actual_deferred_commit_failure",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.073
+    },
+    {
+      "id": "tests.foundation.test_faults::test_guards_before_connect",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.foundation.test_faults::test_routing_and_permanent_failures_park",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.063
+    },
+    {
+      "id": "tests.foundation.test_faults::test_terminal_retry_authorized_replay_can_recover",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.166
+    },
+    {
+      "id": "tests.foundation.test_faults::test_retry_transport_failures_have_separate_finite_budget",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.275
+    },
+    {
+      "id": "tests.foundation.test_faults::test_unexpected_handler_error_uses_bounded_durable_processing_budget",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.13
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd01_rollback",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.057
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd02_commit_before_dispatch",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.122
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd09_identical_duplicate",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.067
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd10_changed_payload_conflict",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.056
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd11_revision_conflict",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.054
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd12_gap_replay",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.116
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd13_known_stale",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.063
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd15_commit_failure_rolls_back",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.061
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd16_17_retry_durable_backoff",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.077
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd18_19_bounded_retry",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.12
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd20_poison_durable[{bad]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.052
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd20_poison_durable[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.053
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd20_poison_durable[body2]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.052
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd21_22_replay_authorization_audit",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.107
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd25_cross_schema_denied[lab_producer-lab_consumer]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.041
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd25_cross_schema_denied[lab_consumer-lab_producer]",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.041
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd29_safe_diagnostics",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.052
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd30_concurrent_duplicates",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.06
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd31_gap_expiry",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.101
+    },
+    {
+      "id": "tests.foundation.test_foundation::test_fnd34_no_v1_imports",
+      "status": "PASS",
+      "suite": "foundation",
+      "seconds": 0.001
+    },
+    {
+      "id": "tests.integration.test_backfill::test_synthetic_26_table_compatibility_is_repeatable",
+      "status": "PASS",
+      "suite": "integration",
+      "seconds": 0.73
+    },
+    {
+      "id": "tests.integration.test_owner_security::test_all_context_runtime_roles_deny_every_foreign_schema",
+      "status": "PASS",
+      "suite": "integration",
+      "seconds": 1.755
+    },
+    {
+      "id": "tests.integration.test_pipeline::test_real_pipeline_transactional_changes_and_fake_send",
+      "status": "PASS",
+      "suite": "integration",
+      "seconds": 22.644
+    },
+    {
+      "id": "tests.integration.test_pipeline::test_real_source_approval_saga_and_taxonomy_events",
+      "status": "PASS",
+      "suite": "integration",
+      "seconds": 11.299
+    },
+    {
+      "id": "tests.integration.test_search_rebuild::test_rebuild_and_live_snapshot_share_owner_mutation_lock",
+      "status": "PASS",
+      "suite": "integration",
+      "seconds": 0.345
+    },
+    {
+      "id": "tests.e2e.test_http_stack::test_independent_services_http_to_fake_notification_then_edits_and_delete",
+      "status": "PASS",
+      "suite": "e2e",
+      "seconds": 9.041
+    },
+    {
+      "id": "tests.e2e.test_http_stack::test_failed_operation_is_observable_and_incomplete_merge_is_rejected",
+      "status": "PASS",
+      "suite": "e2e",
+      "seconds": 0.536
+    },
+    {
+      "id": "tests.e2e.test_http_stack::test_private_lab_has_no_default_network_route",
+      "status": "PASS",
+      "suite": "e2e",
+      "seconds": 0.001
+    }
+  ],
+  "limitations": [
+    "Passing implemented tests does not complete every master acceptance criterion.",
+    "Phase0 audit/proposed docs are not retroactively runtime-certified.",
+    "No live provider/production/real user data or external sends."
+  ]
+}

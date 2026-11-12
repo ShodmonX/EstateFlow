@@ -1,0 +1,13 @@
+# ADR-004 — Source, candidate and canonical lifecycle
+
+> 2026-11-10 isolated implementation note: M00–M10 lab execution was authorized. See ../verification/FINAL_V2_REPORT.md and ADR-006-isolated-v2-as-built.md for actual code/test status. Earlier design sections remain drafts; they are not proof of production policy, physical legacy migration, broker producer authentication or complete V1 parity. D01–D08 remain LAB_PROVISIONAL.
+
+Status: **PROPOSED / OPEN D03–D05, D07**. Date: 2026-11-09. No implementation approved.
+
+VERIFIED problem: repeated edits collide (`src/estateflow/services/telegram_listener.py:473`); normal run drops textless deletes (:251–252); text/index-dependent candidate identities (`src/estateflow/services/source_parsing/contracts.py:364–403`) and partial catalog events (`src/estateflow/services/post_ai_dedup.py:1464–1472`) cannot define a safe replay/canonical lifecycle.
+
+Propose immutable source/message, album, parser generation/item and stored canonical IDs, each with an accountable version owner. Listener source revisions count journal observations under fencing, not global Telegram truth; uncertain order parks until evidence-based reconciliation. Retain tombstone watermarks; a delete retracts source evidence. Catalog recalculates from remaining active evidence and emits actual canonical ID/revision/full snapshot. Last-source hide versus review hold remains D03. New policy reparse creates a new batch/candidate set with explicit supersession/retraction manifest; positional matching cannot silently repoint canonical identity. Merge/review/media changes increment canonical revision and outbox snapshots, with mutation links for multi-aggregate convergence.
+
+Alternatives: source-message ID as listing ID breaks digest fanout and merged sources; text-hash identity changes with edits; timestamps cannot impose reliable global order. Explicit ID mapping/history costs durable storage but preserves lineage. Bounded album settling plus late revisions costs extra parses; permanent suppression of late members risks incomplete data. Privacy retention and replay history must be jointly chosen.
+
+Draft JSON Schemas and synthetic transition expectations are specified in event-contracts.md. Domain equality, ordering, batch activation, replay permissions and stale media protection need future executable validators/tests; JSON Schema alone cannot prove them. No two live session listeners are authorized. Approval required for tombstone correction/unmerge permissions, last-source visibility, buffer expiry, media publication and retention. See task-001-decisions.md.

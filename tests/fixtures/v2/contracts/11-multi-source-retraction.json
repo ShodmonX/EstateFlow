@@ -1,0 +1,145 @@
+{
+  "synthetic": true,
+  "scenario_id": "11-multi-source-retraction",
+  "description": "SYNTHETIC 11-multi-source-retraction",
+  "steps": [
+    {
+      "schema_file": "catalog.listing.changed.v1.schema.json",
+      "event": {
+        "event_id": "574f8c86-8db5-568b-b652-2dd117eee8a3",
+        "event_type": "catalog.listing.changed",
+        "event_version": 1,
+        "producer": "catalog",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "canonical_listing",
+        "aggregate_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+        "aggregate_version": 4,
+        "payload": {
+          "canonical_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+          "canonical_revision": 4,
+          "mutation_id": "9de3804e-132b-5b12-8811-5312b9cfc807",
+          "reason": "evidence_retracted",
+          "visibility": "active",
+          "parent_canonical_id": null,
+          "source_evidence": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 4,
+              "state": "retracted",
+              "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379"
+            },
+            {
+              "message_uid": "e075b3bb-4811-5ad5-8c6e-d4bfff75c915",
+              "source_revision": 1,
+              "state": "active",
+              "candidate_id": "04761fbc-5806-5e23-a44b-8444d663c2ba"
+            }
+          ],
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          },
+          "review": "none",
+          "redirect_from_ids": [],
+          "related_canonical_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "search",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "catalog.listing.retracted.v1.schema.json",
+      "event": {
+        "event_id": "e23664ff-16d3-5ac0-8bbb-3115ecf2236e",
+        "event_type": "catalog.listing.retracted",
+        "event_version": 1,
+        "producer": "catalog",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "canonical_listing",
+        "aggregate_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+        "aggregate_version": 5,
+        "payload": {
+          "canonical_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+          "canonical_revision": 5,
+          "mutation_id": "df7d2e30-5841-5ea6-9cd8-eb02100da439",
+          "reason": "evidence_retracted",
+          "visibility": "hidden",
+          "parent_canonical_id": null,
+          "source_evidence": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 4,
+              "state": "retracted",
+              "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379"
+            },
+            {
+              "message_uid": "e075b3bb-4811-5ad5-8c6e-d4bfff75c915",
+              "source_revision": 1,
+              "state": "retracted",
+              "candidate_id": "04761fbc-5806-5e23-a44b-8444d663c2ba"
+            }
+          ],
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          },
+          "review": "none",
+          "redirect_from_ids": [],
+          "related_canonical_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "search",
+      "expected": "await_approval",
+      "assertion": "Structurally represent hidden last-source policy; runtime use blocked until D03 ratified.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "One source retraction does not erase other active evidence; last-source hidden is proposed.",
+  "requires_decision": [
+    "D03"
+  ]
+}

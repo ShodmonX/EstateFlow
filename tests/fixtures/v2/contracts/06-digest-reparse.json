@@ -1,0 +1,275 @@
+{
+  "synthetic": true,
+  "scenario_id": "06-digest-reparse",
+  "description": "SYNTHETIC 06-digest-reparse",
+  "steps": [
+    {
+      "schema_file": "parser.candidate.parsed.v1.schema.json",
+      "event": {
+        "event_id": "f6f7839c-0344-5386-b21e-a393811e7a86",
+        "event_type": "parser.candidate.parsed",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "candidate",
+        "aggregate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+        "aggregate_version": 1,
+        "payload": {
+          "lineage": {
+            "batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+            "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "candidate_version": 1,
+            "slot_key": "synthetic-slot-0",
+            "generation": 1,
+            "source_refs": [
+              {
+                "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+                "source_revision": 1
+              }
+            ],
+            "album_id": null,
+            "album_revision": null,
+            "policy": {
+              "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+              "policy_revision": 1,
+              "recipe_key": "synthetic.single",
+              "recipe_version": "1",
+              "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "snapshot_ref": "policy/synthetic/1"
+            }
+          },
+          "text": "SYNTHETIC digest item A",
+          "media_capture_refs": [],
+          "supersedes_candidate_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "pre_ai",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "parser.candidate.parsed.v1.schema.json",
+      "event": {
+        "event_id": "ff1da5b2-f2c7-5fd5-899f-f0da606a9b4a",
+        "event_type": "parser.candidate.parsed",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "candidate",
+        "aggregate_id": "04761fbc-5806-5e23-a44b-8444d663c2ba",
+        "aggregate_version": 1,
+        "payload": {
+          "lineage": {
+            "batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+            "candidate_id": "04761fbc-5806-5e23-a44b-8444d663c2ba",
+            "candidate_version": 1,
+            "slot_key": "synthetic-slot-1",
+            "generation": 1,
+            "source_refs": [
+              {
+                "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+                "source_revision": 1
+              }
+            ],
+            "album_id": null,
+            "album_revision": null,
+            "policy": {
+              "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+              "policy_revision": 1,
+              "recipe_key": "synthetic.single",
+              "recipe_version": "1",
+              "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "snapshot_ref": "policy/synthetic/1"
+            }
+          },
+          "text": "SYNTHETIC digest item A",
+          "media_capture_refs": [],
+          "supersedes_candidate_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "pre_ai",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "parser.batch.completed.v1.schema.json",
+      "event": {
+        "event_id": "1ed3cbd2-f8e2-508b-8d43-2d710f6b2c71",
+        "event_type": "parser.batch.completed",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "parser_batch",
+        "aggregate_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+        "aggregate_version": 1,
+        "payload": {
+          "batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+          "generation": 1,
+          "source_refs": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1
+            }
+          ],
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "candidate_ids": [
+            "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "04761fbc-5806-5e23-a44b-8444d663c2ba"
+          ],
+          "supersedes_batch_id": null,
+          "retracts_candidate_ids": [],
+          "outcome": "complete"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "catalog",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "parser.candidate.parsed.v1.schema.json",
+      "event": {
+        "event_id": "346ce68a-0c45-5807-9147-58a43121ff27",
+        "event_type": "parser.candidate.parsed",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "candidate",
+        "aggregate_id": "9e923eb0-f21f-530f-9e75-fc7a42ebcaba",
+        "aggregate_version": 1,
+        "payload": {
+          "lineage": {
+            "batch_id": "f24e40ac-1900-59d1-a77f-0d3ff8287994",
+            "candidate_id": "9e923eb0-f21f-530f-9e75-fc7a42ebcaba",
+            "candidate_version": 1,
+            "slot_key": "synthetic-slot-0",
+            "generation": 2,
+            "source_refs": [
+              {
+                "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+                "source_revision": 1
+              }
+            ],
+            "album_id": null,
+            "album_revision": null,
+            "policy": {
+              "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+              "policy_revision": 2,
+              "recipe_key": "synthetic.single",
+              "recipe_version": "2",
+              "config_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "snapshot_ref": "policy/synthetic/2"
+            }
+          },
+          "text": "SYNTHETIC digest item A",
+          "media_capture_refs": [],
+          "supersedes_candidate_ids": [
+            "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "04761fbc-5806-5e23-a44b-8444d663c2ba"
+          ]
+        }
+      },
+      "schema_valid": true,
+      "consumer": "pre_ai",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "reparse"
+      }
+    },
+    {
+      "schema_file": "parser.batch.completed.v1.schema.json",
+      "event": {
+        "event_id": "048649a8-e680-57ff-bc5d-7b34021ee694",
+        "event_type": "parser.batch.completed",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "parser_batch",
+        "aggregate_id": "f24e40ac-1900-59d1-a77f-0d3ff8287994",
+        "aggregate_version": 2,
+        "payload": {
+          "batch_id": "f24e40ac-1900-59d1-a77f-0d3ff8287994",
+          "generation": 2,
+          "source_refs": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1
+            }
+          ],
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 2,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "2",
+            "config_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "snapshot_ref": "policy/synthetic/2"
+          },
+          "candidate_ids": [
+            "9e923eb0-f21f-530f-9e75-fc7a42ebcaba"
+          ],
+          "supersedes_batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+          "retracts_candidate_ids": [
+            "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "04761fbc-5806-5e23-a44b-8444d663c2ba"
+          ],
+          "outcome": "complete"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "catalog",
+      "expected": "await_approval",
+      "assertion": "Record replacement manifest; wait for extraction outcomes and review of many-to-one canonical mapping before atomic catalog activation.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "reparse"
+      }
+    }
+  ],
+  "expected_final_state": "Source identity unchanged; C declares supersession of A/B; pending extraction and catalog review, old approved generation remains authoritative.",
+  "requires_decision": [
+    "D03"
+  ]
+}

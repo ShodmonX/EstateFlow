@@ -1,0 +1,100 @@
+{
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[a-z]+(?:[._][a-z]+)+$"
+    },
+    "event_version": {
+      "const": 1
+    },
+    "producer": {
+      "enum": [
+        "listener",
+        "source_parser",
+        "pre_ai",
+        "ai",
+        "catalog",
+        "search",
+        "notifications",
+        "identity",
+        "control",
+        "taxonomy",
+        "content",
+        "analytics",
+        "lab_producer",
+        "lab_consumer"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causation_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "aggregate_kind": {
+      "enum": [
+        "source_message",
+        "album",
+        "candidate",
+        "parser_batch",
+        "canonical_listing",
+        "media_job",
+        "synthetic",
+        "command",
+        "domain_record"
+      ]
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregate_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "producer",
+    "occurred_at",
+    "recorded_at",
+    "correlation_id",
+    "causation_id",
+    "aggregate_kind",
+    "aggregate_id",
+    "aggregate_version",
+    "payload"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json",
+  "title": "Draft common event envelope v1",
+  "$comment": "payload constrained by each event schema, never validate only this envelope at ingress. No replay/retry metadata in immutable body."
+}

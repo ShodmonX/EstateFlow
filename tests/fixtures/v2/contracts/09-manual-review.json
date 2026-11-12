@@ -1,0 +1,131 @@
+{
+  "synthetic": true,
+  "scenario_id": "09-manual-review",
+  "description": "SYNTHETIC 09-manual-review",
+  "steps": [
+    {
+      "schema_file": "catalog.listing.changed.v1.schema.json",
+      "event": {
+        "event_id": "e33d853b-5398-5404-a6ec-650b0f191fa3",
+        "event_type": "catalog.listing.changed",
+        "event_version": 1,
+        "producer": "catalog",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "canonical_listing",
+        "aggregate_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+        "aggregate_version": 1,
+        "payload": {
+          "canonical_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+          "canonical_revision": 1,
+          "mutation_id": "2c7fb88c-3002-5719-84f1-e6d85ac60934",
+          "reason": "created",
+          "visibility": "review",
+          "parent_canonical_id": null,
+          "source_evidence": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1,
+              "state": "active",
+              "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379"
+            }
+          ],
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          },
+          "review": "pending",
+          "redirect_from_ids": [],
+          "related_canonical_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "search",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "catalog.listing.changed.v1.schema.json",
+      "event": {
+        "event_id": "818ae352-2012-5d6a-8672-aeead5509d05",
+        "event_type": "catalog.listing.changed",
+        "event_version": 1,
+        "producer": "catalog",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "canonical_listing",
+        "aggregate_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+        "aggregate_version": 2,
+        "payload": {
+          "canonical_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+          "canonical_revision": 2,
+          "mutation_id": "db3cb34b-9395-525a-9a9c-42521bc40389",
+          "reason": "review_approved",
+          "visibility": "active",
+          "parent_canonical_id": null,
+          "source_evidence": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1,
+              "state": "active",
+              "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379"
+            }
+          ],
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          },
+          "review": "approved",
+          "redirect_from_ids": [],
+          "related_canonical_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "search",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "Canonical identity stable; revision 2 approved; visibility event is owner-issued.",
+  "requires_decision": []
+}

@@ -1,0 +1,207 @@
+{
+  "synthetic": true,
+  "scenario_id": "22-invalid-core-state",
+  "description": "SYNTHETIC 22-invalid-core-state",
+  "steps": [
+    {
+      "schema_file": "media.ready.v1.schema.json",
+      "event": {
+        "event_id": "71854246-2139-5f94-91b4-655bf1cabe12",
+        "event_type": "media.ready",
+        "event_version": 1,
+        "producer": "ai",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "media_job",
+        "aggregate_id": "2d357144-6b5d-5276-acb8-c7075650b057",
+        "aggregate_version": 2,
+        "payload": {
+          "media_job_id": "2d357144-6b5d-5276-acb8-c7075650b057",
+          "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+          "source_revision": 1,
+          "media_revision": 2,
+          "media": {
+            "state": "ready",
+            "assets": [],
+            "failure_code": null
+          }
+        }
+      },
+      "schema_valid": false,
+      "consumer": "catalog",
+      "expected": "reject_schema",
+      "assertion": "Reject invalid state-specific core payload; no effects.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "catalog.listing.changed.v1.schema.json",
+      "event": {
+        "event_id": "818ae352-2012-5d6a-8672-aeead5509d05",
+        "event_type": "catalog.listing.changed",
+        "event_version": 1,
+        "producer": "catalog",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "canonical_listing",
+        "aggregate_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+        "aggregate_version": 2,
+        "payload": {
+          "canonical_revision": 2,
+          "mutation_id": "db3cb34b-9395-525a-9a9c-42521bc40389",
+          "reason": "review_approved",
+          "visibility": "active",
+          "parent_canonical_id": null,
+          "source_evidence": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1,
+              "state": "active",
+              "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379"
+            }
+          ],
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          },
+          "review": "approved",
+          "redirect_from_ids": [],
+          "related_canonical_ids": []
+        }
+      },
+      "schema_valid": false,
+      "consumer": "search",
+      "expected": "reject_schema",
+      "assertion": "Reject invalid state-specific core payload; no effects.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "candidate.prechecked.v1.schema.json",
+      "event": {
+        "event_id": "ea34ffe5-9d00-563a-a8c8-f603d9d10ec3",
+        "event_type": "candidate.prechecked",
+        "event_version": 1,
+        "producer": "pre_ai",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "candidate",
+        "aggregate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+        "aggregate_version": 1,
+        "payload": {
+          "lineage": {
+            "batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+            "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "candidate_version": 1,
+            "slot_key": "synthetic-slot-0",
+            "generation": 1,
+            "source_refs": [
+              {
+                "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+                "source_revision": 1
+              }
+            ],
+            "album_id": null,
+            "album_revision": null,
+            "policy": {
+              "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+              "policy_revision": 1,
+              "recipe_key": "synthetic.single",
+              "recipe_version": "1",
+              "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "snapshot_ref": "policy/synthetic/1"
+            }
+          },
+          "decision": "duplicate",
+          "duplicate_of_candidate_id": null,
+          "signal_revision": 1,
+          "reason_code": "synthetic_no_match",
+          "parsed_event_id": "f6f7839c-0344-5386-b21e-a393811e7a86",
+          "text": "SYNTHETIC candidate A",
+          "media_capture_refs": []
+        }
+      },
+      "schema_valid": false,
+      "consumer": "ai",
+      "expected": "reject_schema",
+      "assertion": "Reject invalid state-specific core payload; no effects.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "parser.candidate.rejected.v1.schema.json",
+      "event": {
+        "event_id": "aeb26c08-b150-5ea5-b72e-f8316768033e",
+        "event_type": "parser.candidate.rejected",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "parser_batch",
+        "aggregate_id": "463b83a5-4227-5b80-bc9a-57fe5b15760c",
+        "aggregate_version": 1,
+        "payload": {
+          "batch_id": "463b83a5-4227-5b80-bc9a-57fe5b15760c",
+          "source_refs": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1
+            }
+          ],
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "disposition": "quarantine",
+          "reason_code": "synthetic_policy_mismatch",
+          "quarantine_ref": null
+        }
+      },
+      "schema_valid": false,
+      "consumer": "control",
+      "expected": "reject_schema",
+      "assertion": "Reject invalid state-specific core payload; no effects.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "All four invalid state payloads are rejected.",
+  "requires_decision": []
+}

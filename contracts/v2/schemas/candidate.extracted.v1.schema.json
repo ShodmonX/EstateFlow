@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/candidate.extracted.v1.schema.json",
+  "title": "DRAFT candidate.extracted v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "candidate.extracted"
+        },
+        "producer": {
+          "const": "ai"
+        },
+        "aggregate_kind": {
+          "const": "candidate"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "lineage": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/lineage"
+            },
+            "extraction_run_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "prompt_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "outcome": {
+              "enum": [
+                "accepted",
+                "review_required"
+              ]
+            },
+            "listing": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/listing"
+            },
+            "media": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/media_state"
+            }
+          },
+          "required": [
+            "lineage",
+            "extraction_run_id",
+            "prompt_version",
+            "outcome",
+            "listing",
+            "media"
+          ],
+          "additionalProperties": false
+        },
+        "aggregate_version": {
+          "const": 1
+        }
+      }
+    }
+  ]
+}

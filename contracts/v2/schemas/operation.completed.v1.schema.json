@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/operation.completed.v1.schema.json",
+  "title": "LAB_PROVISIONAL operation.completed",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "operation.completed"
+        },
+        "producer": {
+          "enum": [
+            "listener",
+            "source_parser",
+            "pre_ai",
+            "ai",
+            "catalog",
+            "search",
+            "notifications",
+            "identity",
+            "control",
+            "taxonomy",
+            "content",
+            "analytics"
+          ]
+        },
+        "aggregate_kind": {
+          "const": "domain_record"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "owner": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "subject_id": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "status": {
+              "enum": [
+                "completed",
+                "failed"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "operation_id",
+            "owner",
+            "subject_id",
+            "status",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

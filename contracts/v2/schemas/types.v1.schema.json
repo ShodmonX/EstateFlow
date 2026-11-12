@@ -1,0 +1,602 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/types.v1.schema.json",
+  "title": "Draft core shared value types v1",
+  "$defs": {
+    "policy": {
+      "type": "object",
+      "properties": {
+        "policy_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "policy_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "recipe_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "recipe_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "config_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshot_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "policy_id",
+        "policy_revision",
+        "recipe_key",
+        "recipe_version",
+        "config_sha256",
+        "snapshot_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "platform": {
+          "const": "telegram"
+        },
+        "channel_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "message_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "message_uid": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "source_id",
+        "platform",
+        "channel_id",
+        "message_id",
+        "message_uid"
+      ],
+      "additionalProperties": false
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "batch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "candidate_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "candidate_version": {
+          "const": 1
+        },
+        "slot_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "message_uid": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source_revision": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "message_uid",
+              "source_revision"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "album_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "album_revision": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "policy_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "policy_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "recipe_key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "recipe_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "config_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "snapshot_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "policy_id",
+            "policy_revision",
+            "recipe_key",
+            "recipe_version",
+            "config_sha256",
+            "snapshot_ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "batch_id",
+        "candidate_id",
+        "candidate_version",
+        "slot_key",
+        "generation",
+        "source_refs",
+        "album_id",
+        "album_revision",
+        "policy"
+      ],
+      "additionalProperties": false
+    },
+    "media": {
+      "type": "object",
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "object_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,511}$"
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "mime_type": {
+          "enum": [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "asset_id",
+        "object_key",
+        "content_sha256",
+        "mime_type",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "media_state": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "unavailable",
+            "pending",
+            "ready",
+            "failed"
+          ]
+        },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "object_key": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,511}$"
+              },
+              "content_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "mime_type": {
+                "enum": [
+                  "image/jpeg",
+                  "image/png",
+                  "image/webp"
+                ]
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "asset_id",
+              "object_key",
+              "content_sha256",
+              "mime_type",
+              "width",
+              "height"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "failure_code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "state",
+        "assets",
+        "failure_code"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "ready"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "assets": {
+                "minItems": 1
+              },
+              "failure_code": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "assets": {
+                "maxItems": 0
+              },
+              "failure_code": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "pending",
+                  "unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "assets": {
+                "maxItems": 0
+              },
+              "failure_code": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "listing": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "price": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "currency": {
+          "enum": [
+            "UZS",
+            "USD",
+            null
+          ]
+        },
+        "price_period": {
+          "enum": [
+            "monthly",
+            "daily",
+            "one_time",
+            "unknown"
+          ]
+        },
+        "price_basis": {
+          "enum": [
+            "total",
+            "per_person",
+            "unknown"
+          ]
+        },
+        "rooms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "district": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "taxonomy_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "audience_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "contact_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "price_normalized_monthly": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "area_sqm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "floor": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "total_floors": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rental_confidence": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "listing_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "address": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "owner_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "renovation_level": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "renovation_source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "source_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "furniture": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "audience_excluded_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "uniqueItems": true
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "uniqueItems": true
+        },
+        "field_confidence": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "required": [
+        "description",
+        "price",
+        "currency",
+        "price_period",
+        "price_basis",
+        "rooms",
+        "district",
+        "taxonomy_revision",
+        "audience_tags",
+        "contact_ref"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "message_uid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state": {
+          "enum": [
+            "active",
+            "retracted"
+          ]
+        },
+        "candidate_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "message_uid",
+        "source_revision",
+        "state",
+        "candidate_id"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

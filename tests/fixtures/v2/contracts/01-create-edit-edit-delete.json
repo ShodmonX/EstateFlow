@@ -1,0 +1,205 @@
+{
+  "synthetic": true,
+  "scenario_id": "01-create-edit-edit-delete",
+  "description": "SYNTHETIC 01-create-edit-edit-delete",
+  "steps": [
+    {
+      "schema_file": "raw.message.received.v1.schema.json",
+      "event": {
+        "event_id": "fb0b8353-61ba-5a5b-8d32-c7828248b141",
+        "event_type": "raw.message.received",
+        "event_version": 1,
+        "producer": "listener",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": null,
+        "aggregate_kind": "source_message",
+        "aggregate_id": "502c9536-66b2-587f-8f3d-fea7115a304a",
+        "aggregate_version": 1,
+        "payload": {
+          "source": {
+            "source_id": "37a60cfd-a734-5df8-86f2-db081aee1d38",
+            "platform": "telegram",
+            "channel_id": "synthetic-channel",
+            "message_id": "message-A",
+            "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a"
+          },
+          "source_revision": 1,
+          "observed_order": "confirmed",
+          "platform_revision_token": null,
+          "album_id": null,
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "text": "SYNTHETIC listing revision 1",
+          "media_capture_refs": [],
+          "content_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "raw.message.edited.v1.schema.json",
+      "event": {
+        "event_id": "ac6094d6-b8b0-5e91-bd99-bb27e4ecdc67",
+        "event_type": "raw.message.edited",
+        "event_version": 1,
+        "producer": "listener",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": null,
+        "aggregate_kind": "source_message",
+        "aggregate_id": "502c9536-66b2-587f-8f3d-fea7115a304a",
+        "aggregate_version": 2,
+        "payload": {
+          "source": {
+            "source_id": "37a60cfd-a734-5df8-86f2-db081aee1d38",
+            "platform": "telegram",
+            "channel_id": "synthetic-channel",
+            "message_id": "message-A",
+            "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a"
+          },
+          "source_revision": 2,
+          "observed_order": "confirmed",
+          "platform_revision_token": null,
+          "album_id": null,
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "text": "SYNTHETIC listing revision 2",
+          "media_capture_refs": [],
+          "content_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "raw.message.edited.v1.schema.json",
+      "event": {
+        "event_id": "a2d08950-5c49-5f34-ad9e-ce0a14d49003",
+        "event_type": "raw.message.edited",
+        "event_version": 1,
+        "producer": "listener",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": null,
+        "aggregate_kind": "source_message",
+        "aggregate_id": "502c9536-66b2-587f-8f3d-fea7115a304a",
+        "aggregate_version": 3,
+        "payload": {
+          "source": {
+            "source_id": "37a60cfd-a734-5df8-86f2-db081aee1d38",
+            "platform": "telegram",
+            "channel_id": "synthetic-channel",
+            "message_id": "message-A",
+            "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a"
+          },
+          "source_revision": 3,
+          "observed_order": "confirmed",
+          "platform_revision_token": null,
+          "album_id": null,
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "text": "SYNTHETIC listing revision 3",
+          "media_capture_refs": [],
+          "content_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "raw.message.deleted.v1.schema.json",
+      "event": {
+        "event_id": "06acce9c-212b-5c40-b99f-24e6e8fac48e",
+        "event_type": "raw.message.deleted",
+        "event_version": 1,
+        "producer": "listener",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": null,
+        "aggregate_kind": "source_message",
+        "aggregate_id": "502c9536-66b2-587f-8f3d-fea7115a304a",
+        "aggregate_version": 4,
+        "payload": {
+          "source": {
+            "source_id": "37a60cfd-a734-5df8-86f2-db081aee1d38",
+            "platform": "telegram",
+            "channel_id": "synthetic-channel",
+            "message_id": "message-A",
+            "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a"
+          },
+          "source_revision": 4,
+          "observed_order": "confirmed",
+          "platform_revision_token": null,
+          "album_id": null,
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "reason": "platform_delete"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "retain_tombstone",
+      "assertion": "Retract source evidence; bypass extraction and cheap dedup.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "message-A revision 4 tombstoned; canonical visibility requires evidence recomputation.",
+  "requires_decision": [
+    "D03"
+  ]
+}

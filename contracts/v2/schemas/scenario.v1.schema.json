@@ -1,0 +1,132 @@
+{
+  "type": "object",
+  "properties": {
+    "synthetic": {
+      "const": true
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schema_file": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "event": {
+            "type": "object"
+          },
+          "schema_valid": {
+            "type": "boolean"
+          },
+          "consumer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "expected": {
+            "enum": [
+              "apply",
+              "ignore_duplicate",
+              "ignore_stale",
+              "park_order",
+              "retain_tombstone",
+              "reconcile",
+              "reject_schema",
+              "await_approval"
+            ]
+          },
+          "assertion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "delivery": {
+            "type": "object",
+            "properties": {
+              "attempt": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "replay_operation_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "mode": {
+                "enum": [
+                  "live",
+                  "recovery",
+                  "projection_rebuild",
+                  "reparse"
+                ]
+              }
+            },
+            "required": [
+              "attempt",
+              "replay_operation_id",
+              "mode"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "schema_file",
+          "event",
+          "schema_valid",
+          "consumer",
+          "expected",
+          "assertion",
+          "delivery"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "expected_final_state": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "requires_decision": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "synthetic",
+    "scenario_id",
+    "description",
+    "steps",
+    "expected_final_state",
+    "requires_decision"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/scenario.v1.schema.json",
+  "title": "Synthetic contract scenario v1; expected transitions are specifications, not an executable runtime test"
+}

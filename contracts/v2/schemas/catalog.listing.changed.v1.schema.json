@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/catalog.listing.changed.v1.schema.json",
+  "title": "DRAFT catalog.listing.changed v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "catalog.listing.changed"
+        },
+        "producer": {
+          "const": "catalog"
+        },
+        "aggregate_kind": {
+          "const": "canonical_listing"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "canonical_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "canonical_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "mutation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "reason": {
+              "enum": [
+                "created",
+                "edited",
+                "merged",
+                "review_approved",
+                "review_rejected",
+                "evidence_retracted",
+                "media_changed",
+                "taxonomy_changed"
+              ]
+            },
+            "visibility": {
+              "enum": [
+                "active",
+                "review",
+                "hidden",
+                "merged"
+              ]
+            },
+            "parent_canonical_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source_evidence": {
+              "type": "array",
+              "items": {
+                "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/evidence"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "listing": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/listing"
+            },
+            "media": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/media_state"
+            },
+            "review": {
+              "enum": [
+                "none",
+                "pending",
+                "approved",
+                "rejected"
+              ]
+            },
+            "redirect_from_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "related_canonical_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "canonical_id",
+            "canonical_revision",
+            "mutation_id",
+            "reason",
+            "visibility",
+            "parent_canonical_id",
+            "source_evidence",
+            "listing",
+            "media",
+            "review",
+            "redirect_from_ids",
+            "related_canonical_ids"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

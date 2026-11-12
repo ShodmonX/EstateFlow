@@ -1,0 +1,56 @@
+{
+  "synthetic": true,
+  "scenario_id": "12-media-ready",
+  "description": "SYNTHETIC 12-media-ready",
+  "steps": [
+    {
+      "schema_file": "media.ready.v1.schema.json",
+      "event": {
+        "event_id": "71854246-2139-5f94-91b4-655bf1cabe12",
+        "event_type": "media.ready",
+        "event_version": 1,
+        "producer": "ai",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "media_job",
+        "aggregate_id": "2d357144-6b5d-5276-acb8-c7075650b057",
+        "aggregate_version": 2,
+        "payload": {
+          "media_job_id": "2d357144-6b5d-5276-acb8-c7075650b057",
+          "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+          "source_revision": 1,
+          "media_revision": 2,
+          "media": {
+            "state": "ready",
+            "assets": [
+              {
+                "asset_id": "d89cd6c6-046b-51d8-a829-b082d2817129",
+                "object_key": "synthetic/assets/item.png",
+                "content_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                "mime_type": "image/png",
+                "width": 10,
+                "height": 10
+              }
+            ],
+            "failure_code": null
+          }
+        }
+      },
+      "schema_valid": true,
+      "consumer": "catalog",
+      "expected": "reconcile",
+      "assertion": "Apply media revision only to matching candidate/source revision; visibility governed by D05.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "Media state is explicit; missing bytes never imply success.",
+  "requires_decision": [
+    "D05"
+  ]
+}

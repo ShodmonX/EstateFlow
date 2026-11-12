@@ -1,0 +1,56 @@
+{
+  "synthetic": true,
+  "scenario_id": "18-buffer-unavailable",
+  "description": "SYNTHETIC 18-buffer-unavailable",
+  "steps": [
+    {
+      "schema_file": "parser.candidate.rejected.v1.schema.json",
+      "event": {
+        "event_id": "aeb26c08-b150-5ea5-b72e-f8316768033e",
+        "event_type": "parser.candidate.rejected",
+        "event_version": 1,
+        "producer": "source_parser",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "parser_batch",
+        "aggregate_id": "463b83a5-4227-5b80-bc9a-57fe5b15760c",
+        "aggregate_version": 1,
+        "payload": {
+          "batch_id": "463b83a5-4227-5b80-bc9a-57fe5b15760c",
+          "source_refs": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1
+            }
+          ],
+          "policy": {
+            "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+            "policy_revision": 1,
+            "recipe_key": "synthetic.single",
+            "recipe_version": "1",
+            "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "snapshot_ref": "policy/synthetic/1"
+          },
+          "disposition": "buffer",
+          "reason_code": "buffer_not_configured",
+          "quarantine_ref": null
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "await_approval",
+      "assertion": "Proposed fail closed with bounded wait; no silent passthrough without ratified policy.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "Buffer behavior remains blocked until D04.",
+  "requires_decision": [
+    "D04"
+  ]
+}

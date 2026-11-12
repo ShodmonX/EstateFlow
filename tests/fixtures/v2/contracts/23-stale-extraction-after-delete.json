@@ -1,0 +1,79 @@
+{
+  "synthetic": true,
+  "scenario_id": "23-stale-extraction-after-delete",
+  "description": "SYNTHETIC stale extraction against retained tombstone",
+  "steps": [
+    {
+      "schema_file": "candidate.extracted.v1.schema.json",
+      "event": {
+        "event_id": "1a8e1c2d-9db9-56e9-bcd5-afb2a865e6e9",
+        "event_type": "candidate.extracted",
+        "event_version": 1,
+        "producer": "ai",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "candidate",
+        "aggregate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+        "aggregate_version": 1,
+        "payload": {
+          "lineage": {
+            "batch_id": "789f95ee-ab42-5035-9727-7405e97c239f",
+            "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379",
+            "candidate_version": 1,
+            "slot_key": "synthetic-slot-0",
+            "generation": 1,
+            "source_refs": [
+              {
+                "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+                "source_revision": 1
+              }
+            ],
+            "album_id": null,
+            "album_revision": null,
+            "policy": {
+              "policy_id": "c20a6b4e-1541-57ef-ad29-28f73d0b6d85",
+              "policy_revision": 1,
+              "recipe_key": "synthetic.single",
+              "recipe_version": "1",
+              "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "snapshot_ref": "policy/synthetic/1"
+            }
+          },
+          "extraction_run_id": "0dfb5fa9-b9f6-55a9-aa5f-528476c65bd8",
+          "prompt_version": "draft.synthetic.v1",
+          "outcome": "review_required",
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          }
+        }
+      },
+      "schema_valid": true,
+      "consumer": "catalog",
+      "expected": "ignore_stale",
+      "assertion": "Given catalog has source message tombstone revision 4, reject extraction lineage referring to revision 1; never activate a listing.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "Existing tombstone prevents late AI output from resurrecting source evidence.",
+  "requires_decision": []
+}

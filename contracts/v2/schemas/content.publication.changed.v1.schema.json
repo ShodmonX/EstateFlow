@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/content.publication.changed.v1.schema.json",
+  "title": "LAB_PROVISIONAL content.publication.changed",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "content.publication.changed"
+        },
+        "producer": {
+          "const": "content"
+        },
+        "aggregate_kind": {
+          "const": "domain_record"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "subject_id": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "post_id": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "status": {
+              "type": "string",
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "subject_id",
+            "revision",
+            "post_id",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

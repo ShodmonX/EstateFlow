@@ -1,0 +1,219 @@
+name: estateflow-v2-isolated
+x-runtime: &runtime
+  image: estateflow-v2-lab:dev
+  build:
+    context: ../..
+    dockerfile: infra/v2/docker/Dockerfile
+  init: true
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  mem_limit: 512m
+  cpus: 1
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+  networks: [private]
+services:
+  postgres:
+    image: postgres:16.8-bookworm
+    environment:
+      POSTGRES_DB: estateflow_v2_lab
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?generate lab secrets}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    networks: [private]
+    mem_limit: 512m
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U postgres -d estateflow_v2_lab']
+      interval: 2s
+      timeout: 3s
+      retries: 40
+  rabbitmq:
+    image: rabbitmq:4.0.7-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:?generate lab secrets}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?generate lab secrets}
+    volumes: [rabbitmq_data:/var/lib/rabbitmq]
+    networks: [private]
+    mem_limit: 512m
+    healthcheck:
+      test: [CMD, rabbitmq-diagnostics, -q, ping]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+  migrate:
+    image: estateflow-v2-lab:dev
+    build:
+      context: ../..
+      dockerfile: infra/v2/docker/Dockerfile
+    env_file: ["${EFV2_ENV_FILE:-.env.local}"]
+    command: [python, -m, v2.foundation.cli, migrate]
+    networks: [private]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  v2-test-runner:
+    <<: *runtime
+    profiles: [test]
+    restart: no
+    env_file: ["${EFV2_ENV_FILE:-.env.local}"]
+    command: [python, -m, pytest, -c, /app/v2/pytest.ini, /app/v2/tests]
+  listener:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_LISTENER}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, listener, --role, worker]
+  source_parser:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_SOURCE_PARSER}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, source_parser, --role, worker]
+  pre_ai:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_PRE_AI}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, pre_ai, --role, worker]
+  ai:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_AI}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, ai, --role, worker]
+  catalog:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_CATALOG}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, catalog, --role, worker]
+  search:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_SEARCH}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, search, --role, worker]
+  notifications:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_NOTIFICATIONS}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, notifications, --role, worker]
+  identity:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_IDENTITY}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, identity, --role, worker]
+  control:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_CONTROL}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, control, --role, worker]
+  taxonomy:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_TAXONOMY}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, taxonomy, --role, worker]
+  content:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_CONTENT}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, content, --role, worker]
+  analytics:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_ANALYTICS}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, analytics, --role, worker]
+  notification-sender:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_DSN: ${EFV2_DSN_NOTIFICATIONS}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, notifications, --role, sender]
+  public-api:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, search, --role, public_api]
+  admin-api:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, control, --role, admin_api]
+  internal-api:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, control, --role, internal_api]
+  bot:
+    <<: *runtime
+    environment:
+      EFV2_MODE: FAKE_ONLY
+      EFV2_AUTH_KEY: ${EFV2_AUTH_KEY}
+      EFV2_FAKE_BOT_TOKEN: ${EFV2_FAKE_BOT_TOKEN}
+      EFV2_BROKER_URL: ${EFV2_BROKER_URL}
+    command: [python, -m, v2.runner, --owner, identity, --role, bot]
+networks:
+  private:
+    internal: true
+volumes:
+  postgres_data:
+  rabbitmq_data:

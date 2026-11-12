@@ -1,0 +1,70 @@
+{
+  "synthetic": true,
+  "scenario_id": "14-projection-rebuild",
+  "description": "SYNTHETIC 14-projection-rebuild",
+  "steps": [
+    {
+      "schema_file": "catalog.listing.changed.v1.schema.json",
+      "event": {
+        "event_id": "e33d853b-5398-5404-a6ec-650b0f191fa3",
+        "event_type": "catalog.listing.changed",
+        "event_version": 1,
+        "producer": "catalog",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "canonical_listing",
+        "aggregate_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+        "aggregate_version": 1,
+        "payload": {
+          "canonical_id": "e2cbe09f-111f-5f5e-9e56-10b51a3364af",
+          "canonical_revision": 1,
+          "mutation_id": "2c7fb88c-3002-5719-84f1-e6d85ac60934",
+          "reason": "created",
+          "visibility": "active",
+          "parent_canonical_id": null,
+          "source_evidence": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1,
+              "state": "active",
+              "candidate_id": "776ee6d6-97e6-5b36-bf17-ed34998f3379"
+            }
+          ],
+          "listing": {
+            "description": "SYNTHETIC listing, no personal data",
+            "price": 100,
+            "currency": "USD",
+            "price_period": "monthly",
+            "price_basis": "total",
+            "rooms": 2,
+            "district": "synthetic-district",
+            "taxonomy_revision": 1,
+            "audience_tags": [],
+            "contact_ref": null
+          },
+          "media": {
+            "state": "pending",
+            "assets": [],
+            "failure_code": null
+          },
+          "review": "none",
+          "redirect_from_ids": [],
+          "related_canonical_ids": []
+        }
+      },
+      "schema_valid": true,
+      "consumer": "search",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": "4357d8f6-56be-58f9-a77d-7f58e43bedf0",
+        "mode": "projection_rebuild"
+      }
+    }
+  ],
+  "expected_final_state": "Fresh search projection namespace applies original; notification/content sends prohibited.",
+  "requires_decision": []
+}

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/candidate.prechecked.v1.schema.json",
+  "title": "DRAFT candidate.prechecked v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "candidate.prechecked"
+        },
+        "producer": {
+          "const": "pre_ai"
+        },
+        "aggregate_kind": {
+          "const": "candidate"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "lineage": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/lineage"
+            },
+            "decision": {
+              "enum": [
+                "accepted",
+                "duplicate"
+              ]
+            },
+            "duplicate_of_candidate_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "signal_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "reason_code": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "parsed_event_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 32000
+            },
+            "media_capture_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "uniqueItems": true
+            },
+            "media_required": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "lineage",
+            "decision",
+            "duplicate_of_candidate_id",
+            "signal_revision",
+            "reason_code",
+            "parsed_event_id",
+            "text",
+            "media_capture_refs"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "decision": {
+                    "const": "duplicate"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "duplicate_of_candidate_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "duplicate_of_candidate_id": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "aggregate_version": {
+          "const": 1
+        }
+      }
+    }
+  ]
+}

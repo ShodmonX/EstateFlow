@@ -1,0 +1,265 @@
+{
+  "synthetic": true,
+  "records": [
+    {
+      "legacy_table": "admin_audit_events",
+      "owner": "control",
+      "legacy_id": "synthetic-admin_audit_events",
+      "body": {
+        "id": "synthetic-admin_audit_events",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "analytics_events",
+      "owner": "analytics",
+      "legacy_id": "synthetic-analytics_events",
+      "body": {
+        "id": "synthetic-analytics_events",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "announcement_media",
+      "owner": "catalog",
+      "legacy_id": "synthetic-announcement_media",
+      "body": {
+        "id": "synthetic-announcement_media",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "announcement_merge_audit",
+      "owner": "catalog",
+      "legacy_id": "synthetic-announcement_merge_audit",
+      "body": {
+        "id": "synthetic-announcement_merge_audit",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "announcements",
+      "owner": "catalog",
+      "legacy_id": "synthetic-announcements",
+      "body": {
+        "id": "synthetic-announcements",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "audience_tag_types",
+      "owner": "taxonomy",
+      "legacy_id": "synthetic-audience_tag_types",
+      "body": {
+        "id": "synthetic-audience_tag_types",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "channel_assignment_audit",
+      "owner": "listener",
+      "legacy_id": "synthetic-channel_assignment_audit",
+      "body": {
+        "id": "synthetic-channel_assignment_audit",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "channel_assignments",
+      "owner": "listener",
+      "legacy_id": "synthetic-channel_assignments",
+      "body": {
+        "id": "synthetic-channel_assignments",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "content_channel_posts",
+      "owner": "content",
+      "legacy_id": "synthetic-content_channel_posts",
+      "body": {
+        "id": "synthetic-content_channel_posts",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "dedup_decisions",
+      "owner": "catalog",
+      "legacy_id": "synthetic-dedup_decisions",
+      "body": {
+        "id": "synthetic-dedup_decisions",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "feature_flag_audit_events",
+      "owner": "control",
+      "legacy_id": "synthetic-feature_flag_audit_events",
+      "body": {
+        "id": "synthetic-feature_flag_audit_events",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "feature_flag_states",
+      "owner": "control",
+      "legacy_id": "synthetic-feature_flag_states",
+      "body": {
+        "id": "synthetic-feature_flag_states",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "ingestion_sources",
+      "owner": "listener",
+      "legacy_id": "synthetic-ingestion_sources",
+      "body": {
+        "id": "synthetic-ingestion_sources",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "listener_accounts",
+      "owner": "listener",
+      "legacy_id": "synthetic-listener_accounts",
+      "body": {
+        "id": "synthetic-listener_accounts",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "manual_review_items",
+      "owner": "catalog",
+      "legacy_id": "synthetic-manual_review_items",
+      "body": {
+        "id": "synthetic-manual_review_items",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "notification_delivery_attempts",
+      "owner": "notifications",
+      "legacy_id": "synthetic-notification_delivery_attempts",
+      "body": {
+        "id": "synthetic-notification_delivery_attempts",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "notifications",
+      "owner": "notifications",
+      "legacy_id": "synthetic-notifications",
+      "body": {
+        "id": "synthetic-notifications",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "parsing_logs",
+      "owner": "ai",
+      "legacy_id": "synthetic-parsing_logs",
+      "body": {
+        "id": "synthetic-parsing_logs",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "processing_jobs",
+      "owner": "ai",
+      "legacy_id": "synthetic-processing_jobs",
+      "body": {
+        "id": "synthetic-processing_jobs",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "referral_audit_events",
+      "owner": "identity",
+      "legacy_id": "synthetic-referral_audit_events",
+      "body": {
+        "id": "synthetic-referral_audit_events",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "referral_events",
+      "owner": "identity",
+      "legacy_id": "synthetic-referral_events",
+      "body": {
+        "id": "synthetic-referral_events",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "referral_premium_awards",
+      "owner": "identity",
+      "legacy_id": "synthetic-referral_premium_awards",
+      "body": {
+        "id": "synthetic-referral_premium_awards",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "source_suggestions",
+      "owner": "control",
+      "legacy_id": "synthetic-source_suggestions",
+      "body": {
+        "id": "synthetic-source_suggestions",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "technical_metric_events",
+      "owner": "analytics",
+      "legacy_id": "synthetic-technical_metric_events",
+      "body": {
+        "id": "synthetic-technical_metric_events",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "user_filters",
+      "owner": "notifications",
+      "legacy_id": "synthetic-user_filters",
+      "body": {
+        "id": "synthetic-user_filters",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    },
+    {
+      "legacy_table": "users",
+      "owner": "identity",
+      "legacy_id": "synthetic-users",
+      "body": {
+        "id": "synthetic-users",
+        "synthetic": true,
+        "source_counter": 1
+      }
+    }
+  ]
+}

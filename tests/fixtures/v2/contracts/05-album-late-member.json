@@ -1,0 +1,92 @@
+{
+  "synthetic": true,
+  "scenario_id": "05-album-late-member",
+  "description": "SYNTHETIC 05-album-late-member",
+  "steps": [
+    {
+      "schema_file": "source.album.changed.v1.schema.json",
+      "event": {
+        "event_id": "1630e192-37cd-53b3-babd-0f160f1a9fa1",
+        "event_type": "source.album.changed",
+        "event_version": 1,
+        "producer": "listener",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "album",
+        "aggregate_id": "a639eca0-b872-560b-b82f-1b3ce24d91d2",
+        "aggregate_version": 1,
+        "payload": {
+          "album_id": "a639eca0-b872-560b-b82f-1b3ce24d91d2",
+          "album_revision": 1,
+          "members": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1,
+              "state": "active"
+            }
+          ],
+          "assembly_state": "settled",
+          "change_reason": "initial"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "apply",
+      "assertion": "Apply once using owner revision checks.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    },
+    {
+      "schema_file": "source.album.changed.v1.schema.json",
+      "event": {
+        "event_id": "991e8e65-f606-5deb-9a1e-4a9b8c30106d",
+        "event_type": "source.album.changed",
+        "event_version": 1,
+        "producer": "listener",
+        "occurred_at": "2026-11-09T12:00:00Z",
+        "recorded_at": "2026-11-09T12:00:01Z",
+        "correlation_id": "984902ea-79d7-5011-a460-18d2fbc6f5ce",
+        "causation_id": "af4877f0-a70f-5e40-a7f7-66a5713acf7c",
+        "aggregate_kind": "album",
+        "aggregate_id": "a639eca0-b872-560b-b82f-1b3ce24d91d2",
+        "aggregate_version": 2,
+        "payload": {
+          "album_id": "a639eca0-b872-560b-b82f-1b3ce24d91d2",
+          "album_revision": 2,
+          "members": [
+            {
+              "message_uid": "502c9536-66b2-587f-8f3d-fea7115a304a",
+              "source_revision": 1,
+              "state": "active"
+            },
+            {
+              "message_uid": "e075b3bb-4811-5ad5-8c6e-d4bfff75c915",
+              "source_revision": 1,
+              "state": "active"
+            }
+          ],
+          "assembly_state": "settled",
+          "change_reason": "late_member"
+        }
+      },
+      "schema_valid": true,
+      "consumer": "source_parser",
+      "expected": "reconcile",
+      "assertion": "Replace immutable album assembly revision; schedule new parser generation, keep prior lineage.",
+      "delivery": {
+        "attempt": 0,
+        "replay_operation_id": null,
+        "mode": "live"
+      }
+    }
+  ],
+  "expected_final_state": "Album identity unchanged; membership revision 2 includes two original message identities.",
+  "requires_decision": [
+    "D04"
+  ]
+}

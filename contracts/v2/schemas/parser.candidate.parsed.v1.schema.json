@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/parser.candidate.parsed.v1.schema.json",
+  "title": "DRAFT parser.candidate.parsed v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "parser.candidate.parsed"
+        },
+        "producer": {
+          "const": "source_parser"
+        },
+        "aggregate_kind": {
+          "const": "candidate"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "lineage": {
+              "$ref": "https://contracts.estateflow.invalid/v2/types.v1.schema.json#/$defs/lineage"
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 32000
+            },
+            "media_capture_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "supersedes_candidate_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "media_required": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "lineage",
+            "text",
+            "media_capture_refs",
+            "supersedes_candidate_ids"
+          ],
+          "additionalProperties": false
+        },
+        "aggregate_version": {
+          "const": 1
+        }
+      }
+    }
+  ]
+}

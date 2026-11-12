@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/content.command.execute.v1.schema.json",
+  "title": "LAB_PROVISIONAL content.command.execute",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "content.command.execute"
+        },
+        "producer": {
+          "enum": [
+            "listener",
+            "source_parser",
+            "pre_ai",
+            "ai",
+            "catalog",
+            "search",
+            "notifications",
+            "identity",
+            "control",
+            "taxonomy",
+            "content",
+            "analytics"
+          ]
+        },
+        "aggregate_kind": {
+          "const": "command"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "action": {
+              "enum": [
+                "schedule",
+                "publish",
+                "resolve_unknown"
+              ]
+            },
+            "subject_id": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "actor": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "id",
+                "roles"
+              ],
+              "additionalProperties": false
+            },
+            "expected_version": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "source_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "channel_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "message_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "native_group_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "update_type": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "observed_order": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "policy_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "recipe_key": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "recipe_version": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "mode": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "reason": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "user_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "filter_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "canonical_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "target_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "suggestion_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "tag": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "replacement": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "flag": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "name": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "referrer_id": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "sender_mode": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "entitlement_status": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "object_ref": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "outcome": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "kind": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "media_mode": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "consent": {
+                  "type": "boolean"
+                },
+                "premium": {
+                  "type": "boolean"
+                },
+                "media_required": {
+                  "type": "boolean"
+                },
+                "approved": {
+                  "type": "boolean"
+                },
+                "source_revision": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "expected_revision": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "offset": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "settle_seconds": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "max_wait_seconds": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "criteria": {
+                  "type": "object",
+                  "properties": {
+                    "min_price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "max_price": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "rooms": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "district": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "audience_tag": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "sort": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "listing_type": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "renovation_level": {
+                      "type": "string",
+                      "maxLength": 512
+                    },
+                    "include_per_person": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 50
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "districts": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 512
+                      },
+                      "uniqueItems": true
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "member_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message_uid": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "source_revision": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "message_uid",
+                      "source_revision"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "media_capture_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "uniqueItems": true
+                },
+                "strip_patterns": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "uniqueItems": true
+                },
+                "include_any": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "uniqueItems": true
+                },
+                "exclude_any": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "uniqueItems": true
+                },
+                "split_pattern": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "ttl_seconds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 86400
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "operation_id",
+            "action",
+            "subject_id",
+            "actor",
+            "expected_version",
+            "arguments"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "action": {
+                    "const": "resolve_unknown"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "arguments": {
+                    "required": [
+                      "outcome",
+                      "reason"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

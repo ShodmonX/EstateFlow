@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.estateflow.invalid/v2/media.unavailable.v1.schema.json",
+  "title": "DRAFT media.unavailable v1",
+  "allOf": [
+    {
+      "$ref": "https://contracts.estateflow.invalid/v2/envelope.v1.schema.json"
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "media.unavailable"
+        },
+        "producer": {
+          "const": "ai"
+        },
+        "aggregate_kind": {
+          "const": "media_job"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "media_job_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "candidate_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "source_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "media_revision": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "media": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "assets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "object_key": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,511}$"
+                      },
+                      "content_sha256": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "mime_type": {
+                        "enum": [
+                          "image/jpeg",
+                          "image/png",
+                          "image/webp"
+                        ]
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "object_key",
+                      "content_sha256",
+                      "mime_type",
+                      "width",
+                      "height"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                },
+                "failure_code": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 128
+                }
+              },
+              "required": [
+                "state",
+                "assets",
+                "failure_code"
+              ],
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "const": "ready"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "assets": {
+                        "minItems": 1
+                      },
+                      "failure_code": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "const": "failed"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "assets": {
+                        "maxItems": 0
+                      },
+                      "failure_code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 512
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "pending",
+                          "unavailable"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "assets": {
+                        "maxItems": 0
+                      },
+                      "failure_code": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "media_job_id",
+            "candidate_id",
+            "source_revision",
+            "media_revision",
+            "media"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}
